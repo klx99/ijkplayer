@@ -1048,6 +1048,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             case Settings.PV_PLAYER__IjkMediaPlayer:
             default: {
                 IjkMediaPlayer ijkMediaPlayer = null;
+
                 if (mUri != null) {
                     ijkMediaPlayer = new IjkMediaPlayer();
                     ijkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
@@ -1057,6 +1058,13 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "find_stream_info", 0);
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "manifest_string", mManifestString);
                     }
+
+                    if (mSettings.getUsingAmlogic()) {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "amlogic", 1);
+                    } else {
+                        ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "amlogic", 0);
+                    }
+
                     if (mSettings.getUsingMediaCodec()) {
                         ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 1);
                         if (mSettings.getUsingMediaCodecAutoRotate()) {
