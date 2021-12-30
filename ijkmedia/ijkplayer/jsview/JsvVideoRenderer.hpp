@@ -28,12 +28,28 @@ private:
 /*** type define ***/
 
 /*** static function and variable ***/
+    static const int CoordsPerVertex;
+    static const float VertexData[];
+    static const int VertexCount;
+    static const int VertexStride;
+
+    static const float TextureData[];
 
 /*** class function and variable ***/
-
     std::mutex mutex;
     std::shared_ptr<AVFrame> frame;
-    std::shared_ptr<uint8_t> data[BLOCK_COUNT];
+
+    //顶点位置
+    int glAvPosition;
+    //纹理位置
+    int glAfPosition;
+
+    //shader  yuv变量
+    int glSamplerY;
+    int glSamplerU;
+    int glSamplerV;
+    uint32_t glTextureYUV[3];
+
 };
 
 } // namespace plugin

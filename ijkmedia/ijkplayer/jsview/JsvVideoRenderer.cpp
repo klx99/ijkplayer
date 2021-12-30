@@ -22,53 +22,28 @@ namespace plugin {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
+//每一次取点的时候取几个点
+const int JsvVideoRenderer::CoordsPerVertex = 3;
+
 //顶点坐标
-static float vertexData[] = {   // in counterclockwise order:
+const float JsvVideoRenderer::VertexData[] = {   // in counterclockwise order:
         -1.0f, -1.0f, 0.0f, // bottom left
         1.0f, -1.0f, 0.0f, // bottom right
         -1.0f, 1.0f, 0.0f, // top left
         1.0f, 1.0f, 0.0f,  // top right
 };
 
+const int JsvVideoRenderer::VertexCount = sizeof(VertexData) / sizeof(*VertexData) / CoordsPerVertex;
+//每一次取的总的点 大小
+const int JsvVideoRenderer::VertexStride = CoordsPerVertex * 4; // 4 bytes per vertex
+
 //纹理坐标
-static float textureData[] = {   // in counterclockwise order:
+const float JsvVideoRenderer::TextureData[] = {   // in counterclockwise order:
         0.0f, 1.0f, 0.0f, // bottom left
         1.0f, 1.0f, 0.0f, // bottom right
         0.0f, 0.0f, 0.0f, // top left
         1.0f, 0.0f, 0.0f,  // top right
 };
-
-//每一次取点的时候取几个点
-static const int COORDS_PER_VERTEX = 3;
-
-const int vertexCount = /*vertexData.length*/12 / COORDS_PER_VERTEX;
-//每一次取的总的点 大小
-const int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
-
-//位置
-auto vertexBuffer = vertexData;
-//纹理
-auto textureBuffer = textureData;
-
-//顶点位置
-int avPosition;
-//纹理位置
-int afPosition;
-
-//shader  yuv变量
-int sampler_y;
-int sampler_u;
-int sampler_v;
-uint32_t textureId_yuv[3];
-
-
-////YUV数据
-//int width_yuv;
-//int height_yuv;
-//ByteBuffer y;
-//ByteBuffer u;
-//ByteBuffer v;
-
 
 /***********************************************/
 /***** static function implement ***************/
@@ -86,19 +61,19 @@ int JsvVideoRenderer::prepare()
 
     auto program = getProgram();
     //获取顶点坐标字段
-    avPosition = glGetAttribLocation(program, "av_Position");
+    glAvPosition = glGetAttribLocation(program, "av_Position");
     //获取纹理坐标字段
-    afPosition = glGetAttribLocation(program, "af_Position");
+    glAfPosition = glGetAttribLocation(program, "af_Position");
     //获取yuv字段
-    sampler_y = glGetUniformLocation(program, "sampler_y");
-    sampler_u = glGetUniformLocation(program, "sampler_u");
-    sampler_v = glGetUniformLocation(program, "sampler_v");
+    glSamplerY = glGetUniformLocation(program, "sampler_y");
+    glSamplerU = glGetUniformLocation(program, "sampler_u");
+    glSamplerV = glGetUniformLocation(program, "sampler_v");
 
     //创建3个纹理
-    glGenTextures(3, textureId_yuv);
+    glGenTextures(3, glTextureYUV);
 
     //绑定纹理
-    for (int id : textureId_yuv) {
+    for (int id : glTextureYUV) {
         glBindTexture(GL_TEXTURE_2D, id);
         //环绕（超出纹理坐标范围）  （s==x t==y GL_REPEAT 重复）
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -141,40 +116,40 @@ int JsvVideoRenderer::draw()
     auto program = getProgram();
 
     glUseProgram(program);
-    glEnableVertexAttribArray(avPosition);
-    glVertexAttribPointer(avPosition, COORDS_PER_VERTEX, GL_FLOAT, false, vertexStride, vertexBuffer);
+    glEnableVertexAttribArray(glAvPosition);
+    glVertexAttribPointer(glAvPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, VertexData);
 
-    glEnableVertexAttribArray(afPosition);
-    glVertexAttribPointer(afPosition, COORDS_PER_VERTEX, GL_FLOAT, false, vertexStride, textureBuffer);
+    glEnableVertexAttribArray(glAfPosition);
+    glVertexAttribPointer(glAfPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
 
     usleep(10000);
     std::lock_guard<std::mutex> lock(mutex);
 
     //激活纹理0来绑定y数据
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureId_yuv[0]);
+    glBindTexture(GL_TEXTURE_2D, glTextureYUV[0]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, frame->width, frame->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frame->data[0]);
 
     //激活纹理1来绑定u数据
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, textureId_yuv[1]);
+    glBindTexture(GL_TEXTURE_2D, glTextureYUV[1]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, frame->width / 2, frame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frame->data[1]);
 
     //激活纹理2来绑定u数据
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, textureId_yuv[2]);
+    glBindTexture(GL_TEXTURE_2D, glTextureYUV[2]);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, frame->width / 2, frame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frame->data[2]);
 
     //给fragment_shader里面yuv变量设置值   0 1 2 标识纹理x
-    glUniform1i(sampler_y, 0);
-    glUniform1i(sampler_u, 1);
-    glUniform1i(sampler_v, 2);
+    glUniform1i(glSamplerY, 0);
+    glUniform1i(glSamplerU, 1);
+    glUniform1i(glSamplerV, 2);
 
     //绘制
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, VertexCount);
 
-    glDisableVertexAttribArray(afPosition);
-    glDisableVertexAttribArray(avPosition);
+    glDisableVertexAttribArray(glAfPosition);
+    glDisableVertexAttribArray(glAvPosition);
 
     return 0;
 }
