@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -61,48 +62,75 @@ public class JsvTestActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        mediaPlayer = new IjkMediaPlayer();
-        mediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", settings.getPixelFormat());
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
-
-        mediaPlayer.setOnPreparedListener(preparedListener);
-
-        try {
-            String url = Uri.parse(videoPath).toString();
-            mediaPlayer.setDataSource(url);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setScreenOnWhilePlaying(true);
-            mediaPlayer.prepareAsync();
-        } catch (Exception ex) {
-            Log.e(TAG, "Failed to start IjkMediaPlayer", ex);
-        }
+        startPlayers(1);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-        if(mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
+        for(IjkMediaPlayer mp : mediaPlayerList) {
+            mp.stop();
+            mp.release();
         }
+        mediaPlayerList.clear();
+    }
+
+    private void startPlayers(int count) {
+        for(int idx = 0; idx < count; idx++) {
+            IjkMediaPlayer mp = startPlayerByIndex(idx);
+            if(mp == null) {
+                Log.e(TAG, "Failed to start IjkMediaPlayer: " + idx);
+            }
+
+            mediaPlayerList.add(mp);
+
+            JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
+                @Override
+                public void onDrawFrame(Object key, float[] mvpMatrix) {
+                    Integer idx = (Integer) key;
+                    IjkMediaPlayer mp = mediaPlayerList.get(idx);
+
+                    
+                    mp.native_jsvDrawFrame(mvpMatrix);
+                }
+            };
+            fakeForgeRenderer.appendOnDrawFrameListener(idx, drawFrameListener);
+
+        }
+    }
+
+    private IjkMediaPlayer startPlayerByIndex(int idx) {
+        IjkMediaPlayer mp = new IjkMediaPlayer();
+
+        mp.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", settings.getPixelFormat());
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
+
+        mp.setOnPreparedListener(preparedListener);
+
+        try {
+            String url = Uri.parse(videoPath).toString();
+            mp.setDataSource(url);
+            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mp.setScreenOnWhilePlaying(true);
+            mp.prepareAsync();
+        } catch (Exception ex) {
+            Log.e(TAG, "Failed to start IjkMediaPlayer", ex);
+            mp.release();
+
+            return null;
+        }
+
+        return mp;
     }
 
     IMediaPlayer.OnPreparedListener preparedListener = new IMediaPlayer.OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
-            fakeForgeRenderer.setOnDrawFrameListener(drawFrameListener);
-            mediaPlayer.start();
-        }
-    };
-
-    JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
-        @Override
-        public void onDrawFrame(float[] mvpMatrix) {
-            mediaPlayer.native_jsvDrawFrame(mvpMatrix);
+            mp.start();
         }
     };
 
@@ -112,5 +140,5 @@ public class JsvTestActivity extends AppCompatActivity {
     private JsvFakeForgeRenderer fakeForgeRenderer;
 
     private String videoPath;
-    private IjkMediaPlayer mediaPlayer;
+    private ArrayList<IjkMediaPlayer> mediaPlayerList = new ArrayList();
 }

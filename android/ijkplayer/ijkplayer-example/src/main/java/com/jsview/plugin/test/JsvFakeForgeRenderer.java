@@ -5,20 +5,31 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 class JsvFakeForgeRenderer implements GLSurfaceView.Renderer {
     interface OnDrawFrameListener {
-        void onDrawFrame(final float[] mvpMatrix);
+        void onDrawFrame(Object key, final float[] mvpMatrix);
     }
 
     public JsvFakeForgeRenderer(Context context) {
         mContext = context;
     }
 
-    public void setOnDrawFrameListener(OnDrawFrameListener listener) {
-        drawFrameListener = listener;
+    public void appendOnDrawFrameListener(Object key, OnDrawFrameListener listener) {
+        if(listener == null) {
+            throw new RuntimeException("Append OnDrawFrameListener is null.");
+        }
+
+        drawFrameListenerMap.put(key, listener);
+    }
+
+    public void removeOnDrawFrameListener(Object key) {
+        drawFrameListenerMap.remove(key);
     }
 
     @Override
@@ -47,8 +58,10 @@ class JsvFakeForgeRenderer implements GLSurfaceView.Renderer {
         mTriangleBackground.onDrawFrame(mvpMatrix);
 
         Matrix.rotateM(mvpMatrix, 0, 180, 0, 0, 1.0f);
-        if(drawFrameListener != null) {
-            drawFrameListener.onDrawFrame(mvpMatrix);
+        for (Map.Entry<Object, OnDrawFrameListener> entry : drawFrameListenerMap.entrySet()) {
+            Object key = entry.getKey();
+            OnDrawFrameListener listener = entry.getValue();
+            listener.onDrawFrame(key, mvpMatrix);
         }
 
         mTriangleForeground.onDrawFrame(mvpMatrix);
@@ -58,7 +71,8 @@ class JsvFakeForgeRenderer implements GLSurfaceView.Renderer {
     private float[] mViewMatrix = new float[16];
 
     private Context mContext;
-    private OnDrawFrameListener drawFrameListener;
+    // LinkedHashMap是一个有序map
+    private LinkedHashMap<Object, OnDrawFrameListener> drawFrameListenerMap = new LinkedHashMap();
 
     private Triangle mTriangleForeground;
     private Triangle mTriangleBackground;
