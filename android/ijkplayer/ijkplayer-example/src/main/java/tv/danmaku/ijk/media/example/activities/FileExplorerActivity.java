@@ -94,13 +94,7 @@ public class FileExplorerActivity extends AppActivity {
             mSettings.setLastDirectory(path);
             doOpenDirectory(path, true);
         } else if (f.exists()) {
-            String pixelFormat = mSettings.getPixelFormat();
-            if(pixelFormat == "fcc-jsv0"
-            || pixelFormat == "fcc-jsv1") {
-                JsvTestActivity.intentTo(this, f.getPath(), f.getName());
-            } else {
-                VideoActivity.intentTo(this, f.getPath(), f.getName());
-            }
+            VideoActivity.intentTo(this, f.getPath(), f.getName());
         }
     }
 }

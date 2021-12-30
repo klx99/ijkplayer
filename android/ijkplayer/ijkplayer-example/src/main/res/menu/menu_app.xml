@@ -4,6 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".menu_app">
     <item
+        android:id="@+id/action_jsview"
+        android:title="JsView"
+        app:showAsAction="ifRoom" /> <!-- JsView Added -->
+    <item
         android:id="@+id/action_sample"
         android:title="@string/sample"
         app:showAsAction="ifRoom" />

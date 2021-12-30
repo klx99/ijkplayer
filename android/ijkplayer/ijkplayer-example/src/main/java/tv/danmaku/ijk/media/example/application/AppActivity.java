@@ -29,6 +29,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.jsview.plugin.test.JsvTestActivity;
+
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.activities.RecentMediaActivity;
 import tv.danmaku.ijk.media.example.activities.SampleMediaActivity;
@@ -89,6 +91,10 @@ public class AppActivity extends AppCompatActivity {
             RecentMediaActivity.intentTo(this);
         } else if (id == R.id.action_sample) {
             SampleMediaActivity.intentTo(this);
+        // JsView Added >>>
+        } else if (id == R.id.action_jsview) {
+            JsvTestActivity.intentTo(this);
+        // JsView Added <<<
         }
 
         return super.onOptionsItemSelected(item);
