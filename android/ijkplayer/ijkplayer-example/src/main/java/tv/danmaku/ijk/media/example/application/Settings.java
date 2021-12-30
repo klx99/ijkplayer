@@ -69,12 +69,12 @@ public class Settings {
 
     public boolean getUsingOpenSLES() {
         String key = mAppContext.getString(R.string.pref_key_using_opensl_es);
-        return mSharedPreferences.getBoolean(key, false);
+        return mSharedPreferences.getBoolean(key, true);
     }
 
     public String getPixelFormat() {
         String key = mAppContext.getString(R.string.pref_key_pixel_format);
-        return mSharedPreferences.getString(key, "");
+        return mSharedPreferences.getString(key, "fcc-_es2");
     }
 
     public boolean getEnableNoView() {
