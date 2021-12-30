@@ -60,10 +60,13 @@ int JsvVideoRenderer::prepare()
     }
 
     auto program = getProgram();
+
+    glumMVP = glGetUniformLocation(program, "um_MVP");
+
     //获取顶点坐标字段
-    glAvPosition = glGetAttribLocation(program, "av_Position");
+    glavPosition = glGetAttribLocation(program, "av_Position");
     //获取纹理坐标字段
-    glAfPosition = glGetAttribLocation(program, "af_Position");
+    glafPosition = glGetAttribLocation(program, "af_Position");
     //获取yuv字段
     glSamplerY = glGetUniformLocation(program, "sampler_y");
     glSamplerU = glGetUniformLocation(program, "sampler_u");
@@ -107,7 +110,7 @@ int JsvVideoRenderer::write(AVFrame* frame)
     return 0;
 }
 
-int JsvVideoRenderer::draw()
+int JsvVideoRenderer::draw(float mvpMatrix[], int size)
 {
     if(!frame) {
         return -1;
@@ -116,13 +119,15 @@ int JsvVideoRenderer::draw()
     auto program = getProgram();
 
     glUseProgram(program);
-    glEnableVertexAttribArray(glAvPosition);
-    glVertexAttribPointer(glAvPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, VertexData);
 
-    glEnableVertexAttribArray(glAfPosition);
-    glVertexAttribPointer(glAfPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
+    glUniformMatrix4fv(glumMVP, 1, GL_FALSE, mvpMatrix);
 
-    usleep(10000);
+    glEnableVertexAttribArray(glavPosition);
+    glVertexAttribPointer(glavPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, VertexData);
+
+    glEnableVertexAttribArray(glafPosition);
+    glVertexAttribPointer(glafPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
+
     std::lock_guard<std::mutex> lock(mutex);
 
     //激活纹理0来绑定y数据
@@ -148,8 +153,8 @@ int JsvVideoRenderer::draw()
     //绘制
     glDrawArrays(GL_TRIANGLE_STRIP, 0, VertexCount);
 
-    glDisableVertexAttribArray(glAfPosition);
-    glDisableVertexAttribArray(glAvPosition);
+    glDisableVertexAttribArray(glafPosition);
+    glDisableVertexAttribArray(glavPosition);
 
     return 0;
 }
@@ -158,13 +163,14 @@ int JsvVideoRenderer::draw()
 const char* JsvVideoRenderer::getVertexShaderSource()
 {
     static constexpr const char* source =
-            "attribute vec4 av_Position;" //顶点位置
+        "uniform mat4 um_MVP;"
+        "attribute vec4 av_Position;" //顶点位置
         "attribute vec2 af_Position;" //纹理位置
         "varying vec2 v_texPo;" //纹理位置  与fragment_shader交互
         "void main() {"
         "    v_texPo = af_Position;"
-        "    gl_Position = av_Position;"
-        "}";
+        "    gl_Position  = um_MVP * av_Position;"
+    "}";
 
 return source;
 }

@@ -19,7 +19,7 @@ public:
     virtual int prepare();
     int write(AVFrame* frame);
 
-    int draw();
+    int draw(float mvpMatrix[], int size);
 
     virtual const char* getVertexShaderSource();
     virtual const char* getFragmentShaderSource();
@@ -39,10 +39,11 @@ private:
     std::mutex mutex;
     std::shared_ptr<AVFrame> frame;
 
+    int glumMVP;
     //顶点位置
-    int glAvPosition;
+    int glavPosition;
     //纹理位置
-    int glAfPosition;
+    int glafPosition;
 
     //shader  yuv变量
     int glSamplerY;

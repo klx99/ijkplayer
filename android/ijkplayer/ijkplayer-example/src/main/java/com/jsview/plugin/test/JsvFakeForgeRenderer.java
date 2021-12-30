@@ -46,11 +46,11 @@ class JsvFakeForgeRenderer implements GLSurfaceView.Renderer {
 
         mTriangleBackground.onDrawFrame(mvpMatrix);
 
+        Matrix.rotateM(mvpMatrix, 0, 180, 0, 0, 1.0f);
         if(drawFrameListener != null) {
             drawFrameListener.onDrawFrame(mvpMatrix);
         }
 
-        Matrix.rotateM(mvpMatrix, 0, 180, 0, 0, 1.0f);
         mTriangleForeground.onDrawFrame(mvpMatrix);
     }
 

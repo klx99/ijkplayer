@@ -72,7 +72,7 @@ int DrawJsvVideoRenderer(JsvContext* context, float mvpMatrix[], int size)
         }
         context->videoPrepared = true;
     }
-    int ret = videoRenderer->draw();
+    int ret = videoRenderer->draw(mvpMatrix, size);
     if(ret < 0) {
         __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw to video renderer.");
         return ret;
