@@ -28,5 +28,5 @@ APP_STL := c++_static
 APP_CFLAGS := -O0 -Wall -pipe \
     -ffast-math \
     -fstrict-aliasing -Werror=strict-aliasing \
-    -Wno-psabi -Wa,--noexecstack \
+    -Wa,--noexecstack \
     -DANDROID -DNDEBUG
