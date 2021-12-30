@@ -26,7 +26,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -38,6 +37,8 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.TableLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
 
 import java.io.File;
 import java.io.IOException;

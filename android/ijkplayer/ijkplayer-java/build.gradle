@@ -1,17 +1,14 @@
 apply plugin: 'com.android.library'
 
 android {
-    // http://tools.android.com/tech-docs/new-build-system/tips
-    //noinspection GroovyAssignabilityCheck
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    //noinspection GroovyAssignabilityCheck
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion 29
+    buildToolsVersion "30.0.2"
 
     lintOptions {
         abortOnError false
     }
     defaultConfig {
-        minSdkVersion 9
+        minSdkVersion 17
         targetSdkVersion rootProject.ext.targetSdkVersion
     }
     buildTypes {
@@ -23,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");
+apply from: new File("../tools/gradle-on-demand.gradle");
