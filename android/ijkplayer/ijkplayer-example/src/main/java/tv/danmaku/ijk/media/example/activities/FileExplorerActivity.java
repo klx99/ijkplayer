@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import android.text.TextUtils;
 
+import com.jsview.plugin.test.JsvTestActivity;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
@@ -93,7 +94,8 @@ public class FileExplorerActivity extends AppActivity {
             mSettings.setLastDirectory(path);
             doOpenDirectory(path, true);
         } else if (f.exists()) {
-            VideoActivity.intentTo(this, f.getPath(), f.getName());
+            JsvTestActivity.intentTo(this, f.getPath(), f.getName());
+//            VideoActivity.intentTo(this, f.getPath(), f.getName());
         }
     }
 }
