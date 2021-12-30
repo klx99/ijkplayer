@@ -152,7 +152,7 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
             return EGL_FALSE;
         }
 
-        return EGL_TRUE;
+        return JSV_GLES2_display(opaque->egl, overlay);
     }
     // JsView Added <<<
 
@@ -196,9 +196,6 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         // both GLES & ANativeWindow support
         if (vout->overlay_format == SDL_FCC__GLES2 && opaque->egl)
             return IJK_EGL_display(opaque->egl, native_window, overlay);
-        else if (vout->overlay_format == SDL_FCC_JSV0 && opaque->egl) {
-            return EGL_TRUE;
-        }
         break;
     }
     }

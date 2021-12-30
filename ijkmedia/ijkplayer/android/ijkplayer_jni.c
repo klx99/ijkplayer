@@ -1128,7 +1128,22 @@ LABEL_RETURN:
 }
 
 
+// JsView Added >>>
+static jint
+IjkMediaPlayer_native_jsvDrawFrame(JNIEnv *env, jobject thiz, jfloatArray mvp_matrix) {
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
 
+    jfloat* ptr = (*env)->GetFloatArrayElements(env, mvp_matrix, NULL);
+    jsize len = (*env)->GetArrayLength(env, mvp_matrix);
+
+    int ret = ijkmp_jsv_draw_frame(mp, ptr, len);
+
+    (*env)->ReleaseFloatArrayElements(env, mvp_matrix, ptr, JNI_ABORT);
+    ijkmp_dec_ref_p(&mp);
+
+    return ret;
+}
+// JsView Added <<<
 
 
 // ----------------------------------------------------------------------------
@@ -1180,6 +1195,7 @@ static JNINativeMethod g_methods[] = {
 
     { "native_setLogLevel",     "(I)V",                     (void *) IjkMediaPlayer_native_setLogLevel },
     { "_setFrameAtTime",        "(Ljava/lang/String;JJII)V", (void *) IjkMediaPlayer_setFrameAtTime },
+    { "native_jsvDrawFrame",       "([F)I",                    (void *) IjkMediaPlayer_native_jsvDrawFrame }, // JsView Added
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

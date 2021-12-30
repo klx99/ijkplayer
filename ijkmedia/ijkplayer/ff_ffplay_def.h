@@ -66,6 +66,8 @@
 #include "ff_ffpipenode.h"
 #include "ijkmeta.h"
 
+#include "jsview/JsvApi.h" // JsView Added
+
 #define DEFAULT_HIGH_WATER_MARK_IN_BYTES        (256 * 1024)
 
 /*
@@ -720,6 +722,8 @@ typedef struct FFPlayer {
     char *mediacodec_default_name;
     int ijkmeta_delay_init;
     int render_wait_start;
+
+    JsvContext *jsv_context; // JsView Added
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

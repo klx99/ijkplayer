@@ -908,6 +908,11 @@ static void video_image_display2(FFPlayer *ffp)
                 SDL_Delay(20);
             }
         }
+        // JsView Added >>>, 等到GL线程去描画
+        if(ffp->vout->overlay_format == SDL_FCC_JSV1) {
+            ffp_jsv1_cache_frame(ffp, vp->frame);
+        } else
+        // JsView Added <<<
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
@@ -1064,6 +1069,12 @@ static void stream_close(FFPlayer *ffp)
 /* display the current picture, if any */
 static void video_display2(FFPlayer *ffp)
 {
+    // JsView Added >>>
+    if(ffp->vout->overlay_format == SDL_FCC_JSV0) { // 留待forge线程描画
+        return;
+    }
+    // JsView Added <<<
+
     VideoState *is = ffp->is;
     if (is->video_st)
         video_image_display2(ffp);
@@ -1656,6 +1667,11 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 #endif
 #endif
         // FIXME: set swscale options
+        // JsView Added >>>, 等到GL线程去描画
+        if(ffp->vout->overlay_format == SDL_FCC_JSV1) {
+            av_frame_move_ref(vp->frame, src_frame);
+        } else
+        // JsView Added <<<
         if (SDL_VoutFillFrameYUVOverlay(vp->bmp, src_frame) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
             exit(1);
@@ -4022,6 +4038,11 @@ void ffp_destroy(FFPlayer *ffp)
 
     msg_queue_destroy(&ffp->msg_queue);
 
+    // JsView Added >>>
+    if(ffp->jsv_context) {
+        DeleteJsvContext(&ffp->jsv_context);
+    }
+    // JsView Added <<<
 
     av_free(ffp);
 }
@@ -4186,6 +4207,8 @@ void ffp_set_option_intptr(FFPlayer *ffp, int opt_category, const char *name, ui
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 {
     switch (chroma_fourcc) {
+        case SDL_FCC_JSV0: // JsView Added
+        case SDL_FCC_JSV1: // JsView Added
         case SDL_FCC__GLES2:
         case SDL_FCC_I420:
         case SDL_FCC_YV12:
@@ -5048,3 +5071,62 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 
     return ffp->meta;
 }
+
+// JsView Added >>>
+int ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame)
+{
+    if (!ffp)
+        return NULL;
+
+    if(!ffp->jsv_context) {
+        ffp->jsv_context = NewJsvContext();
+        assert(ffp->jsv_context);
+    }
+
+    WriteToJsvVideoRenderer(ffp->jsv_context, frame);
+
+    return 0;
+}
+
+int ffp_jsv1_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
+{
+    if (!ffp) {
+        return -1;
+    }
+
+    if(!ffp->jsv_context) {
+        return -1;
+    }
+
+    int ret = DrawJsvVideoRenderer(ffp->jsv_context, mvp_matrix, size);
+
+    return ret;
+}
+
+// 使用ijk自带的YV12shader，不出图。
+int ffp_jsv0_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
+{
+    if (!ffp)
+        return -1;
+
+    VideoState *is = ffp->is;
+    if (is->video_st) {
+        video_image_display2(ffp);
+    }
+
+    return 0;
+}
+
+int ffp_jsv_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
+{
+    int ret = -1;
+
+    if(ffp->vout->overlay_format == SDL_FCC_JSV0) {
+        ret = ffp_jsv0_draw_frame(ffp, mvp_matrix, size);
+    } else if(ffp->vout->overlay_format == SDL_FCC_JSV1) {
+        ret = ffp_jsv1_draw_frame(ffp, mvp_matrix, size);
+    }
+
+    return ret;
+}
+// JsView Added <<<

@@ -387,3 +387,62 @@ IJK_EGL *IJK_EGL_create()
 }
 
 #endif
+
+// JsView Added >>>
+static EGLBoolean JSV_GLES2_prepareRenderer(IJK_EGL* egl, SDL_VoutOverlay *overlay)
+{
+    assert(egl);
+    assert(egl->opaque);
+
+    IJK_EGL_Opaque *opaque = egl->opaque;
+
+    if (!IJK_GLES2_Renderer_isValid(opaque->renderer) ||
+        !IJK_GLES2_Renderer_isFormat(opaque->renderer, overlay->format)) {
+
+        IJK_GLES2_Renderer_reset(opaque->renderer);
+        IJK_GLES2_Renderer_freeP(&opaque->renderer);
+
+        opaque->renderer = IJK_GLES2_Renderer_create(overlay);
+        if (!opaque->renderer) {
+            ALOGE("[EGL] Could not create render.");
+            return EGL_FALSE;
+        }
+
+        if (!IJK_GLES2_Renderer_use(opaque->renderer)) {
+            ALOGE("[EGL] Could not use render.");
+            IJK_GLES2_Renderer_freeP(&opaque->renderer);
+            return EGL_FALSE;
+        }
+    }
+
+//    if (!IJK_EGL_setSurfaceSize(egl, overlay->w, overlay->h)) {
+//        ALOGE("[EGL] IJK_EGL_setSurfaceSize(%d, %d) failed\n", overlay->w, overlay->h);
+//        return EGL_FALSE;
+//    }
+//
+//    glViewport(0, 0, egl->width, egl->height);  IJK_GLES2_checkError_TRACE("glViewport");
+    return EGL_TRUE;
+}
+
+EGLBoolean JSV_GLES2_display(IJK_EGL* egl, SDL_VoutOverlay *overlay)
+{
+    if (!egl)
+        return EGL_FALSE;
+
+    IJK_EGL_Opaque *opaque = egl->opaque;
+    if (!opaque)
+        return EGL_FALSE;
+
+    if (!JSV_GLES2_prepareRenderer(egl, overlay)) {
+        __android_log_print(ANDROID_LOG_ERROR, "JsView", "[EGL] IJK_EGL_prepareRenderer failed\n");
+        return EGL_FALSE;
+    }
+
+    if (!JSV_GLES2_Renderer_renderOverlay(opaque->renderer, overlay)) {
+        __android_log_print(ANDROID_LOG_ERROR, "JsView", "[EGL] IJK_GLES2_Renderer_renderOverlay failed\n");
+        return EGL_FALSE;
+    }
+
+    return EGL_TRUE;
+}
+// JsView Added <<<

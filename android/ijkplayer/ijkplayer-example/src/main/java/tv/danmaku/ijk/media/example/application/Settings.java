@@ -74,7 +74,10 @@ public class Settings {
 
     public String getPixelFormat() {
         String key = mAppContext.getString(R.string.pref_key_pixel_format);
-        return mSharedPreferences.getString(key, "fcc-jsv0");
+//        return "fcc-_es2";
+//        return "fcc-jsv0";
+        return "fcc-jsv1";
+//        return mSharedPreferences.getString(key, "");
     }
 
     public boolean getEnableNoView() {

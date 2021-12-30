@@ -796,3 +796,14 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 
     return -1;
 }
+
+// JsView Added >>>
+int ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size)
+{
+    assert(mp);
+
+    int ret = ffp_jsv_draw_frame(mp->ffplayer, mvp_matrix, size);
+
+    return ret;
+}
+// JsView Added <<<

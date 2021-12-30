@@ -68,4 +68,6 @@ void        IJK_EGL_freep(IJK_EGL **egl);
 EGLBoolean  IJK_EGL_display(IJK_EGL* egl, EGLNativeWindowType window, SDL_VoutOverlay *overlay);
 void        IJK_EGL_terminate(IJK_EGL* egl);
 
+EGLBoolean JSV_GLES2_display(IJK_EGL* egl, SDL_VoutOverlay *overlay); // JsView Added
+
 #endif
