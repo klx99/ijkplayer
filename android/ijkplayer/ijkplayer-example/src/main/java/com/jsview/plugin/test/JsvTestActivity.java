@@ -6,7 +6,10 @@ import android.media.AudioManager;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -35,8 +38,8 @@ public class JsvTestActivity extends AppCompatActivity {
         fakeForgeView = findViewById(R.id.fake_forge_view);
         fakeForgeView.setEGLContextClientVersion(2);
         fakeForgeView.setRenderer(fakeForgeRenderer);
-//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -48,6 +51,19 @@ public class JsvTestActivity extends AppCompatActivity {
         super.onStart();
 
         startPlayers(MediaPlayerCount < VideoUrlList.size() ? MediaPlayerCount : VideoUrlList.size());
+
+
+        logLooper = new Runnable() {
+            @Override
+            public void run() {
+                float fps = fakeForgeRenderer.getFps();
+                TextView logView = findViewById(R.id.log_view);
+                logView.setText(Float.toString(fps));
+                mainHandler.postDelayed(logLooper, 500);
+            }
+        };
+        mainHandler.postDelayed(logLooper, 500);
+
     }
 
     @Override
@@ -62,13 +78,13 @@ public class JsvTestActivity extends AppCompatActivity {
     }
 
     private void startPlayers(int count) {
-        for(int idx = 0; idx < count; idx++) {
+        for(int idx = count - 1; idx >= 0; idx--) {
             IjkMediaPlayer mp = startPlayerByIndex(VideoUrlList.get(idx), idx != 0);
             if(mp == null) {
                 Log.e(TAG, "Failed to start IjkMediaPlayer: " + idx);
             }
 
-            mediaPlayerList.add(mp);
+            mediaPlayerList.add(0, mp);
 
             IjkMediaPlayer.OnVideoSyncListener videoSyncListener = new IjkMediaPlayer.OnVideoSyncListener () {
                 @Override
@@ -88,7 +104,7 @@ public class JsvTestActivity extends AppCompatActivity {
                     float center = MediaPlayerCount / 2.0f;
                     float[] matrix = mvpMatrix.clone();
                     Matrix.scaleM(matrix, 0, 0.5f, 0.5f, 1);
-                    Matrix.translateM(matrix, 0, offset * (center - idx), offset * (center - idx), 0);
+                    Matrix.translateM(matrix, 0, offset * (idx - center), offset * (idx - center), 0);
 
                     mp.native_jsvDrawFrame(matrix);
                 }
@@ -141,18 +157,27 @@ public class JsvTestActivity extends AppCompatActivity {
         return mp;
     }
 
+    private Handler mainHandler = new Handler(Looper.getMainLooper());
+    Runnable logLooper;
+
     private GLSurfaceView fakeForgeView;
     private JsvFakeForgeRenderer fakeForgeRenderer;
 
     private ArrayList<IjkMediaPlayer> mediaPlayerList = new ArrayList();
 
-//    private static final String OverlayFormat = "fcc-jsv0";
+    // private static final String OverlayFormat = "fcc-jsv0";
     private static final String OverlayFormat = "fcc-jsv1";
-    private static final int MediaPlayerCount = 1;
+    private static final int MediaPlayerCount = 4;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
+//        "http://192.168.1.99/test.mp4",
+//        "http://192.168.1.99/test.mp4",
+        "http://192.168.1.99/test.mp4",
+        "http://192.168.1.99/test.mp4",
+//        "http://192.168.1.99/test.mp4",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear1/prog_index.m3u8",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear2/prog_index.m3u8",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear3/prog_index.m3u8",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear4/prog_index.m3u8",
-        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8"));
+        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8"
+    ));
 }

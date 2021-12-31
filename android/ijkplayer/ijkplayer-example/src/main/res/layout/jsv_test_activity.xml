@@ -20,16 +20,26 @@
             android:layout_gravity="center">
         </android.opengl.GLSurfaceView>
 
-
-        <TextView
-            android:id="@+id/toast_text_view"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left|center_vertical"
             android:background="@color/ijk_transparent_dark"
-            android:padding="16dp"
-            android:textSize="16sp"
-            android:text="Hello JsView!" />
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:textSize="16sp"
+                android:text="Hello JsView!" />
+            <TextView
+                android:id="@+id/log_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:textSize="16sp" />
+
+        </LinearLayout>
 
     </FrameLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
