@@ -38,8 +38,8 @@ public class JsvTestActivity extends AppCompatActivity {
         fakeForgeView = findViewById(R.id.fake_forge_view);
         fakeForgeView.setEGLContextClientVersion(2);
         fakeForgeView.setRenderer(fakeForgeRenderer);
-//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -181,7 +181,7 @@ public class JsvTestActivity extends AppCompatActivity {
 
 //     private static final String OverlayFormat = "fcc-jsv0";
     private static final String OverlayFormat = "fcc-jsv1";
-    private static final int MediaPlayerCount = 4;
+    private static final int MediaPlayerCount = 1;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
 //        "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
 //        "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
@@ -189,10 +189,10 @@ public class JsvTestActivity extends AppCompatActivity {
 //        "http://39.135.138.58:18890/PLTV/88888888/224/3221225644/index.m3u8",
 //        "http://192.168.1.99/test.mp4",
 //        "http://192.168.1.99/test.mp4",
-        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear1/prog_index.m3u8",
-        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear2/prog_index.m3u8",
-        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear3/prog_index.m3u8",
-        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear4/prog_index.m3u8",
+//        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear1/prog_index.m3u8",
+//        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear2/prog_index.m3u8",
+//        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear3/prog_index.m3u8",
+//        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear4/prog_index.m3u8",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8"
     ));
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <EGL/egl.h>
 #include "JsvGLES2.hpp"
 
 struct AVFrame;
@@ -37,7 +38,9 @@ private:
 
 /*** class function and variable ***/
     std::mutex mutex;
-    std::shared_ptr<AVFrame> frame;
+    std::shared_ptr<AVFrame> lastFrame;
+
+//    EGLDisplay eglDisplay;
 
     int glumMVP;
     //顶点位置

@@ -81,7 +81,7 @@ LOCAL_SRC_FILES += ijkavutil/ijkstl.cpp
 LOCAL_SRC_FILES += jsview/JsvApi.cpp
 LOCAL_SRC_FILES += jsview/JsvGLES2.cpp
 LOCAL_SRC_FILES += jsview/JsvVideoRenderer.cpp
-LOCAL_LDLIBS += -lGLESv2
+LOCAL_LDLIBS += -lEGL -lGLESv2
 # JsView Added <<<
 
 LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl

@@ -8,7 +8,11 @@
 
 #include "JsvVideoRenderer.hpp"
 
+#include <android/log.h>
+//#include <EGL/eglext.h>
+//#include <EGL/eglplatform.h>
 #include <GLES2/gl2.h>
+
 #include <unistd.h>
 
 extern "C" {
@@ -54,6 +58,12 @@ const float JsvVideoRenderer::TextureData[] = {   // in counterclockwise order:
 /***********************************************/
 int JsvVideoRenderer::prepare()
 {
+//    eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+//    if (eglDisplay == EGL_NO_DISPLAY) {
+//        __android_log_print(ANDROID_LOG_INFO, "JsView", "[EGL] eglGetDisplay failed.");
+//        return EGL_FALSE;
+//    }
+
     int ret = JsvGLES2::prepare();
     if(ret < 0) {
         return ret;
@@ -91,30 +101,32 @@ int JsvVideoRenderer::prepare()
 
 int JsvVideoRenderer::write(AVFrame* frame)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    auto creater = []() -> AVFrame* {
+        return av_frame_alloc();
+    };
+    auto deleter = [](AVFrame* ptr) -> void {
+        av_frame_free(&ptr);
+    };
+    auto sharedFrame = std::shared_ptr<AVFrame>(creater(), deleter);
 
-    if(this->frame == nullptr) {
-        auto creater = []() -> AVFrame* {
-            return av_frame_alloc();
-        };
-        auto deleter = [](AVFrame* ptr) -> void {
-            av_frame_free(&ptr);
-        };
-        this->frame = std::shared_ptr<AVFrame>(creater(), deleter);
-    } else {
-        av_frame_unref(this->frame.get());
+    av_frame_move_ref(sharedFrame.get(), frame);
+
+    {
+        std::lock_guard <std::mutex> lock(mutex);
+        this->lastFrame = sharedFrame;
     }
-
-    av_frame_move_ref(this->frame.get(), frame);
 
     return 0;
 }
 
 int JsvVideoRenderer::draw(float mvpMatrix[], int size)
 {
-    if(!frame) {
+    if(!this->lastFrame) {
         return 0;
     }
+
+    using namespace std::chrono;
+    int64_t startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
     auto program = getProgram();
 
@@ -128,22 +140,32 @@ int JsvVideoRenderer::draw(float mvpMatrix[], int size)
     glEnableVertexAttribArray(glafPosition);
     glVertexAttribPointer(glafPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
 
-    std::lock_guard<std::mutex> lock(mutex);
+//    EGLint eglImageAttributes[] = {EGL_WIDTH, frame->width, EGL_HEIGHT, frame->height,
+//                                   EGL_IMAGE_FORMAT_FSL, EGL_FORMAT_YUV_YV12_FSL, EGL_NONE};
+//    auto eglImage = eglCreateImageKHR(eglDisplay, EGL_NO_CONTEXT, EGL_NEW_IMAGE_FSL, NULL, eglImageAttributes);
+//    struct EGLImageInfoFSL eglImageInfo;
+//    eglQueryImageFSL(eglDisplay, eglImage, EGL_CLIENTBUFFER_TYPE_FSL, (EGLint *)&eglImageInfo);
+
+    std::shared_ptr<AVFrame> sharedFrame;
+    {
+        std::lock_guard <std::mutex> lock(mutex);
+        sharedFrame = this->lastFrame;
+    }
 
     //激活纹理0来绑定y数据
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, glTextureYUV[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, frame->width, frame->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frame->data[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sharedFrame->width, sharedFrame->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, sharedFrame->data[0]);
 
     //激活纹理1来绑定u数据
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, glTextureYUV[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, frame->width / 2, frame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frame->data[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sharedFrame->width / 2, sharedFrame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, sharedFrame->data[1]);
 
     //激活纹理2来绑定u数据
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, glTextureYUV[2]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, frame->width / 2, frame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, frame->data[2]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sharedFrame->width / 2, sharedFrame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, sharedFrame->data[2]);
 
     //给fragment_shader里面yuv变量设置值   0 1 2 标识纹理x
     glUniform1i(glSamplerY, 0);
@@ -156,9 +178,12 @@ int JsvVideoRenderer::draw(float mvpMatrix[], int size)
     glDisableVertexAttribArray(glafPosition);
     glDisableVertexAttribArray(glavPosition);
 
+//    int64_t endTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+//    int64_t deltaTime = endTime - startTime;
+//    __android_log_print(ANDROID_LOG_INFO, "JsView", "%s time: start/end=%lld/%lld, delta=%lld", __PRETTY_FUNCTION__, startTime, endTime, deltaTime);
+
     return 0;
 }
-
 
 const char* JsvVideoRenderer::getVertexShaderSource()
 {
