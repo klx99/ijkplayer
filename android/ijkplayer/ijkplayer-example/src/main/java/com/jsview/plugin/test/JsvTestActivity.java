@@ -78,39 +78,50 @@ public class JsvTestActivity extends AppCompatActivity {
     }
 
     private void startPlayers(int count) {
-        for(int idx = count - 1; idx >= 0; idx--) {
-            IjkMediaPlayer mp = startPlayerByIndex(VideoUrlList.get(idx), idx != 0);
+        for(int idx = 0; idx < count; idx++) {
+            IjkMediaPlayer mp = startPlayerWithRenderer(idx);
             if(mp == null) {
                 Log.e(TAG, "Failed to start IjkMediaPlayer: " + idx);
             }
 
-            mediaPlayerList.add(0, mp);
+            mediaPlayerList.add(mp);
+        }
+    }
 
-            IjkMediaPlayer.OnVideoSyncListener videoSyncListener = new IjkMediaPlayer.OnVideoSyncListener () {
-                @Override
-                public void onVideoSync(IMediaPlayer mp) {
-                    fakeForgeView.requestRender();
-                }
-            };
-            mp.setOnVideoSyncListener(videoSyncListener);
+    private IjkMediaPlayer startPlayerWithRenderer(int idx) {
+        IjkMediaPlayer mp = startPlayerByIndex(VideoUrlList.get(idx), idx != 0);
+        if(mp == null) {
+            Log.e(TAG, "Failed to start IjkMediaPlayer: " + idx);
+        }
 
-            JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
-                @Override
-                public void onDrawFrame(Object key, final float[] mvpMatrix) {
-                    Integer idx = (Integer) key;
-                    IjkMediaPlayer mp = mediaPlayerList.get(idx);
+        IjkMediaPlayer.OnVideoSyncListener videoSyncListener = new IjkMediaPlayer.OnVideoSyncListener () {
+            @Override
+            public void onVideoSync(IMediaPlayer mp) {
+                fakeForgeView.requestRender();
+            }
+        };
+        mp.setOnVideoSyncListener(videoSyncListener);
 
+        JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
+            @Override
+            public void onDrawFrame(Object key, final float[] mvpMatrix) {
+                Integer idx = (Integer) key;
+                IjkMediaPlayer mp = mediaPlayerList.get(idx);
+
+                float[] matrix = mvpMatrix.clone();
+                if(idx > 0) { // 第0个视频全屏播放
                     float offset = 2.0f / MediaPlayerCount;
                     float center = MediaPlayerCount / 2.0f;
-                    float[] matrix = mvpMatrix.clone();
                     Matrix.scaleM(matrix, 0, 0.5f, 0.5f, 1);
                     Matrix.translateM(matrix, 0, offset * (idx - center), offset * (idx - center), 0);
-
-                    mp.native_jsvDrawFrame(matrix);
                 }
-            };
-            fakeForgeRenderer.appendOnDrawFrameListener(idx, drawFrameListener);
-        }
+
+                mp.native_jsvDrawFrame(matrix);
+            }
+        };
+        fakeForgeRenderer.appendOnDrawFrameListener(idx, drawFrameListener);
+
+        return mp;
     }
 
     private IjkMediaPlayer startPlayerByIndex(String url, boolean mute) {
@@ -170,13 +181,13 @@ public class JsvTestActivity extends AppCompatActivity {
 
 //     private static final String OverlayFormat = "fcc-jsv0";
     private static final String OverlayFormat = "fcc-jsv1";
-    private static final int MediaPlayerCount = 1;
+    private static final int MediaPlayerCount = 4;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
-        "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
-        "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
-        "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",
-        "http://39.135.138.58:18890/PLTV/88888888/224/3221225644/index.m3u8",
-        "http://192.168.1.99/test.mp4",
+//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
+//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
+//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",
+//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225644/index.m3u8",
+//        "http://192.168.1.99/test.mp4",
 //        "http://192.168.1.99/test.mp4",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear1/prog_index.m3u8",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear2/prog_index.m3u8",
