@@ -407,12 +407,12 @@ static EGLBoolean JSV_GLES2_prepareRenderer(IJK_EGL* egl, SDL_VoutOverlay *overl
             ALOGE("[EGL] Could not create render.");
             return EGL_FALSE;
         }
+    }
 
-        if (!IJK_GLES2_Renderer_use(opaque->renderer)) {
-            ALOGE("[EGL] Could not use render.");
-            IJK_GLES2_Renderer_freeP(&opaque->renderer);
-            return EGL_FALSE;
-        }
+    if (!IJK_GLES2_Renderer_use(opaque->renderer)) {
+        ALOGE("[EGL] Could not use render.");
+        IJK_GLES2_Renderer_freeP(&opaque->renderer);
+        return EGL_FALSE;
     }
 
 //    if (!IJK_EGL_setSurfaceSize(egl, overlay->w, overlay->h)) {
