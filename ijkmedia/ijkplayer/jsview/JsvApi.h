@@ -11,6 +11,9 @@ extern "C" {
 typedef struct {
     void* videoRenderer;
     bool videoPrepared;
+
+    void (*videoSyncCallback)(void*);
+    void *videoSyncData;
 } JsvContext;
 
 JsvContext* NewJsvContext();

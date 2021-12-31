@@ -15,9 +15,6 @@ JsvContext* NewJsvContext()
 {
     JsvContext* context = new JsvContext();
 
-    context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
-    context->videoPrepared = false;
-
     return context;
 }
 
@@ -42,12 +39,16 @@ void WriteToJsvVideoRenderer(JsvContext* context, AVFrame *frame)
         return;
     }
     if(context->videoRenderer == nullptr) {
-        __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw frame to video renderer, video renderer has been deleted.");
-        return;
+        context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
     }
 
     auto videoRenderer = reinterpret_cast<jsview::plugin::JsvVideoRenderer*>(context->videoRenderer);
     videoRenderer->write(frame);
+
+    if(context->videoSyncCallback && context->videoSyncData) {
+        context->videoSyncCallback(context->videoSyncData);
+    }
+
 }
 
 int DrawJsvVideoRenderer(JsvContext* context, float mvpMatrix[], int size)

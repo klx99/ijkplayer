@@ -4012,6 +4012,9 @@ FFPlayer *ffp_create()
     ffp->meta = ijkmeta_create();
 
     av_opt_set_defaults(ffp);
+
+    ffp->jsv_context = NewJsvContext(); // JsView Added
+
     return ffp;
 }
 
@@ -4038,11 +4041,7 @@ void ffp_destroy(FFPlayer *ffp)
 
     msg_queue_destroy(&ffp->msg_queue);
 
-    // JsView Added >>>
-    if(ffp->jsv_context) {
-        DeleteJsvContext(&ffp->jsv_context);
-    }
-    // JsView Added <<<
+    DeleteJsvContext(&ffp->jsv_context); // JsView Added
 
     av_free(ffp);
 }
@@ -5075,13 +5074,8 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 // JsView Added >>>
 int ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame)
 {
-    if (!ffp)
+    if (!ffp || !ffp->jsv_context)
         return NULL;
-
-    if(!ffp->jsv_context) {
-        ffp->jsv_context = NewJsvContext();
-        assert(ffp->jsv_context);
-    }
 
     WriteToJsvVideoRenderer(ffp->jsv_context, frame);
 
@@ -5090,15 +5084,14 @@ int ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame)
 
 int ffp_jsv1_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
 {
-    if (!ffp) {
-        return -1;
-    }
-
-    if(!ffp->jsv_context) {
+    if (!ffp || !ffp->jsv_context) {
         return -1;
     }
 
     int ret = DrawJsvVideoRenderer(ffp->jsv_context, mvp_matrix, size);
+    if(ret < 0) {
+        return -1;
+    }
 
     return ret;
 }
@@ -5106,8 +5099,9 @@ int ffp_jsv1_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
 // 使用ijk自带的YV12shader，不出图。
 int ffp_jsv0_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
 {
-    if (!ffp)
+    if (!ffp || !ffp->jsv_context) {
         return -1;
+    }
 
     VideoState *is = ffp->is;
     if (is->video_st) {
@@ -5128,5 +5122,15 @@ int ffp_jsv_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
     }
 
     return ret;
+}
+
+void ffp_set_video_sync_callback(FFPlayer *ffp, void(*callback)(void*), void *opaque)
+{
+    if (!ffp || !ffp->jsv_context) {
+        return;
+    }
+
+    ffp->jsv_context->videoSyncCallback = callback;
+    ffp->jsv_context->videoSyncData = opaque;
 }
 // JsView Added <<<

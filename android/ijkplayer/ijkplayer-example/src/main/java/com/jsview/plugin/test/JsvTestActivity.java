@@ -35,7 +35,8 @@ public class JsvTestActivity extends AppCompatActivity {
         fakeForgeView = findViewById(R.id.fake_forge_view);
         fakeForgeView.setEGLContextClientVersion(2);
         fakeForgeView.setRenderer(fakeForgeRenderer);
-        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -69,6 +70,14 @@ public class JsvTestActivity extends AppCompatActivity {
 
             mediaPlayerList.add(mp);
 
+            IjkMediaPlayer.OnVideoSyncListener videoSyncListener = new IjkMediaPlayer.OnVideoSyncListener () {
+                @Override
+                public void onVideoSync(IMediaPlayer mp) {
+                    fakeForgeView.requestRender();
+                }
+            };
+            mp.setOnVideoSyncListener(videoSyncListener);
+
             JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
                 @Override
                 public void onDrawFrame(Object key, final float[] mvpMatrix) {
@@ -97,7 +106,6 @@ public class JsvTestActivity extends AppCompatActivity {
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", OverlayFormat);
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
-
 
         IMediaPlayer.OnPreparedListener preparedListener = new IMediaPlayer.OnPreparedListener() {
             public void onPrepared(IMediaPlayer mp) {
@@ -140,7 +148,7 @@ public class JsvTestActivity extends AppCompatActivity {
 
 //    private static final String OverlayFormat = "fcc-jsv0";
     private static final String OverlayFormat = "fcc-jsv1";
-    private static final int MediaPlayerCount = 5;
+    private static final int MediaPlayerCount = 1;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear1/prog_index.m3u8",
         "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear2/prog_index.m3u8",

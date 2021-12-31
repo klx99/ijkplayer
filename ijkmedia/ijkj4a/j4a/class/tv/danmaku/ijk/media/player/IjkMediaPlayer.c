@@ -30,6 +30,7 @@ typedef struct J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer {
     jmethodID method_postEventFromNative;
     jmethodID method_onSelectCodec;
     jmethodID method_onNativeInvoke;
+    jmethodID method_onVideoSync;
 } J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 static J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 
@@ -324,6 +325,17 @@ jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onNativeInvoke__catchA
     return ret_value;
 }
 
+void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onVideoSync(JNIEnv *env, jobject weakThiz)
+{
+    (*env)->CallStaticVoidMethod(env, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onVideoSync, weakThiz);
+}
+
+void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onVideoSync__catchAll(JNIEnv *env, jobject weakThiz)
+{
+    J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onVideoSync(env, weakThiz);
+    J4A_ExceptionCheck__catchAll(env);
+}
+
 int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
 {
     int         ret                   = -1;
@@ -380,6 +392,13 @@ int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
     sign     = "(Ljava/lang/Object;ILandroid/os/Bundle;)Z";
     class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onNativeInvoke = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
     if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onNativeInvoke == NULL)
+        goto fail;
+
+    class_id = class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id;
+    name     = "onVideoSync";
+    sign     = "(Ljava/lang/Object;)V";
+    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onVideoSync = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onVideoSync == NULL)
         goto fail;
 
     J4A_ALOGD("J4ALoader: OK: '%s' loaded\n", "tv.danmaku.ijk.media.player.IjkMediaPlayer");

@@ -1285,5 +1285,35 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static native void native_profileEnd();
     public static native void native_setLogLevel(int level);
 
-    public native int native_jsvDrawFrame(float[] mvpMatrix); // JsView Added
+    // JsView Added >>>
+
+    // JsView Added >>>
+    public interface OnVideoSyncListener {
+        void onVideoSync(IMediaPlayer mp);
+    }
+    public void setOnVideoSyncListener(OnVideoSyncListener listener) {
+        videoSyncListener = listener;
+    }
+    @CalledByNative
+    private static void onVideoSync(Object weakThiz) {
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>)) {
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null) {
+            return;
+        }
+
+        if(player.videoSyncListener != null) {
+            player.videoSyncListener.onVideoSync(player);
+        }
+
+    }
+
+    public native int native_jsvDrawFrame(float[] mvpMatrix);
+
+    private OnVideoSyncListener videoSyncListener;
+    // JsView Added <<<
 }

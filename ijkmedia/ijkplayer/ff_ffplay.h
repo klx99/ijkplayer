@@ -119,7 +119,10 @@ void      ffp_set_property_int64(FFPlayer *ffp, int id, int64_t value);
 // must be freed with free();
 struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 
-int       ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame);
-int       ffp_jsv_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size); // JsView Added
+// JsView Added >>>
+int  ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame);
+int  ffp_jsv_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size);
+void ffp_set_video_sync_callback(FFPlayer *ffp, void(*callback)(void*), void *opaque);
+// JsView Added <<<
 
 #endif

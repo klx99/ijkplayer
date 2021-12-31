@@ -218,6 +218,9 @@ void           *ijkmp_set_weak_thiz(IjkMediaPlayer *mp, void *weak_thiz);
 int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);
 void            ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, int64_t start_time, int64_t end_time, int num, int definition);
 
-int             ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size); // JsView Added
+// JsView Added >>>
+int             ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size);
+void            ijkmp_set_video_sync_callback(IjkMediaPlayer *mp, void(*callback)(void*), void *opaque);
+// JsView Added <<<
 
 #endif
