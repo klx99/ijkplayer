@@ -1,6 +1,7 @@
 package com.jsview.plugin.test;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -39,8 +40,8 @@ class JsvFakeForgeRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
         GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 
-        mTriangleForeground = new Triangle(mContext);
-        mTriangleBackground = new Triangle(mContext);
+        mTriangleForeground = new Triangle(mContext, Color.GREEN);
+        mTriangleBackground = new Triangle(mContext, Color.RED);
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 

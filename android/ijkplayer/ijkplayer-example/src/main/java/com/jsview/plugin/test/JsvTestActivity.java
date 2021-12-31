@@ -165,8 +165,8 @@ public class JsvTestActivity extends AppCompatActivity {
 
     private ArrayList<IjkMediaPlayer> mediaPlayerList = new ArrayList();
 
-     private static final String OverlayFormat = "fcc-jsv0";
-//    private static final String OverlayFormat = "fcc-jsv1";
+//     private static final String OverlayFormat = "fcc-jsv0";
+    private static final String OverlayFormat = "fcc-jsv1";
     private static final int MediaPlayerCount = 1;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",

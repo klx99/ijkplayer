@@ -1,10 +1,14 @@
 package com.jsview.plugin.test;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.os.Build;
 import android.os.SystemClock;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -13,7 +17,7 @@ import java.nio.FloatBuffer;
 import static com.jsview.plugin.test.JsvTestActivity.TAG;
 
 public class Triangle {
-    Triangle(Context context) {
+    Triangle(Context context, int color) {
         mContext = context;
         mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
                 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -40,7 +44,7 @@ public class Triangle {
             throw new RuntimeException("Could not get attrib location for uMVPMatrix");
         }
 
-        mTextureID = getImageTexture();
+        mTextureID = getImageTexture(color);
     }
 
     void onDrawFrame(final float[] mvpMatrix) {
@@ -130,7 +134,8 @@ public class Triangle {
         }
     }
 
-    int getImageTexture() {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    int getImageTexture(int color) {
         if(mTextureID != 0) {
             return mTextureID;
         }
@@ -153,12 +158,12 @@ public class Triangle {
                 GLES20.GL_REPEAT);
 
 //        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.ic_launcher);
-//
 //        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
 //        bitmap.recycle();
-        byte[] color = new byte[]{0, 127, 0};
+
+        byte[] colorBytes = new byte[]{(byte) Color.red(color), (byte) Color.green(color), (byte) Color.blue(color)};
         ByteBuffer bufferColor = ByteBuffer.allocateDirect(3);
-        bufferColor.put(color).position(0);
+        bufferColor.put(colorBytes).position(0);
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0,
                 GLES20.GL_RGB, 1, 1, 0, GLES20.GL_RGB,
                 GLES20.GL_UNSIGNED_BYTE, bufferColor);
