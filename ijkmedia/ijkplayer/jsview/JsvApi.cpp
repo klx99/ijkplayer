@@ -8,6 +8,7 @@
 
 #include "JsvApi.h"
 
+#include <chrono>
 #include <android/log.h>
 #include "JsvVideoRenderer.hpp"
 
@@ -34,6 +35,8 @@ void DeleteJsvContext(JsvContext** context)
 
 void WriteToJsvVideoRenderer(JsvContext* context, AVFrame *frame)
 {
+//    using namespace std::chrono;
+//    int64_t startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
     if(context == nullptr) {
         __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw frame to video renderer, context has been deleted.");
         return;
@@ -48,7 +51,9 @@ void WriteToJsvVideoRenderer(JsvContext* context, AVFrame *frame)
     if(context->videoSyncCallback && context->videoSyncData) {
         context->videoSyncCallback(context->videoSyncData);
     }
-
+//    int64_t endTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+//    int64_t deltaTime = endTime - startTime;
+//    __android_log_print(ANDROID_LOG_INFO, "JsView", "======= video sync time: start/end=%lld/%lld, delta=%lld", startTime, endTime, deltaTime);
 }
 
 int DrawJsvVideoRenderer(JsvContext* context, float mvpMatrix[], int size)

@@ -38,8 +38,8 @@ public class JsvTestActivity extends AppCompatActivity {
         fakeForgeView = findViewById(R.id.fake_forge_view);
         fakeForgeView.setEGLContextClientVersion(2);
         fakeForgeView.setRenderer(fakeForgeRenderer);
-        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -122,6 +122,9 @@ public class JsvTestActivity extends AppCompatActivity {
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", OverlayFormat);
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
+
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
 
         IMediaPlayer.OnPreparedListener preparedListener = new IMediaPlayer.OnPreparedListener() {
             public void onPrepared(IMediaPlayer mp) {

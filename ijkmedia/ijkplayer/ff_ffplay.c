@@ -116,6 +116,32 @@ static AVPacket flush_pkt;
 #define IJKVERSION_GET_MINOR(x)     ((x >>  8) & 0xFF)
 #define IJKVERSION_GET_MICRO(x)     ((x      ) & 0xFF)
 
+// JsView Added >>>
+static int64_t prevDisplayTime;
+void print_display_fps() {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &now);
+    int64_t nowTime = (now.tv_sec) * 1000 + now.tv_nsec / 1000000;
+
+    int64_t deltaTime = nowTime - prevDisplayTime;
+    prevDisplayTime = nowTime;
+
+//    __android_log_print(ANDROID_LOG_INFO, "JsView", "%s() cost time(ms): %lld", __func__, deltaTime);
+}
+
+static int64_t prevDisplayTime;
+void print_decode_fps() {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &now);
+    int64_t nowTime = (now.tv_sec) * 1000 + now.tv_nsec / 1000000;
+
+    int64_t deltaTime = nowTime - prevDisplayTime;
+    prevDisplayTime = nowTime;
+
+    __android_log_print(ANDROID_LOG_INFO, "JsView", "%s() cost time(ms): %lld", __func__, deltaTime);
+}
+// JsView Added <<<
+
 #if CONFIG_AVFILTER
 static inline
 int cmp_audio_fmts(enum AVSampleFormat fmt1, int64_t channel_count1,

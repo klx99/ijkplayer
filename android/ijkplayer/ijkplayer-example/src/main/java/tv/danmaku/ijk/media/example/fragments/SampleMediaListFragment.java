@@ -129,8 +129,8 @@ public class SampleMediaListFragment extends Fragment {
                 "    ]\n" +
                 "}";
 
+        mAdapter.addItem("http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8", "JsView直播流");
         mAdapter.addItem(manifest_string, "las test");
-        mAdapter.addItem("http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8", "直播流============================");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", "bipbop basic master playlist");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8", "bipbop basic 400x300 @ 232 kbps");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8", "bipbop basic 640x480 @ 650 kbps");

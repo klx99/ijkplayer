@@ -113,7 +113,7 @@ int JsvVideoRenderer::write(AVFrame* frame)
 int JsvVideoRenderer::draw(float mvpMatrix[], int size)
 {
     if(!frame) {
-        return -1;
+        return 0;
     }
 
     auto program = getProgram();
