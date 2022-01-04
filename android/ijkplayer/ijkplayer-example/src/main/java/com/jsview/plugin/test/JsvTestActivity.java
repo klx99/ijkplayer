@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import tv.danmaku.ijk.media.example.R;
+import tv.danmaku.ijk.media.example.widget.media.InfoHudViewHolder;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
@@ -35,6 +37,8 @@ public class JsvTestActivity extends AppCompatActivity {
 
         fakeForgeRenderer = new JsvFakeForgeRenderer(this);
 
+        TableLayout hudView = findViewById(R.id.hud_view);
+        hudViewHolder = new InfoHudViewHolder(this, hudView);
         fakeForgeView = findViewById(R.id.fake_forge_view);
         fakeForgeView.setEGLContextClientVersion(2);
         fakeForgeView.setRenderer(fakeForgeRenderer);
@@ -51,19 +55,6 @@ public class JsvTestActivity extends AppCompatActivity {
         super.onStart();
 
         startPlayers(MediaPlayerCount < VideoUrlList.size() ? MediaPlayerCount : VideoUrlList.size());
-
-
-        logLooper = new Runnable() {
-            @Override
-            public void run() {
-                float fps = fakeForgeRenderer.getFps();
-                TextView logView = findViewById(R.id.log_view);
-                logView.setText(Float.toString(fps));
-                mainHandler.postDelayed(logLooper, 500);
-            }
-        };
-        mainHandler.postDelayed(logLooper, 500);
-
     }
 
     @Override
@@ -121,6 +112,10 @@ public class JsvTestActivity extends AppCompatActivity {
         };
         fakeForgeRenderer.appendOnDrawFrameListener(idx, drawFrameListener);
 
+        if(idx == 0) {
+            hudViewHolder.setMediaPlayer(mp);
+        }
+
         return mp;
     }
 
@@ -128,7 +123,7 @@ public class JsvTestActivity extends AppCompatActivity {
         IjkMediaPlayer mp = new IjkMediaPlayer();
 
         mp.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
-        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", 0);
+        mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec", UseMediaCodec);
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "opensles", 1);
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", OverlayFormat);
         mp.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
@@ -171,14 +166,13 @@ public class JsvTestActivity extends AppCompatActivity {
         return mp;
     }
 
-    private Handler mainHandler = new Handler(Looper.getMainLooper());
-    Runnable logLooper;
-
+    private InfoHudViewHolder hudViewHolder;
     private GLSurfaceView fakeForgeView;
     private JsvFakeForgeRenderer fakeForgeRenderer;
 
     private ArrayList<IjkMediaPlayer> mediaPlayerList = new ArrayList();
 
+    private static final int UseMediaCodec = 0;
 //     private static final String OverlayFormat = "fcc-jsv0";
     private static final String OverlayFormat = "fcc-jsv1";
     private static final int MediaPlayerCount = 1;
