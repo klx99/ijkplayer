@@ -90,7 +90,10 @@ typedef struct SDL_AMediaCodec
 
     bool                    (*func_isInputBuffersValid)(SDL_AMediaCodec* acodec);
 
-    ssize_t                 (*func_readOutputData)(SDL_AMediaCodec* acodec, size_t idx, uint8_t **data, size_t size); // JsView Added
+    // JsView Added >>>
+    ssize_t                 (*func_refOutputData)(SDL_AMediaCodec* acodec, size_t idx, void **ref, uint8_t **data);
+    void                    (*func_unrefOutputData)(SDL_AMediaCodec* acodec, size_t idx, void *ref);
+    // JsView Added <<<
 } SDL_AMediaCodec;
 
 int                     SDL_AMediaCodec_create_object_serial();
@@ -142,4 +145,8 @@ sdl_amedia_status_t     SDL_AMediaCodecFake_queueFakeFrame(SDL_AMediaCodec* acod
 ssize_t                 SDL_AMediaCodecFake_dequeueOutputBuffer(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs);
 ssize_t                 SDL_AMediaCodecFake_dequeueFakeFrameOnly(SDL_AMediaCodec* acodec, SDL_AMediaCodecBufferInfo *info, int64_t timeoutUs);
 
+// JsView Added >>>
+ssize_t SDL_AMediaCodec_refOutputData(SDL_AMediaCodec* acodec, size_t idx, void** ref, uint8_t **data);
+void SDL_AMediaCodec_unrefOutputData(SDL_AMediaCodec* acodec, size_t idx, void* ref);
+// JsView Added <<<
 #endif

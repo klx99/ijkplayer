@@ -185,6 +185,51 @@ int JsvVideoRenderer::draw(float mvpMatrix[], int size)
     return 0;
 }
 
+int JsvVideoRenderer::drawWithData(float mvpMatrix[], int matrixSize,
+                                   int colorFormat, int width, int height,
+                                   uint8_t* data, int dataSize)
+{
+    auto program = getProgram();
+
+    glUseProgram(program);
+
+    glUniformMatrix4fv(glumMVP, 1, GL_FALSE, mvpMatrix);
+
+    glEnableVertexAttribArray(glavPosition);
+    glVertexAttribPointer(glavPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, VertexData);
+
+    glEnableVertexAttribArray(glafPosition);
+    glVertexAttribPointer(glafPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
+
+    //激活纹理0来绑定y数据
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, glTextureYUV[0]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width, height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data);
+
+    //激活纹理1来绑定u数据
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, glTextureYUV[1]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width / 2, height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data + width*height);
+
+    //激活纹理2来绑定u数据
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, glTextureYUV[2]);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, width / 2, height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, data + width*height + width*height/4);
+
+    //给fragment_shader里面yuv变量设置值   0 1 2 标识纹理x
+    glUniform1i(glSamplerY, 0);
+    glUniform1i(glSamplerU, 1);
+    glUniform1i(glSamplerV, 2);
+
+    //绘制
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, VertexCount);
+
+    glDisableVertexAttribArray(glafPosition);
+    glDisableVertexAttribArray(glavPosition);
+
+    return 0;
+}
+
 const char* JsvVideoRenderer::getVertexShaderSource()
 {
     static constexpr const char* source =

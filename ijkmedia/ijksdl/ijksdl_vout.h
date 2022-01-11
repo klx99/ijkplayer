@@ -55,6 +55,12 @@ struct SDL_VoutOverlay {
     void    (*unref)(SDL_VoutOverlay *overlay);
 
     int     (*func_fill_frame)(SDL_VoutOverlay *overlay, const AVFrame *frame);
+
+    // JsViewAdded >>>
+    int (*ref_mediacodec_buffer)(SDL_VoutOverlay *overlay, size_t idx, void **ref, uint8_t **data);
+    void (*unref_mediacodec_buffer)(SDL_VoutOverlay *overlay, size_t idx, void *ref);
+    int mediacodec_buffer_idx;
+    // JsViewAdded <<<
 };
 
 typedef struct SDL_Vout_Opaque SDL_Vout_Opaque;

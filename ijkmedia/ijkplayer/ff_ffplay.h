@@ -123,6 +123,12 @@ struct IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp);
 int  ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame);
 int  ffp_jsv_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size);
 void ffp_set_video_sync_callback(FFPlayer *ffp, void(*callback)(void*), void *opaque);
+
+int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *frame);
+int ffp_jsv2_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight);
+int ffp_jsv2_lock_frame_buffer(FFPlayer *ffp, uint8_t** data);
+void ffp_jsv2_unlock_frame_buffer(FFPlayer *ffp);
+int  ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial, int frame_buffer_index); // JsView Added
 // JsView Added <<<
 
 #endif

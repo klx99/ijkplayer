@@ -20,13 +20,13 @@ class JsvFakeVideoRenderer {
     public JsvFakeVideoRenderer(IjkMediaPlayer mp, JsvFakeForgeRenderer forgeRenderer) {
         playerHandler = mp.native_lockPlayerHandler();
         long getFrameFormatHandler = mp.native_getFrameFormatHandler();
-        long obtainFrameBufferHandler = mp.native_obtainFrameBufferHandler();
-        long releaseFrameBufferHandler = mp.native_releaseFrameBufferHandler();
+        long lockFrameBufferHandler = mp.native_lockFrameBufferHandler();
+        long unlockFrameBufferHandler = mp.native_unlockFrameBufferHandler();
 
         IjkMediaPlayer.native_testPlayerNativeHandlers(playerHandler,
                                                        getFrameFormatHandler,
-                                                       obtainFrameBufferHandler,
-                                                       releaseFrameBufferHandler);
+                                                       lockFrameBufferHandler,
+                                                       unlockFrameBufferHandler);
 
         forgeRenderer.appendOnDrawFrameListener(this, drawFrameListener);
     }
