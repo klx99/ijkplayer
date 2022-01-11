@@ -564,12 +564,12 @@ typedef struct {
 
     int videoWidth;
     int videoHeight;
-    int videoColorFormat;
+    int video_color_format;
 
     Frame *vp;
-    int outputBufferIndex;
-    int outputBufferSize;
-    uint8_t *outputBufferData;
+    int output_buffer_index;
+    int output_buffer_size;
+    uint8_t *output_buffer_data;
     void* outputBufferRef;
 } JsvMediaCodecInfo;
 // JsView Added <<<

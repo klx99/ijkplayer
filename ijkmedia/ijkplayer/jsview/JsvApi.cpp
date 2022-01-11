@@ -19,8 +19,8 @@ JsvContext* NewJsvContext()
 
 //    pthread_mutex_init(&context->mediaCodecInfo.mutex, NULL);
 
-//    context->mediaCodecInfo.outputBufferSize = 1024*1024*10;
-//    context->mediaCodecInfo.outputBuffer = new uint8_t[context->mediaCodecInfo.outputBufferSize];
+//    context->mediaCodecInfo.output_buffer_size = 1024*1024*10;
+//    context->mediaCodecInfo.outputBuffer = new uint8_t[context->mediaCodecInfo.output_buffer_size];
 
     return context;
 }
