@@ -69,6 +69,7 @@
 #define SDL_FCC__GLES2  SDL_FOURCC('_', 'E', 'S', '2')    /**< let Vout choose format */
 #define SDL_FCC_JSV0    SDL_FOURCC('J', 'S', 'V', '0')    /**< JsView format 0, use ijk gl */
 #define SDL_FCC_JSV1    SDL_FOURCC('J', 'S', 'V', '1')    /**< JsView format 1, use custom gl */
+#define SDL_FCC_JSV2    SDL_FOURCC('J', 'S', 'V', '2')    /**< JsView format 2, use forge gl */
 
 // undefine
 #define SDL_FCC_UNDF    SDL_FOURCC('U', 'N', 'D', 'F')    /**< undefined */

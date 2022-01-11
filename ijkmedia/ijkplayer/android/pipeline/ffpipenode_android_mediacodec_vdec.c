@@ -126,7 +126,8 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     ijkmp_mediacodecinfo_context *mcc      = &opaque->mcc;
     SDL_AMediaCodec              *acodec   = NULL;
 
-    if (opaque->jsurface == NULL) {
+    if (opaque->jsurface == NULL
+    && opaque->ffp->overlay_format != SDL_FCC_JSV2) { // JsView Added
         // we don't need real codec if we don't have a surface
         acodec = SDL_AMediaCodecDummy_create();
     } else {

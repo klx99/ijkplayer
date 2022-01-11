@@ -1315,5 +1315,17 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public native int native_jsvDrawFrame(float[] mvpMatrix);
 
     private OnVideoSyncListener videoSyncListener;
+
+    public native long native_lockPlayerHandler();
+    public native void native_unlockPlayerHandler(long handler);
+    public native long native_getFrameFormatHandler();
+    public native long native_obtainFrameBufferHandler();
+    public native long native_releaseFrameBufferHandler();
+
+    public static native void native_testPlayerNativeHandlers(long playerHandler,
+                                                       long getFrameFormatHandler,
+                                                       long obtainFrameBufferHandler,
+                                                       long releaseFrameBufferHandler);
+    public static native void native_testDrawFrame(long playerHandler, float[] mvpMatrix);
     // JsView Added <<<
 }

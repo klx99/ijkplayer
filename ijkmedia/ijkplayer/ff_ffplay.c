@@ -937,6 +937,8 @@ static void video_image_display2(FFPlayer *ffp)
         // JsView Added >>>, 等到GL线程去描画
         if(ffp->vout->overlay_format == SDL_FCC_JSV1) {
             ffp_jsv1_cache_frame(ffp, vp->frame);
+//        } else if(ffp->vout->overlay_format == SDL_FCC_JSV2) {
+//            ffp_jsv1_cache_frame(ffp, vp->frame);
         } else
         // JsView Added <<<
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
@@ -1696,6 +1698,8 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         // JsView Added >>>, 等到GL线程去描画
         if(ffp->vout->overlay_format == SDL_FCC_JSV1) {
             av_frame_move_ref(vp->frame, src_frame);
+//        } else if(ffp->vout->overlay_format == SDL_FCC_JSV2) {
+//            av_frame_move_ref(vp->frame, src_frame);
         } else
         // JsView Added <<<
         if (SDL_VoutFillFrameYUVOverlay(vp->bmp, src_frame) < 0) {
@@ -4234,6 +4238,7 @@ void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
     switch (chroma_fourcc) {
         case SDL_FCC_JSV0: // JsView Added
         case SDL_FCC_JSV1: // JsView Added
+        case SDL_FCC_JSV2: // JsView Added
         case SDL_FCC__GLES2:
         case SDL_FCC_I420:
         case SDL_FCC_YV12:
@@ -5098,6 +5103,20 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 }
 
 // JsView Added >>>
+int ffp_jsv2_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
+{
+    if (!ffp || !ffp->jsv_context) {
+        return -1;
+    }
+
+    int ret = DrawJsvVideoRenderer(ffp->jsv_context, mvp_matrix, size);
+    if(ret < 0) {
+        return -1;
+    }
+
+    return ret;
+}
+
 int ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame)
 {
     if (!ffp || !ffp->jsv_context)
@@ -5145,6 +5164,8 @@ int ffp_jsv_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
         ret = ffp_jsv0_draw_frame(ffp, mvp_matrix, size);
     } else if(ffp->vout->overlay_format == SDL_FCC_JSV1) {
         ret = ffp_jsv1_draw_frame(ffp, mvp_matrix, size);
+    } else if(ffp->vout->overlay_format == SDL_FCC_JSV2) {
+        ret = ffp_jsv2_draw_frame(ffp, mvp_matrix, size);
     }
 
     return ret;

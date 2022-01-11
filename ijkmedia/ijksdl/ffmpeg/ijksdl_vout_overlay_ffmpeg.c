@@ -287,6 +287,7 @@ SDL_VoutOverlay *SDL_VoutFFmpeg_CreateOverlay(int width, int height, int frame_f
     switch (overlay_format) {
         case SDL_FCC_JSV0: // JsView Added
         case SDL_FCC_JSV1: // JsView Added
+        case SDL_FCC_JSV2: // JsView Added
         case SDL_FCC__GLES2: {
             switch (frame_format) {
                 case AV_PIX_FMT_YUV444P10LE:

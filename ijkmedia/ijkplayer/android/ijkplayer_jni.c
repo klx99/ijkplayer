@@ -1166,6 +1166,64 @@ IjkMediaPlayer_native_jsvDrawFrame(JNIEnv *env, jobject thiz, jfloatArray mvp_ma
 
     return ret;
 }
+
+static jlong
+IjkMediaPlayer_native_lockPlayerHandler(JNIEnv *env, jobject thiz) {
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+
+    jlong handle = ijkmp_safe_ref(mp);
+
+    ijkmp_dec_ref_p(&mp);
+
+    return handle;
+}
+
+static void
+IjkMediaPlayer_native_unlockPlayerHandler(JNIEnv *env, jobject thiz, jlong handler) {
+    ijkmp_safe_unref(handler);
+}
+
+static jlong
+IjkMediaPlayer_native_getFrameFormatHandler(JNIEnv *env, jobject thiz) {
+    jlong handler = (jlong)ijkmp_get_frame_format;
+    return handler;
+}
+
+static jlong
+IjkMediaPlayer_native_obtainFrameBufferHandler(JNIEnv *env, jobject thiz) {
+    jlong handler = (jlong)ijkmp_obtain_frame_buffer;
+    return handler;
+}
+
+static jlong
+IjkMediaPlayer_native_releaseFrameBufferHandler(JNIEnv *env, jobject thiz) {
+    jlong handler = (jlong)ijkmp_release_frame_buffer;
+    return handler;
+}
+
+
+static void
+IjkMediaPlayer_native_testPlayerNativeHandlers(JNIEnv *env, jclass clazz,
+                                               jlong handler,
+                                               jlong getFrameFormatHandler,
+                                               jlong obtainFrameBufferHandler,
+                                               jlong releaseFrameBufferHandler) {
+    test_native_handlers(handler,
+                         getFrameFormatHandler,
+                         obtainFrameBufferHandler,
+                         releaseFrameBufferHandler);
+}
+
+static void
+IjkMediaPlayer_native_testDrawFrame(JNIEnv *env, jclass clazz, jlong handler, jfloatArray mvp_matrix) {
+    jfloat* ptr = (*env)->GetFloatArrayElements(env, mvp_matrix, NULL);
+    jsize len = (*env)->GetArrayLength(env, mvp_matrix);
+
+    test_draw_frame(handler, ptr, len);
+
+    (*env)->ReleaseFloatArrayElements(env, mvp_matrix, ptr, JNI_ABORT);
+}
+
 // JsView Added <<<
 
 
@@ -1218,7 +1276,18 @@ static JNINativeMethod g_methods[] = {
 
     { "native_setLogLevel",     "(I)V",                     (void *) IjkMediaPlayer_native_setLogLevel },
     { "_setFrameAtTime",        "(Ljava/lang/String;JJII)V", (void *) IjkMediaPlayer_setFrameAtTime },
-    { "native_jsvDrawFrame",       "([F)I",                    (void *) IjkMediaPlayer_native_jsvDrawFrame }, // JsView Added
+    { "native_jsvDrawFrame",       "([F)I",                 (void *) IjkMediaPlayer_native_jsvDrawFrame }, // JsView Added
+
+    // JsView Added >>>
+    { "native_lockPlayerHandler",         "()J",      (void *) IjkMediaPlayer_native_lockPlayerHandler },
+    { "native_unlockPlayerHandler",       "(J)V",     (void *) IjkMediaPlayer_native_unlockPlayerHandler },
+    { "native_getFrameFormatHandler",     "()J",      (void *) IjkMediaPlayer_native_getFrameFormatHandler },
+    { "native_obtainFrameBufferHandler",  "()J",      (void *) IjkMediaPlayer_native_obtainFrameBufferHandler },
+    { "native_releaseFrameBufferHandler", "()J",      (void *) IjkMediaPlayer_native_releaseFrameBufferHandler },
+
+    { "native_testPlayerNativeHandlers",  "(JJJJ)V",  (void *) IjkMediaPlayer_native_testPlayerNativeHandlers },
+    { "native_testDrawFrame",             "(J[F)V",   (void *) IjkMediaPlayer_native_testDrawFrame },
+    // JsView Added <<<
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

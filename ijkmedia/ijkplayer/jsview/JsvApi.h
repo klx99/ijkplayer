@@ -9,11 +9,19 @@ extern "C" {
 #include <libavutil/frame.h>
 
 typedef struct {
+    int  (*get_frame_format_handler)(int64_t imp, int* videoFormat, int* videoWidth, int* videoHeight);
+    int  (*obtain_frame_buffer_handler)(int64_t imp, uint8_t** data, int* size);
+    void (*release_frame_buffer_handler)(int64_t imp, int index);
+} MediaCodecHandler;
+
+typedef struct {
     void* videoRenderer;
     bool videoPrepared;
 
     void (*videoSyncCallback)(void*);
     void *videoSyncData;
+
+    MediaCodecHandler mediaCodecHandler;
 } JsvContext;
 
 JsvContext* NewJsvContext();

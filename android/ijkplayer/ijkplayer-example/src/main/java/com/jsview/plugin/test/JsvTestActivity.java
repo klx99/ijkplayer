@@ -3,6 +3,7 @@ package com.jsview.plugin.test;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.media.MediaCodec;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -93,24 +94,25 @@ public class JsvTestActivity extends AppCompatActivity {
         };
         mp.setOnVideoSyncListener(videoSyncListener);
 
-        JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
-            @Override
-            public void onDrawFrame(Object key, final float[] mvpMatrix) {
-                Integer idx = (Integer) key;
-                IjkMediaPlayer mp = mediaPlayerList.get(idx);
-
-                float[] matrix = mvpMatrix.clone();
-                if(idx > 0) { // 第0个视频全屏播放
-                    float offset = 2.0f / MediaPlayerCount;
-                    float center = MediaPlayerCount / 2.0f;
-                    Matrix.scaleM(matrix, 0, 0.5f, 0.5f, 1);
-                    Matrix.translateM(matrix, 0, offset * (idx - center), offset * (idx - center), 0);
-                }
-
-                mp.native_jsvDrawFrame(matrix);
-            }
-        };
-        fakeForgeRenderer.appendOnDrawFrameListener(idx, drawFrameListener);
+//        JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
+//            @Override
+//            public void onDrawFrame(Object key, final float[] mvpMatrix) {
+//                Integer idx = (Integer) key;
+//                IjkMediaPlayer mp = mediaPlayerList.get(idx);
+//
+//                float[] matrix = mvpMatrix.clone();
+//                if(idx > 0) { // 第0个视频全屏播放
+//                    float offset = 2.0f / MediaPlayerCount;
+//                    float center = MediaPlayerCount / 2.0f;
+//                    Matrix.scaleM(matrix, 0, 0.5f, 0.5f, 1);
+//                    Matrix.translateM(matrix, 0, offset * (idx - center), offset * (idx - center), 0);
+//                }
+//
+//                mp.native_jsvDrawFrame(matrix);
+//            }
+//        };
+//        fakeForgeRenderer.appendOnDrawFrameListener(idx, drawFrameListener);
+        fakeVideoRenderer = new JsvFakeVideoRenderer(mp, fakeForgeRenderer);
 
         if(idx == 0) {
             hudViewHolder.setMediaPlayer(mp);
@@ -169,14 +171,17 @@ public class JsvTestActivity extends AppCompatActivity {
     private InfoHudViewHolder hudViewHolder;
     private GLSurfaceView fakeForgeView;
     private JsvFakeForgeRenderer fakeForgeRenderer;
+    private JsvFakeVideoRenderer fakeVideoRenderer;
 
     private ArrayList<IjkMediaPlayer> mediaPlayerList = new ArrayList();
 
-    private static final int UseMediaCodec = 0;
+    private static final int UseMediaCodec = 1;
 //     private static final String OverlayFormat = "fcc-jsv0";
-    private static final String OverlayFormat = "fcc-jsv1";
+//    private static final String OverlayFormat = "fcc-jsv1";
+    private static final String OverlayFormat = "fcc-jsv2";
     private static final int MediaPlayerCount = 1;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
+          "/data/local/tmp/test.mp4",
 //        "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
 //        "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
 //        "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",
