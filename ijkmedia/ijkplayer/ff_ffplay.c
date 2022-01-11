@@ -1548,7 +1548,8 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
     SDL_UnlockMutex(is->pictq.mutex);
 }
 
-static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial, int frame_buffer_index) // JsView Modified
+static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial,
+                         int output_buffer_index, int output_buffer_offset, int output_buffer_size) // JsView Modified
 {
     VideoState *is = ffp->is;
     Frame *vp;
@@ -1696,9 +1697,14 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 #endif
         // FIXME: set swscale options
         // JsView Added >>>, 等到GL线程去描画
+        if(ffp->overlay_format == SDL_FCC_JSV2) {
+            vp->bmp->output_buffer_index = output_buffer_index;
+            vp->bmp->output_buffer_offset = output_buffer_offset;
+            vp->bmp->output_buffer_size = output_buffer_size;
+        }
         if(ffp->overlay_format == SDL_FCC_JSV1) {
             av_frame_move_ref(vp->frame, src_frame);
-        } else
+        } else // 包括SDL_FCC_JSV2
         // JsView Added <<<
         if (SDL_VoutFillFrameYUVOverlay(vp->bmp, src_frame) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
@@ -1714,12 +1720,6 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         vp->sar = src_frame->sample_aspect_ratio;
         vp->bmp->sar_num = vp->sar.num;
         vp->bmp->sar_den = vp->sar.den;
-
-        // JsView Added >>>
-        if(ffp->overlay_format == SDL_FCC_JSV2) {
-            vp->bmp->mediacodec_buffer_idx = frame_buffer_index;
-        }
-        // JsView Added <<<
 
 #ifdef FFP_MERGE
         av_frame_move_ref(vp->frame, src_frame);
@@ -2367,7 +2367,7 @@ static int ffplay_video_thread(void *arg)
 #endif
             duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
             pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
-            ret = queue_picture(ffp, frame, pts, duration, frame->pkt_pos, is->viddec.pkt_serial, -1); // JsView Modified
+            ret = queue_picture(ffp, frame, pts, duration, frame->pkt_pos, is->viddec.pkt_serial, -1, -1, -1); // JsView Modified
             av_frame_unref(frame);
 #if CONFIG_AVFILTER
         }
@@ -4619,7 +4619,7 @@ void ffp_frame_queue_push(FrameQueue *f)
 
 int ffp_queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial)
 {
-    return queue_picture(ffp, src_frame, pts, duration, pos, serial, -1);
+    return queue_picture(ffp, src_frame, pts, duration, pos, serial, -1, -1, -1);
 }
 
 int ffp_get_master_sync_type(VideoState *is)
@@ -5219,7 +5219,7 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
     if(mediaCodecInfo->frame) {
         Frame* vp = (Frame*)ffp->jsv_context->mediaCodecInfo.frame;
         SDL_VoutOverlay *overlay = vp->bmp;
-        overlay->unref_mediacodec_buffer(overlay, overlay->mediacodec_buffer_idx,
+        overlay->unref_mediacodec_buffer(overlay, overlay->output_buffer_index,
                                          mediaCodecInfo->outputBufferRef);
     }
 
@@ -5230,9 +5230,16 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
         return -1;
     }
 
-    mediaCodecInfo->outputBufferSize = overlay->ref_mediacodec_buffer(overlay, overlay->mediacodec_buffer_idx,
-                                                                      &mediaCodecInfo->outputBufferRef,
-                                                                      &mediaCodecInfo->outputBuffer);
+    int ret = overlay->ref_mediacodec_buffer(overlay, overlay->output_buffer_index,
+                                             &mediaCodecInfo->outputBufferRef,
+                                             &mediaCodecInfo->outputBuffer);
+    if(ret < 0) {
+        pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
+        return ret;
+    }
+
+    mediaCodecInfo->outputBuffer += vp->bmp->output_buffer_offset;
+    mediaCodecInfo->outputBufferSize = vp->bmp->output_buffer_size;
 
     pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
 //    WriteToJsvVideoRenderer(ffp->jsv_context, frame);
@@ -5279,8 +5286,10 @@ void ffp_jsv2_unlock_frame_buffer(FFPlayer *ffp)
     pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
 }
 
-int ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial, int frame_buffer_index)
+int ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial,
+                                 int output_buffer_index, int output_buffer_offset, int output_buffer_size)
 {
-    return queue_picture(ffp, src_frame, pts, duration, pos, serial, frame_buffer_index);
+    return queue_picture(ffp, src_frame, pts, duration, pos, serial,
+                         output_buffer_index, output_buffer_offset, output_buffer_size);
 }
 // JsView Added <<<

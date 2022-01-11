@@ -128,7 +128,8 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *frame);
 int ffp_jsv2_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight);
 int ffp_jsv2_lock_frame_buffer(FFPlayer *ffp, uint8_t** data);
 void ffp_jsv2_unlock_frame_buffer(FFPlayer *ffp);
-int  ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial, int frame_buffer_index); // JsView Added
+int  ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial,
+                                  int output_buffer_index, int output_buffer_offset, int output_buffer_size);
 // JsView Added <<<
 
 #endif
