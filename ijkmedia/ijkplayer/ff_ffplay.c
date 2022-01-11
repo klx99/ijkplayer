@@ -1698,9 +1698,9 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
         // FIXME: set swscale options
         // JsView Added >>>, 等到GL线程去描画
         if(ffp->overlay_format == SDL_FCC_JSV2) {
-            vp->bmp->output_buffer_index = output_buffer_index;
-            vp->bmp->output_buffer_offset = output_buffer_offset;
-            vp->bmp->output_buffer_size = output_buffer_size;
+            vp->output_buffer_index = output_buffer_index;
+            vp->output_buffer_offset = output_buffer_offset;
+            vp->output_buffer_size = output_buffer_size;
         }
         if(ffp->overlay_format == SDL_FCC_JSV1) {
             av_frame_move_ref(vp->frame, src_frame);
@@ -4047,7 +4047,11 @@ FFPlayer *ffp_create()
 
     av_opt_set_defaults(ffp);
 
-    ffp->jsv_context = NewJsvContext(); // JsView Added
+    // JsView Added >>>
+    ffp->jsv_context = NewJsvContext();
+    pthread_mutex_init(&ffp->jsv_mediacodec_info.mutex, NULL);
+    ffp->jsv_mediacodec_info.outputBufferIndex = -1;
+    // JsView Added <<<
 
     return ffp;
 }
@@ -4075,7 +4079,10 @@ void ffp_destroy(FFPlayer *ffp)
 
     msg_queue_destroy(&ffp->msg_queue);
 
-    DeleteJsvContext(&ffp->jsv_context); // JsView Added
+    // JsView Added >>>
+    DeleteJsvContext(&ffp->jsv_context);
+    pthread_mutex_destroy(&ffp->jsv_mediacodec_info.mutex);
+    // JsView Added <<<
 
     av_free(ffp);
 }
@@ -5213,35 +5220,35 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
     if (!ffp || !ffp->jsv_context)
         return -1;
 
-    pthread_mutex_lock(&ffp->jsv_context->mediaCodecInfo.mutex);
+    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
 
-    MediaCodecInfo *mediaCodecInfo = &ffp->jsv_context->mediaCodecInfo;
-    if(mediaCodecInfo->frame) {
-        Frame* vp = (Frame*)ffp->jsv_context->mediaCodecInfo.frame;
-        SDL_VoutOverlay *overlay = vp->bmp;
-        overlay->unref_mediacodec_buffer(overlay, overlay->output_buffer_index,
+    JsvMediaCodecInfo *mediaCodecInfo = &ffp->jsv_mediacodec_info;
+    if(mediaCodecInfo->outputBufferIndex >= 0) {
+        SDL_VoutOverlay *overlay = mediaCodecInfo->vp->bmp;
+        overlay->unref_mediacodec_buffer(overlay, mediaCodecInfo->outputBufferIndex,
                                          mediaCodecInfo->outputBufferRef);
     }
 
-    ffp->jsv_context->mediaCodecInfo.frame = vp;
+    ffp->jsv_mediacodec_info.vp = vp;
 
     SDL_VoutOverlay *overlay = vp->bmp;
     if (!overlay || !overlay->func_fill_frame) {
         return -1;
     }
 
-    int ret = overlay->ref_mediacodec_buffer(overlay, overlay->output_buffer_index,
+    int ret = overlay->ref_mediacodec_buffer(overlay, vp->output_buffer_index,
                                              &mediaCodecInfo->outputBufferRef,
-                                             &mediaCodecInfo->outputBuffer);
+                                             &mediaCodecInfo->outputBufferData);
     if(ret < 0) {
-        pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
+        pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
         return ret;
     }
 
-    mediaCodecInfo->outputBuffer += vp->bmp->output_buffer_offset;
-    mediaCodecInfo->outputBufferSize = vp->bmp->output_buffer_size;
+    mediaCodecInfo->outputBufferIndex = vp->output_buffer_index;
+    mediaCodecInfo->outputBufferData += vp->output_buffer_offset;
+    mediaCodecInfo->outputBufferSize = vp->output_buffer_size;
 
-    pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
+    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
 //    WriteToJsvVideoRenderer(ffp->jsv_context, frame);
 
     return mediaCodecInfo->outputBufferSize;
@@ -5250,15 +5257,15 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
 int ffp_jsv2_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight)
 {
     if (!ffp || !ffp->jsv_context
-    || ffp->jsv_context->mediaCodecInfo.videoColorFormat <= 0
-    || ffp->jsv_context->mediaCodecInfo.videoWidth <= 0
-    || ffp->jsv_context->mediaCodecInfo.videoHeight <= 0) {
+    || ffp->jsv_mediacodec_info.videoColorFormat <= 0
+    || ffp->jsv_mediacodec_info.videoWidth <= 0
+    || ffp->jsv_mediacodec_info.videoHeight <= 0) {
         return -1;
     }
 
-    *videoFormat = ffp->jsv_context->mediaCodecInfo.videoColorFormat;
-    *videoWidth = ffp->jsv_context->mediaCodecInfo.videoWidth;
-    *videoHeight = ffp->jsv_context->mediaCodecInfo.videoHeight;
+    *videoFormat = ffp->jsv_mediacodec_info.videoColorFormat;
+    *videoWidth = ffp->jsv_mediacodec_info.videoWidth;
+    *videoHeight = ffp->jsv_mediacodec_info.videoHeight;
 
     return 0;
 }
@@ -5266,14 +5273,14 @@ int ffp_jsv2_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, 
 int ffp_jsv2_lock_frame_buffer(FFPlayer *ffp, uint8_t** data)
 {
     if (!ffp || !ffp->jsv_context
-    || ffp->jsv_context->mediaCodecInfo.outputBuffer <= 0) {
+    || ffp->jsv_mediacodec_info.outputBufferData == NULL) {
         return -1;
     }
 
-    pthread_mutex_lock(&ffp->jsv_context->mediaCodecInfo.mutex);
+    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
 
-    *data = ffp->jsv_context->mediaCodecInfo.outputBuffer;
-    int size = ffp->jsv_context->mediaCodecInfo.outputBufferSize;
+    *data = ffp->jsv_mediacodec_info.outputBufferData;
+    int size = ffp->jsv_mediacodec_info.outputBufferSize;
 
     return size;
 }
@@ -5283,7 +5290,7 @@ void ffp_jsv2_unlock_frame_buffer(FFPlayer *ffp)
     if (!ffp || !ffp->jsv_context)
         return;
 
-    pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
+    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
 }
 
 int ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial,

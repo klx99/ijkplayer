@@ -1144,11 +1144,11 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
 
                 // JsView Added >>>
                 if(ffp->overlay_format == SDL_FCC_JSV2) {
-                    pthread_mutex_lock(&ffp->jsv_context->mediaCodecInfo.mutex);
-                    ffp->jsv_context->mediaCodecInfo.videoWidth = width;
-                    ffp->jsv_context->mediaCodecInfo.videoHeight = height;
-                    ffp->jsv_context->mediaCodecInfo.videoColorFormat = color_format;
-                    pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
+                    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
+                    ffp->jsv_mediacodec_info.videoWidth = width;
+                    ffp->jsv_mediacodec_info.videoHeight = height;
+                    ffp->jsv_mediacodec_info.videoColorFormat = color_format;
+                    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
                 }
                 // JsView Added <<<
         }
@@ -1334,11 +1334,11 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
 
                 // JsView Added >>>
                 if(ffp->overlay_format == SDL_FCC_JSV2) {
-                    pthread_mutex_lock(&ffp->jsv_context->mediaCodecInfo.mutex);
-                    ffp->jsv_context->mediaCodecInfo.videoWidth = width;
-                    ffp->jsv_context->mediaCodecInfo.videoHeight = height;
-                    ffp->jsv_context->mediaCodecInfo.videoColorFormat = color_format;
-                    pthread_mutex_unlock(&ffp->jsv_context->mediaCodecInfo.mutex);
+                    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
+                    ffp->jsv_mediacodec_info.videoWidth = width;
+                    ffp->jsv_mediacodec_info.videoHeight = height;
+                    ffp->jsv_mediacodec_info.videoColorFormat = color_format;
+                    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
                 }
                 // JsView Added <<<
         }
