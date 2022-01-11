@@ -73,6 +73,9 @@ void J4AC_android_media_MediaCodec__flush(JNIEnv *env, jobject thiz);
 void J4AC_android_media_MediaCodec__flush__catchAll(JNIEnv *env, jobject thiz);
 void J4AC_android_media_MediaCodec__release(JNIEnv *env, jobject thiz);
 void J4AC_android_media_MediaCodec__release__catchAll(JNIEnv *env, jobject thiz);
+jobjectArray J4AC_android_media_MediaCodec__getOutputBuffers(JNIEnv *env, jobject thiz);
+jobjectArray J4AC_android_media_MediaCodec__getOutputBuffers__catchAll(JNIEnv *env, jobject thiz);
+jobjectArray J4AC_android_media_MediaCodec__getOutputBuffers__asGlobalRef__catchAll(JNIEnv *env, jobject thiz);
 int J4A_loadClass__J4AC_android_media_MediaCodec(JNIEnv *env);
 
 #define J4A_HAVE_SIMPLE__J4AC_android_media_MediaCodec
@@ -126,6 +129,9 @@ int J4A_loadClass__J4AC_android_media_MediaCodec(JNIEnv *env);
 #define J4AC_MediaCodec__flush__catchAll J4AC_android_media_MediaCodec__flush__catchAll
 #define J4AC_MediaCodec__release J4AC_android_media_MediaCodec__release
 #define J4AC_MediaCodec__release__catchAll J4AC_android_media_MediaCodec__release__catchAll
+#define J4AC_MediaCodec__getOutputBuffers J4AC_android_media_MediaCodec__getOutputBuffers
+#define J4AC_MediaCodec__getOutputBuffers__asGlobalRef__catchAll J4AC_android_media_MediaCodec__getOutputBuffers__asGlobalRef__catchAll
+#define J4AC_MediaCodec__getOutputBuffers__catchAll J4AC_android_media_MediaCodec__getOutputBuffers__catchAll
 #define J4A_loadClass__J4AC_MediaCodec J4A_loadClass__J4AC_android_media_MediaCodec
 
 #endif//J4A__android_media_MediaCodec__H

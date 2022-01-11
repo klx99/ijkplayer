@@ -89,6 +89,8 @@ typedef struct SDL_AMediaCodec
     sdl_amedia_status_t     (*func_releaseOutputBuffer)(SDL_AMediaCodec* acodec, size_t idx, bool render);
 
     bool                    (*func_isInputBuffersValid)(SDL_AMediaCodec* acodec);
+
+    ssize_t                 (*func_readOutputData)(SDL_AMediaCodec* acodec, size_t idx, uint8_t **data, size_t size); // JsView Added
 } SDL_AMediaCodec;
 
 int                     SDL_AMediaCodec_create_object_serial();

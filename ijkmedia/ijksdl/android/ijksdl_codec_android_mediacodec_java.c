@@ -351,6 +351,52 @@ bool SDL_AMediaCodecJava_isInputBuffersValid(SDL_AMediaCodec* acodec)
     return opaque->is_input_buffer_valid;
 }
 
+// JsView Added >>>
+static ssize_t SDL_AMediaCodecJava_readOutputData(SDL_AMediaCodec* acodec, size_t idx, uint8_t **data, size_t size)
+{
+    AMCTRACE("%s", __func__);
+    ssize_t read_ret = -1;
+    jobject output_buffer_array = NULL;
+    jobject output_buffer = NULL;
+
+    JNIEnv *env = NULL;
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s: SetupThreadEnv failed", __func__);
+        return -1;
+    }
+
+    SDL_AMediaCodec_Opaque *opaque = (SDL_AMediaCodec_Opaque *)acodec->opaque;
+    output_buffer_array = J4AC_MediaCodec__getOutputBuffers__catchAll(env, opaque->android_media_codec);
+    if (!output_buffer_array)
+        return -1;
+
+    int buffer_count = (*env)->GetArrayLength(env, output_buffer_array);
+    if (J4A_ExceptionCheck__catchAll(env) || idx < 0 || idx >= buffer_count) {
+        ALOGE("%s: idx(%d) < count(%d)\n", __func__, (int)idx, (int)buffer_count);
+        goto fail;
+    }
+
+    output_buffer = (*env)->GetObjectArrayElement(env, output_buffer_array, idx);
+    if (J4A_ExceptionCheck__catchAll(env) || !output_buffer) {
+        ALOGE("%s: GetObjectArrayElement failed\n", __func__);
+        goto fail;
+    }
+
+    {
+        jlong buf_size = (*env)->GetDirectBufferCapacity(env, output_buffer);
+        void *buf_ptr  = (*env)->GetDirectBufferAddress(env, output_buffer);
+
+        read_ret = size < buf_size ? size : buf_size;
+        memcpy(*data, buf_ptr, read_ret);
+    }
+
+    fail:
+    SDL_JNI_DeleteLocalRefP(env, &output_buffer);
+    SDL_JNI_DeleteLocalRefP(env, &output_buffer_array);
+    return read_ret;
+}
+// JsView Added <<<
+
 static SDL_AMediaCodec* SDL_AMediaCodecJava_init(JNIEnv *env, jobject android_media_codec)
 {
     SDLTRACE("%s", __func__);
@@ -388,6 +434,8 @@ static SDL_AMediaCodec* SDL_AMediaCodecJava_init(JNIEnv *env, jobject android_me
     acodec->func_releaseOutputBuffer    = SDL_AMediaCodecJava_releaseOutputBuffer;
 
     acodec->func_isInputBuffersValid    = SDL_AMediaCodecJava_isInputBuffersValid;
+
+    acodec->func_readOutputData         = SDL_AMediaCodecJava_readOutputData;
 
     SDL_AMediaCodec_increaseReference(acodec);
     return acodec;

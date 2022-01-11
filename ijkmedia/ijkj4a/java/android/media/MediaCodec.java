@@ -33,4 +33,6 @@ public class MediaCodec {
     public final void stop();
     public final void flush();
     public final void release();
+
+    public ByteBuffer[] getOutputBuffers();
 }
