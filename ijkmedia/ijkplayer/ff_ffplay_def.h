@@ -229,6 +229,12 @@ typedef struct Frame {
     int format;
     AVRational sar;
     int uploaded;
+
+    // JsView Added >>>
+    int output_buffer_index;
+    int output_buffer_offset;
+    int output_buffer_size;
+    // JsView Added <<<
 } Frame;
 
 typedef struct FrameQueue {
@@ -552,6 +558,22 @@ inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
 }
 
 /* ffplayer */
+// JsView Added >>>
+typedef struct {
+    pthread_mutex_t mutex;
+
+    int videoWidth;
+    int videoHeight;
+    int videoColorFormat;
+
+    Frame *vp;
+    int outputBufferIndex;
+    int outputBufferSize;
+    uint8_t *outputBufferData;
+    void* outputBufferRef;
+} JsvMediaCodecInfo;
+// JsView Added <<<
+
 struct IjkMediaMeta;
 struct IJKFF_Pipeline;
 typedef struct FFPlayer {
@@ -723,7 +745,10 @@ typedef struct FFPlayer {
     int ijkmeta_delay_init;
     int render_wait_start;
 
-    JsvContext *jsv_context; // JsView Added
+    // JsView Added >>>
+    JsvContext *jsv_context;
+    JsvMediaCodecInfo jsv_mediacodec_info;
+    // JsView Added <<<
 } FFPlayer;
 
 #define fftime_to_milliseconds(ts) (av_rescale(ts, 1000, AV_TIME_BASE))

@@ -9,19 +9,6 @@ extern "C" {
 #include <libavutil/frame.h>
 
 typedef struct {
-    pthread_mutex_t mutex;
-
-    int videoWidth;
-    int videoHeight;
-    int videoColorFormat;
-
-    void* frame;
-    void* outputBufferRef;
-    uint8_t *outputBuffer;
-    int outputBufferSize;
-} MediaCodecInfo;
-
-typedef struct {
     int64_t mediaPlayerHandler;
     int  (*getFrameFormatHandler)(int64_t imp, int* videoFormat, int* videoWidth, int* videoHeight);
     int  (*lockFrameBufferHandler)(int64_t imp, uint8_t** data);
@@ -36,7 +23,6 @@ typedef struct {
     void *videoSyncData;
 
     MediaCodecHandler mediaCodecHandler;
-    MediaCodecInfo mediaCodecInfo;
 } JsvContext;
 
 JsvContext* NewJsvContext();

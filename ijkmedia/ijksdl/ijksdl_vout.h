@@ -59,9 +59,6 @@ struct SDL_VoutOverlay {
     // JsViewAdded >>>
     int (*ref_mediacodec_buffer)(SDL_VoutOverlay *overlay, size_t idx, void **ref, uint8_t **data);
     void (*unref_mediacodec_buffer)(SDL_VoutOverlay *overlay, size_t idx, void *ref);
-    int output_buffer_index;
-    int output_buffer_offset;
-    int output_buffer_size;
     // JsViewAdded <<<
 };
 

@@ -17,7 +17,7 @@ JsvContext* NewJsvContext()
     JsvContext* context = new JsvContext();
     context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
 
-    pthread_mutex_init(&context->mediaCodecInfo.mutex, NULL);
+//    pthread_mutex_init(&context->mediaCodecInfo.mutex, NULL);
 
 //    context->mediaCodecInfo.outputBufferSize = 1024*1024*10;
 //    context->mediaCodecInfo.outputBuffer = new uint8_t[context->mediaCodecInfo.outputBufferSize];
@@ -36,8 +36,8 @@ void DeleteJsvContext(JsvContext** context)
         delete videoRenderer;
     }
 
-    pthread_mutex_destroy(&(*context)->mediaCodecInfo.mutex);
-    delete[] (*context)->mediaCodecInfo.outputBuffer;
+//    pthread_mutex_destroy(&(*context)->mediaCodecInfo.mutex);
+//    delete[] (*context)->mediaCodecInfo.outputBuffer;
 
     *context = nullptr;
 }
