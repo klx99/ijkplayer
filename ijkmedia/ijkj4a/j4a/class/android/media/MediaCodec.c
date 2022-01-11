@@ -47,6 +47,7 @@ typedef struct J4AC_android_media_MediaCodec {
     jmethodID method_stop;
     jmethodID method_flush;
     jmethodID method_release;
+    jmethodID method_getOutputBuffers;
 } J4AC_android_media_MediaCodec;
 static J4AC_android_media_MediaCodec class_J4AC_android_media_MediaCodec;
 
@@ -518,6 +519,41 @@ void J4AC_android_media_MediaCodec__release__catchAll(JNIEnv *env, jobject thiz)
     J4A_ExceptionCheck__catchAll(env);
 }
 
+jobjectArray J4AC_android_media_MediaCodec__getOutputBuffers(JNIEnv *env, jobject thiz)
+{
+    return (*env)->CallObjectMethod(env, thiz, class_J4AC_android_media_MediaCodec.method_getOutputBuffers);
+}
+
+jobjectArray J4AC_android_media_MediaCodec__getOutputBuffers__catchAll(JNIEnv *env, jobject thiz)
+{
+    jobjectArray ret_object = J4AC_android_media_MediaCodec__getOutputBuffers(env, thiz);
+    if (J4A_ExceptionCheck__catchAll(env) || !ret_object) {
+        return NULL;
+    }
+
+    return ret_object;
+}
+
+jobjectArray J4AC_android_media_MediaCodec__getOutputBuffers__asGlobalRef__catchAll(JNIEnv *env, jobject thiz)
+{
+    jobjectArray ret_object   = NULL;
+    jobjectArray local_object = J4AC_android_media_MediaCodec__getOutputBuffers__catchAll(env, thiz);
+    if (J4A_ExceptionCheck__catchAll(env) || !local_object) {
+        ret_object = NULL;
+        goto fail;
+    }
+
+    ret_object = J4A_NewGlobalRef__catchAll(env, local_object);
+    if (!ret_object) {
+        ret_object = NULL;
+        goto fail;
+    }
+
+fail:
+    J4A_DeleteLocalRef__p(env, &local_object);
+    return ret_object;
+}
+
 int J4A_loadClass__J4AC_android_media_MediaCodec(JNIEnv *env)
 {
     int         ret                   = -1;
@@ -627,6 +663,13 @@ int J4A_loadClass__J4AC_android_media_MediaCodec(JNIEnv *env)
     sign     = "()V";
     class_J4AC_android_media_MediaCodec.method_release = J4A_GetMethodID__catchAll(env, class_id, name, sign);
     if (class_J4AC_android_media_MediaCodec.method_release == NULL)
+        goto fail;
+
+    class_id = class_J4AC_android_media_MediaCodec.id;
+    name     = "getOutputBuffers";
+    sign     = "()[Ljava/nio/ByteBuffer;";
+    class_J4AC_android_media_MediaCodec.method_getOutputBuffers = J4A_GetMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_android_media_MediaCodec.method_getOutputBuffers == NULL)
         goto fail;
 
     J4A_ALOGD("J4ALoader: OK: '%s' loaded\n", "android.media.MediaCodec");
