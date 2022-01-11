@@ -131,8 +131,38 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
 
     overlay->w = (int)frame->width;
     overlay->h = (int)frame->height;
+
     return 0;
 }
+
+// JsView Added >>>
+static int func_ref_mediacodec_buffer(SDL_VoutOverlay *overlay, size_t idx, void **ref, uint8_t **data)
+{
+    assert(frame->format == IJK_AV_PIX_FMT__ANDROID_MEDIACODEC);
+
+    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
+
+    if (!check_object(overlay, __func__))
+        return -1;
+
+    int ret = opaque->acodec->func_refOutputData(opaque->acodec, idx, ref, data);
+
+    return ret;
+}
+
+static void func_unref_mediacodec_buffer(SDL_VoutOverlay *overlay, size_t idx, void *ref)
+{
+    assert(frame->format == IJK_AV_PIX_FMT__ANDROID_MEDIACODEC);
+
+    SDL_VoutOverlay_Opaque *opaque = overlay->opaque;
+
+    if (!check_object(overlay, __func__))
+        return;
+
+    opaque->acodec->func_unrefOutputData(opaque->acodec, idx, ref);
+}
+
+// JsView Added <<<
 
 SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, SDL_Vout *vout)
 {
@@ -163,6 +193,12 @@ SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, SDL_Vo
     overlay->unlock       = overlay_unlock;
     overlay->unref        = overlay_unref;
     overlay->func_fill_frame = func_fill_frame;
+
+    // JsView Added >>>
+    overlay->ref_mediacodec_buffer = func_ref_mediacodec_buffer;
+    overlay->unref_mediacodec_buffer = func_unref_mediacodec_buffer;
+    overlay->mediacodec_buffer_idx = -1;
+    // JsView Added <<<
 
     if (!opaque->mutex) {
         ALOGE("SDL_CreateMutex failed");

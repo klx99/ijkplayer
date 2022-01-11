@@ -292,3 +292,17 @@ ssize_t SDL_AMediaCodecFake_dequeueFakeFrameOnly(SDL_AMediaCodec* acodec, SDL_AM
 {
     return SDL_AMediaCodec_FakeFifo_dequeueOutputBuffer(&acodec->common->fake_fifo, info, 0);
 }
+
+// JsView Added >>>
+ssize_t SDL_AMediaCodec_refOutputData(SDL_AMediaCodec* acodec, size_t idx, void** ref, uint8_t **data)
+{
+    assert(acodec->func_refOutputData);
+    return acodec->func_refOutputData(acodec, idx, ref, data);
+}
+
+void SDL_AMediaCodec_unrefOutputData(SDL_AMediaCodec* acodec, size_t idx, void* ref)
+{
+    assert(acodec->func_unrefOutputData);
+    acodec->func_unrefOutputData(acodec, idx, ref);
+}
+// JsView Added <<<

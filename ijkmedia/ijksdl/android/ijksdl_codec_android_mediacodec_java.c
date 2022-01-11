@@ -352,7 +352,7 @@ bool SDL_AMediaCodecJava_isInputBuffersValid(SDL_AMediaCodec* acodec)
 }
 
 // JsView Added >>>
-static ssize_t SDL_AMediaCodecJava_readOutputData(SDL_AMediaCodec* acodec, size_t idx, uint8_t **data, size_t size)
+static ssize_t SDL_AMediaCodecJava_refOutputData(SDL_AMediaCodec* acodec, size_t idx, void **ref, uint8_t **data)
 {
     AMCTRACE("%s", __func__);
     ssize_t read_ret = -1;
@@ -386,14 +386,37 @@ static ssize_t SDL_AMediaCodecJava_readOutputData(SDL_AMediaCodec* acodec, size_
         jlong buf_size = (*env)->GetDirectBufferCapacity(env, output_buffer);
         void *buf_ptr  = (*env)->GetDirectBufferAddress(env, output_buffer);
 
-        read_ret = size < buf_size ? size : buf_size;
-        memcpy(*data, buf_ptr, read_ret);
+//        read_ret = size < buf_size ? size : buf_size;
+//        memcpy(*data, buf_ptr, read_ret);
+        *data = buf_ptr;
+        read_ret = buf_size;
     }
 
     fail:
-    SDL_JNI_DeleteLocalRefP(env, &output_buffer);
+//    SDL_JNI_DeleteLocalRefP(env, &output_buffer);
+    *ref = output_buffer;
     SDL_JNI_DeleteLocalRefP(env, &output_buffer_array);
     return read_ret;
+}
+
+static void SDL_AMediaCodecJava_unrefOutputData(SDL_AMediaCodec* acodec, size_t idx, void *ref)
+{
+    SDL_AMediaCodecJava_releaseOutputBuffer(acodec, idx, false);
+
+    if(ref == NULL) {
+        return;
+    }
+
+    AMCTRACE("%s", __func__);
+    jobject output_buffer = ref;
+
+    JNIEnv *env = NULL;
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s: SetupThreadEnv failed", __func__);
+        return;
+    }
+
+    SDL_JNI_DeleteLocalRefP(env, &output_buffer);
 }
 // JsView Added <<<
 
@@ -435,7 +458,10 @@ static SDL_AMediaCodec* SDL_AMediaCodecJava_init(JNIEnv *env, jobject android_me
 
     acodec->func_isInputBuffersValid    = SDL_AMediaCodecJava_isInputBuffersValid;
 
-    acodec->func_readOutputData         = SDL_AMediaCodecJava_readOutputData;
+    // JsView Added >>>
+    acodec->func_refOutputData         = SDL_AMediaCodecJava_refOutputData;
+    acodec->func_unrefOutputData       = SDL_AMediaCodecJava_unrefOutputData;
+    // JsView Added <<<
 
     SDL_AMediaCodec_increaseReference(acodec);
     return acodec;

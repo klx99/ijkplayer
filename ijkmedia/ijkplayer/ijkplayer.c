@@ -848,37 +848,39 @@ int ijkmp_get_frame_format(int64_t imp, int* videoFormat, int* videoWidth, int* 
         return -1;
     }
 
+    int ret = ffp_jsv2_get_frame_format(mp->ffplayer, videoFormat, videoWidth, videoHeight);
 
-    return -1;
+    return ret;
 }
 
-int ijkmp_obtain_frame_buffer(int64_t imp, uint8_t** data, int* size)
+int ijkmp_lock_frame_buffer(int64_t imp, uint8_t** data)
 {
     IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
-    if(mp == NULL || data == NULL || size == NULL) {
+    if(mp == NULL || data == NULL) {
         return -1;
     }
 
+    int ret = ffp_jsv2_lock_frame_buffer(mp->ffplayer, data);
 
-
-    return -1;
+    return ret;
 }
 
-void ijkmp_release_frame_buffer(int64_t imp, int index)
+void ijkmp_unlock_frame_buffer(int64_t imp)
 {
     IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
-    if(mp == NULL || index < 0) {
+    if(mp == NULL) {
         return;
     }
 
+    ffp_jsv2_unlock_frame_buffer(mp->ffplayer);
 
     return;
 }
 
 void test_native_handlers(int64_t imp,
                           int64_t getFrameFormatHandler,
-                          int64_t obtainFrameBufferHandler,
-                          int64_t releaseFrameBufferHandler)
+                          int64_t lockFrameBufferHandler,
+                          int64_t unlockFrameBufferHandler)
 {
     IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
     if(mp == NULL || mp->ffplayer->jsv_context == NULL) {
@@ -886,9 +888,10 @@ void test_native_handlers(int64_t imp,
     }
 
     MediaCodecHandler* handler = &mp->ffplayer->jsv_context->mediaCodecHandler;
-    handler->get_frame_format_handler = getFrameFormatHandler;
-    handler->obtain_frame_buffer_handler = obtainFrameBufferHandler;
-    handler->release_frame_buffer_handler = releaseFrameBufferHandler;
+    handler->mediaPlayerHandler = imp;
+    handler->getFrameFormatHandler = getFrameFormatHandler;
+    handler->lockFrameBufferHandler = lockFrameBufferHandler;
+    handler->unlockFrameBufferHandler = unlockFrameBufferHandler;
 }
 
 void test_draw_frame(int64_t imp, float *mvp_matrix, int size)

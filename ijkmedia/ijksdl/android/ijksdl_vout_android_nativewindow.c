@@ -155,6 +155,11 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
         }
 
         return JSV_GLES2_display(opaque->egl, overlay);
+    } else if (vout->overlay_format == SDL_FCC_JSV2
+    && overlay->format == SDL_FCC__AMC) {
+        IJK_EGL_terminate(opaque->egl);
+        return SDL_VoutOverlayAMediaCodec_releaseFrame_l(overlay, NULL, true);
+//        return overlay->opaque.
     }
     // JsView Added <<<
 

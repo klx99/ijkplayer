@@ -21,6 +21,9 @@ public:
     int write(AVFrame* frame);
 
     int draw(float mvpMatrix[], int size);
+    int drawWithData(float mvpMatrix[], int matrixSize,
+                     int colorFormat, int width, int height,
+                     uint8_t* data, int dataSize);
 
     virtual const char* getVertexShaderSource();
     virtual const char* getFragmentShaderSource();

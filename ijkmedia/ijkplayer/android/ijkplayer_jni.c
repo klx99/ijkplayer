@@ -1190,14 +1190,14 @@ IjkMediaPlayer_native_getFrameFormatHandler(JNIEnv *env, jobject thiz) {
 }
 
 static jlong
-IjkMediaPlayer_native_obtainFrameBufferHandler(JNIEnv *env, jobject thiz) {
-    jlong handler = (jlong)ijkmp_obtain_frame_buffer;
+IjkMediaPlayer_native_lockFrameBufferHandler(JNIEnv *env, jobject thiz) {
+    jlong handler = (jlong)ijkmp_lock_frame_buffer;
     return handler;
 }
 
 static jlong
-IjkMediaPlayer_native_releaseFrameBufferHandler(JNIEnv *env, jobject thiz) {
-    jlong handler = (jlong)ijkmp_release_frame_buffer;
+IjkMediaPlayer_native_unlockFrameBufferHandler(JNIEnv *env, jobject thiz) {
+    jlong handler = (jlong)ijkmp_unlock_frame_buffer;
     return handler;
 }
 
@@ -1206,12 +1206,12 @@ static void
 IjkMediaPlayer_native_testPlayerNativeHandlers(JNIEnv *env, jclass clazz,
                                                jlong handler,
                                                jlong getFrameFormatHandler,
-                                               jlong obtainFrameBufferHandler,
-                                               jlong releaseFrameBufferHandler) {
+                                               jlong lockFrameBufferHandler,
+                                               jlong unlockFrameBufferHandler) {
     test_native_handlers(handler,
                          getFrameFormatHandler,
-                         obtainFrameBufferHandler,
-                         releaseFrameBufferHandler);
+                         lockFrameBufferHandler,
+                         unlockFrameBufferHandler);
 }
 
 static void
@@ -1282,8 +1282,8 @@ static JNINativeMethod g_methods[] = {
     { "native_lockPlayerHandler",         "()J",      (void *) IjkMediaPlayer_native_lockPlayerHandler },
     { "native_unlockPlayerHandler",       "(J)V",     (void *) IjkMediaPlayer_native_unlockPlayerHandler },
     { "native_getFrameFormatHandler",     "()J",      (void *) IjkMediaPlayer_native_getFrameFormatHandler },
-    { "native_obtainFrameBufferHandler",  "()J",      (void *) IjkMediaPlayer_native_obtainFrameBufferHandler },
-    { "native_releaseFrameBufferHandler", "()J",      (void *) IjkMediaPlayer_native_releaseFrameBufferHandler },
+    { "native_lockFrameBufferHandler",  "()J",      (void *) IjkMediaPlayer_native_lockFrameBufferHandler },
+    { "native_unlockFrameBufferHandler", "()J",      (void *) IjkMediaPlayer_native_unlockFrameBufferHandler },
 
     { "native_testPlayerNativeHandlers",  "(JJJJ)V",  (void *) IjkMediaPlayer_native_testPlayerNativeHandlers },
     { "native_testDrawFrame",             "(J[F)V",   (void *) IjkMediaPlayer_native_testDrawFrame },

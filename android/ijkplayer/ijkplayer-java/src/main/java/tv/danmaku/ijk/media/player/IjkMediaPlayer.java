@@ -1319,13 +1319,13 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public native long native_lockPlayerHandler();
     public native void native_unlockPlayerHandler(long handler);
     public native long native_getFrameFormatHandler();
-    public native long native_obtainFrameBufferHandler();
-    public native long native_releaseFrameBufferHandler();
+    public native long native_lockFrameBufferHandler();
+    public native long native_unlockFrameBufferHandler();
 
     public static native void native_testPlayerNativeHandlers(long playerHandler,
                                                        long getFrameFormatHandler,
-                                                       long obtainFrameBufferHandler,
-                                                       long releaseFrameBufferHandler);
+                                                       long lockFrameBufferHandler,
+                                                       long unlockFrameBufferHandler);
     public static native void native_testDrawFrame(long playerHandler, float[] mvpMatrix);
     // JsView Added <<<
 }
