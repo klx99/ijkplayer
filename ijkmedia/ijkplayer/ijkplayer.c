@@ -815,4 +815,92 @@ void ijkmp_set_video_sync_callback(IjkMediaPlayer *mp, void(*callback)(void*), v
 
     return;
 }
+
+int64_t ijkmp_safe_ref(IjkMediaPlayer *mp)
+{
+    if(mp == NULL) {
+        return -1;
+    }
+
+    ijkmp_inc_ref(mp);
+
+    int64_t imp = (int64_t)mp;
+
+    return imp;
+}
+
+int ijkmp_safe_unref(int64_t imp)
+{
+    IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
+    if(mp == NULL) {
+        return -1;
+    }
+
+    ijkmp_dec_ref(mp);
+    return 0;
+}
+
+int ijkmp_get_frame_format(int64_t imp, int* videoFormat, int* videoWidth, int* videoHeight)
+{
+    IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
+    if(mp == NULL || videoFormat == NULL
+    || videoWidth == NULL || videoHeight == NULL) {
+        return -1;
+    }
+
+
+    return -1;
+}
+
+int ijkmp_obtain_frame_buffer(int64_t imp, uint8_t** data, int* size)
+{
+    IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
+    if(mp == NULL || data == NULL || size == NULL) {
+        return -1;
+    }
+
+
+
+    return -1;
+}
+
+void ijkmp_release_frame_buffer(int64_t imp, int index)
+{
+    IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
+    if(mp == NULL || index < 0) {
+        return;
+    }
+
+
+    return;
+}
+
+void test_native_handlers(int64_t imp,
+                          int64_t getFrameFormatHandler,
+                          int64_t obtainFrameBufferHandler,
+                          int64_t releaseFrameBufferHandler)
+{
+    IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
+    if(mp == NULL || mp->ffplayer->jsv_context == NULL) {
+        return;
+    }
+
+    MediaCodecHandler* handler = &mp->ffplayer->jsv_context->mediaCodecHandler;
+    handler->get_frame_format_handler = getFrameFormatHandler;
+    handler->obtain_frame_buffer_handler = obtainFrameBufferHandler;
+    handler->release_frame_buffer_handler = releaseFrameBufferHandler;
+}
+
+void test_draw_frame(int64_t imp, float *mvp_matrix, int size)
+{
+    IjkMediaPlayer* mp = (IjkMediaPlayer*)imp;
+    if(mp == NULL || mp->ffplayer->jsv_context == NULL) {
+        return;
+    }
+
+    ffp_jsv_draw_frame(mp->ffplayer, mvp_matrix, size);
+
+    return;
+}
+
 // JsView Added <<<
