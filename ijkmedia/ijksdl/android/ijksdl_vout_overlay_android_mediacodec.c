@@ -197,7 +197,7 @@ SDL_VoutOverlay *SDL_VoutAMediaCodec_CreateOverlay(int width, int height, SDL_Vo
     // JsView Added >>>
     overlay->ref_mediacodec_buffer = func_ref_mediacodec_buffer;
     overlay->unref_mediacodec_buffer = func_unref_mediacodec_buffer;
-    overlay->mediacodec_buffer_idx = -1;
+    overlay->output_buffer_index = -1;
     // JsView Added <<<
 
     if (!opaque->mutex) {

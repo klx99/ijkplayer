@@ -445,10 +445,10 @@ static int amc_fill_frame(
         frame->pts = AV_NOPTS_VALUE;
     // ALOGE("%s: %f", __func__, (float)frame->pts);
 
-    *got_frame = output_buffer_index; // JsView Modified
+    *got_frame = 1;
     return 0;
 fail:
-    *got_frame = -1; // JsView Modified
+    *got_frame = 0;
     return -1;
 }
 
@@ -1077,7 +1077,8 @@ static void sort_amc_buf_out(AMC_Buf_Out *buf_out, int size) {
     }
 }
 
-static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame)
+static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame,
+                                 int *index, int *offset, int *size) // JsView Modified
 {
     IJKFF_Pipenode_Opaque *opaque   = node->opaque;
     FFPlayer              *ffp      = opaque->ffp;
@@ -1097,15 +1098,6 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
     if (output_buffer_index == AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED) {
         ALOGI("AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED\n");
         // continue;
-
-        // JsView Added >>>
-        // TODO
-//        if(ffp->overlay_format == SDL_FCC_JSV2) {
-//            SDL_AMediaCodecFake_getOutputBuffers(opaque->acodec);
-//
-//            ffp->jsv_context->mediaCodecInfo.outputBufferArray = output_buffer_index;
-//        }
-        // JsView Added <<<
     } else if (output_buffer_index == AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED) {
         ALOGI("AMEDIACODEC__INFO_OUTPUT_FORMAT_CHANGED\n");
         SDL_AMediaFormat_deleteP(&opaque->output_aformat);
@@ -1171,6 +1163,13 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
 
         goto done;
     } else if (output_buffer_index >= 0) {
+        // JsView Added >>>
+        if(ffp->overlay_format == SDL_FCC_JSV2) {
+            *index = output_buffer_index;
+            *offset = bufferInfo.offset;
+            *size = bufferInfo.size;
+        }
+        // JsView Added <<<
         ffp->stat.vdps = SDL_SpeedSamplerAdd(&opaque->sampler, FFP_SHOW_VDPS_MEDIACODEC, "vdps[MediaCodec]");
 
         if (dequeue_count)
@@ -1421,7 +1420,8 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
     return 0;
 }
 
-static int drain_output_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame)
+static int drain_output_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs, int *dequeue_count, AVFrame *frame, int *got_frame,
+                               int *output_buffer_index, int *output_buffer_offset, int *output_buffer_size) // JsView Modified
 {
     IJKFF_Pipenode_Opaque *opaque = node->opaque;
     SDL_LockMutex(opaque->acodec_mutex);
@@ -1432,7 +1432,8 @@ static int drain_output_buffer(JNIEnv *env, IJKFF_Pipenode *node, int64_t timeUs
         SDL_CondWaitTimeout(opaque->acodec_cond, opaque->acodec_mutex, 100);
     }
 
-    int ret = drain_output_buffer_l(env, node, timeUs, dequeue_count, frame, got_frame);
+    int ret = drain_output_buffer_l(env, node, timeUs, dequeue_count, frame, got_frame,
+                                    output_buffer_index, output_buffer_offset, output_buffer_size); // JsView Modified
     SDL_UnlockMutex(opaque->acodec_mutex);
     return ret;
 }
@@ -1628,8 +1629,10 @@ static int func_run_sync(IJKFF_Pipenode *node)
 
     while (!q->abort_request) {
         int64_t timeUs = opaque->acodec_first_dequeue_output_request ? 0 : AMC_OUTPUT_TIMEOUT_US;
-        got_frame = -1; // JsView Modified
-        ret = drain_output_buffer(env, node, timeUs, &dequeue_count, frame, &got_frame);
+        got_frame = 0;
+        int output_buffer_index = -1, output_buffer_offset = -1, output_buffer_size = -1; // JsView Added
+        ret = drain_output_buffer(env, node, timeUs, &dequeue_count, frame, &got_frame,
+                                  &output_buffer_index, &output_buffer_offset, &output_buffer_size); // JsView Modified
         if (opaque->acodec_first_dequeue_output_request) {
             SDL_LockMutex(opaque->acodec_first_dequeue_output_mutex);
             opaque->acodec_first_dequeue_output_request = false;
@@ -1638,11 +1641,11 @@ static int func_run_sync(IJKFF_Pipenode *node)
         }
         if (ret != 0) {
             ret = -1;
-            if (got_frame >= 0 && frame->opaque) // JsView Modified
+            if (got_frame && frame->opaque)
                 SDL_VoutAndroid_releaseBufferProxyP(opaque->weak_vout, (SDL_AMediaCodecBufferProxy **)&frame->opaque, false);
             goto fail;
         }
-        if (got_frame >= 0) { // JsView Modified
+        if (got_frame) {
             duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
             pts = (frame->pts == AV_NOPTS_VALUE) ? NAN : frame->pts * av_q2d(tb);
             if (ffp->framedrop > 0 || (ffp->framedrop && ffp_get_master_sync_type(is) != AV_SYNC_VIDEO_MASTER)) {
@@ -1672,8 +1675,9 @@ static int func_run_sync(IJKFF_Pipenode *node)
             }
             // JsView Added >>>
             if(ffp->overlay_format == SDL_FCC_JSV2) {
-                ret = ffp_queue_picture_with_index(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame),
-                                                   is->viddec.pkt_serial, got_frame);
+                ret = ffp_queue_picture_with_index(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial,
+                                                   output_buffer_index, output_buffer_offset, output_buffer_size);
+            // JsView Added <<<
             } else
             ret = ffp_queue_picture(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial);
             if (ret) {
