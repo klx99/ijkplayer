@@ -85,3 +85,21 @@ int ffpipenode_flush(IJKFF_Pipenode *node)
 
     return node->func_flush(node);
 }
+
+// JsView Added >>>
+int ffpipenode_ref_mediacodec_buffer(IJKFF_Pipenode *node, int idx, void **ref, uint8_t **data)
+{
+    if (!node || !node->func_ref_mediacodec_buffer)
+        return 0;
+
+    return node->func_ref_mediacodec_buffer(node, idx, ref, data);
+}
+
+void ffpipenode_unref_mediacodec_buffer(IJKFF_Pipenode *node, int idx, void *ref)
+{
+    if (!node || !node->func_unref_mediacodec_buffer)
+        return;
+
+    node->func_unref_mediacodec_buffer(node, idx, ref);
+}
+// JsView Added <<<
