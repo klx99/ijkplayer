@@ -1147,7 +1147,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                     pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
                     ffp->jsv_mediacodec_info.videoWidth = width;
                     ffp->jsv_mediacodec_info.videoHeight = height;
-                    ffp->jsv_mediacodec_info.videoColorFormat = color_format;
+                    ffp->jsv_mediacodec_info.video_color_format = color_format;
                     pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
                 }
                 // JsView Added <<<
@@ -1337,7 +1337,7 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
                     pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
                     ffp->jsv_mediacodec_info.videoWidth = width;
                     ffp->jsv_mediacodec_info.videoHeight = height;
-                    ffp->jsv_mediacodec_info.videoColorFormat = color_format;
+                    ffp->jsv_mediacodec_info.video_color_format = color_format;
                     pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
                 }
                 // JsView Added <<<

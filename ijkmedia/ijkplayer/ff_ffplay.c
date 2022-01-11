@@ -4050,7 +4050,7 @@ FFPlayer *ffp_create()
     // JsView Added >>>
     ffp->jsv_context = NewJsvContext();
     pthread_mutex_init(&ffp->jsv_mediacodec_info.mutex, NULL);
-    ffp->jsv_mediacodec_info.outputBufferIndex = -1;
+    ffp->jsv_mediacodec_info.output_buffer_index = -1;
     // JsView Added <<<
 
     return ffp;
@@ -5223,41 +5223,41 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
     pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
 
     JsvMediaCodecInfo *mediaCodecInfo = &ffp->jsv_mediacodec_info;
-    if(mediaCodecInfo->outputBufferIndex >= 0) {
+    if(mediaCodecInfo->output_buffer_index >= 0) {
         ffpipenode_unref_mediacodec_buffer(ffp->node_vdec,
-                                           mediaCodecInfo->outputBufferIndex,
+                                           mediaCodecInfo->output_buffer_index,
                                            mediaCodecInfo->outputBufferRef);
     }
 
     int ret = ffpipenode_ref_mediacodec_buffer(ffp->node_vdec,
                                                vp->output_buffer_index,
                                                &mediaCodecInfo->outputBufferRef,
-                                               &mediaCodecInfo->outputBufferData);
+                                               &mediaCodecInfo->output_buffer_data);
     if(ret < 0) {
         pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
         return ret;
     }
 
-    mediaCodecInfo->outputBufferIndex = vp->output_buffer_index;
-    mediaCodecInfo->outputBufferData += vp->output_buffer_offset;
-    mediaCodecInfo->outputBufferSize = vp->output_buffer_size;
+    mediaCodecInfo->output_buffer_index = vp->output_buffer_index;
+    mediaCodecInfo->output_buffer_data += vp->output_buffer_offset;
+    mediaCodecInfo->output_buffer_size = vp->output_buffer_size;
 
     pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
 //    WriteToJsvVideoRenderer(ffp->jsv_context, frame);
 
-    return mediaCodecInfo->outputBufferSize;
+    return mediaCodecInfo->output_buffer_size;
 }
 
 int ffp_jsv2_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight)
 {
     if (!ffp || !ffp->jsv_context
-    || ffp->jsv_mediacodec_info.videoColorFormat <= 0
+    || ffp->jsv_mediacodec_info.video_color_format <= 0
     || ffp->jsv_mediacodec_info.videoWidth <= 0
     || ffp->jsv_mediacodec_info.videoHeight <= 0) {
         return -1;
     }
 
-    *videoFormat = ffp->jsv_mediacodec_info.videoColorFormat;
+    *videoFormat = ffp->jsv_mediacodec_info.video_color_format;
     *videoWidth = ffp->jsv_mediacodec_info.videoWidth;
     *videoHeight = ffp->jsv_mediacodec_info.videoHeight;
 
@@ -5267,14 +5267,14 @@ int ffp_jsv2_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, 
 int ffp_jsv2_lock_frame_buffer(FFPlayer *ffp, uint8_t** data)
 {
     if (!ffp || !ffp->jsv_context
-    || ffp->jsv_mediacodec_info.outputBufferData == NULL) {
+    || ffp->jsv_mediacodec_info.output_buffer_data == NULL) {
         return -1;
     }
 
     pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
 
-    *data = ffp->jsv_mediacodec_info.outputBufferData;
-    int size = ffp->jsv_mediacodec_info.outputBufferSize;
+    *data = ffp->jsv_mediacodec_info.output_buffer_data;
+    int size = ffp->jsv_mediacodec_info.output_buffer_size;
 
     return size;
 }
