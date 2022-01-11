@@ -352,7 +352,7 @@ bool SDL_AMediaCodecJava_isInputBuffersValid(SDL_AMediaCodec* acodec)
 }
 
 // JsView Added >>>
-static ssize_t SDL_AMediaCodecJava_refOutputData(SDL_AMediaCodec* acodec, size_t idx, void **ref, uint8_t **data)
+static ssize_t SDL_AMediaCodecJava_refOutputData(SDL_AMediaCodec* acodec, int idx, void **ref, uint8_t **data)
 {
     AMCTRACE("%s", __func__);
     ssize_t read_ret = -1;

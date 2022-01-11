@@ -1728,6 +1728,29 @@ static int func_flush(IJKFF_Pipenode *node)
     return 0;
 }
 
+// JsView Added >>>
+int func_ref_mediacodec_buffer(IJKFF_Pipenode *node, int idx, void **ref, uint8_t **data)
+{
+    IJKFF_Pipenode_Opaque *opaque   = node->opaque;
+
+    if (!opaque)
+        return -1;
+
+    int ret = opaque->acodec->func_refOutputData(opaque->acodec, idx, ref, data);
+
+    return ret;
+}
+void func_unref_mediacodec_buffer(IJKFF_Pipenode *node, int idx, void *ref)
+{
+    IJKFF_Pipenode_Opaque *opaque   = node->opaque;
+
+    if (!opaque)
+        return;
+
+    opaque->acodec->func_unrefOutputData(opaque->acodec, idx, ref);
+}
+// JsView Added <<<
+
 int ffpipenode_config_from_android_mediacodec(FFPlayer *ffp, IJKFF_Pipeline *pipeline, SDL_Vout *vout, IJKFF_Pipenode *node) {
     int                   ret     = 0;
     VideoState            *is     = ffp->is;
@@ -1966,6 +1989,12 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
         node->func_run_sync = func_run_sync;
     }
     node->func_flush    = func_flush;
+    // JsView Added >>>
+    if(ffp->overlay_format == SDL_FCC_JSV2) {
+        node->func_ref_mediacodec_buffer = func_ref_mediacodec_buffer;
+        node->func_unref_mediacodec_buffer = func_unref_mediacodec_buffer;
+    }
+    // JsView Added <<<
     opaque->pipeline    = pipeline;
     opaque->ffp         = ffp;
     opaque->decoder     = &is->viddec;

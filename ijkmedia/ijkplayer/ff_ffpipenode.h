@@ -35,6 +35,11 @@ struct IJKFF_Pipenode {
     void (*func_destroy) (IJKFF_Pipenode *node);
     int  (*func_run_sync)(IJKFF_Pipenode *node);
     int  (*func_flush)   (IJKFF_Pipenode *node); // optional
+
+    // JsView Added >>>
+    int  (*func_ref_mediacodec_buffer)(IJKFF_Pipenode *node, int idx, void **ref, uint8_t **data);
+    void (*func_unref_mediacodec_buffer)(IJKFF_Pipenode *node, int idx, void *ref);
+    // JsView Added <<<
 };
 
 IJKFF_Pipenode *ffpipenode_alloc(size_t opaque_size);
@@ -43,5 +48,10 @@ void ffpipenode_free_p(IJKFF_Pipenode **node);
 
 int  ffpipenode_run_sync(IJKFF_Pipenode *node);
 int  ffpipenode_flush(IJKFF_Pipenode *node);
+
+// JsView Added >>>
+int  ffpipenode_ref_mediacodec_buffer(IJKFF_Pipenode *node, int idx, void **ref, uint8_t **data);
+void ffpipenode_unref_mediacodec_buffer(IJKFF_Pipenode *node, int idx, void *ref);
+// JsView Added <<<
 
 #endif

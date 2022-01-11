@@ -91,8 +91,8 @@ typedef struct SDL_AMediaCodec
     bool                    (*func_isInputBuffersValid)(SDL_AMediaCodec* acodec);
 
     // JsView Added >>>
-    ssize_t                 (*func_refOutputData)(SDL_AMediaCodec* acodec, size_t idx, void **ref, uint8_t **data);
-    void                    (*func_unrefOutputData)(SDL_AMediaCodec* acodec, size_t idx, void *ref);
+    ssize_t                 (*func_refOutputData)(SDL_AMediaCodec* acodec, int idx, void **ref, uint8_t **data);
+    void                    (*func_unrefOutputData)(SDL_AMediaCodec* acodec, int idx, void *ref);
     // JsView Added <<<
 } SDL_AMediaCodec;
 

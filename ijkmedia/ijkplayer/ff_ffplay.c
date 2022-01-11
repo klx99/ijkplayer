@@ -5224,21 +5224,15 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
 
     JsvMediaCodecInfo *mediaCodecInfo = &ffp->jsv_mediacodec_info;
     if(mediaCodecInfo->outputBufferIndex >= 0) {
-        SDL_VoutOverlay *overlay = mediaCodecInfo->vp->bmp;
-        overlay->unref_mediacodec_buffer(overlay, mediaCodecInfo->outputBufferIndex,
-                                         mediaCodecInfo->outputBufferRef);
+        ffpipenode_unref_mediacodec_buffer(ffp->node_vdec,
+                                           mediaCodecInfo->outputBufferIndex,
+                                           mediaCodecInfo->outputBufferRef);
     }
 
-    ffp->jsv_mediacodec_info.vp = vp;
-
-    SDL_VoutOverlay *overlay = vp->bmp;
-    if (!overlay || !overlay->func_fill_frame) {
-        return -1;
-    }
-
-    int ret = overlay->ref_mediacodec_buffer(overlay, vp->output_buffer_index,
-                                             &mediaCodecInfo->outputBufferRef,
-                                             &mediaCodecInfo->outputBufferData);
+    int ret = ffpipenode_ref_mediacodec_buffer(ffp->node_vdec,
+                                               vp->output_buffer_index,
+                                               &mediaCodecInfo->outputBufferRef,
+                                               &mediaCodecInfo->outputBufferData);
     if(ret < 0) {
         pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
         return ret;
