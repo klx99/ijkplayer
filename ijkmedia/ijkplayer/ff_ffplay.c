@@ -5243,7 +5243,10 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
     mediaCodecInfo->output_buffer_size = vp->output_buffer_size;
 
     pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
-//    WriteToJsvVideoRenderer(ffp->jsv_context, frame);
+
+    if(ffp->jsv_context->videoSyncCallback) {
+        ffp->jsv_context->videoSyncCallback(ffp->jsv_context->videoSyncData);
+    }
 
     return mediaCodecInfo->output_buffer_size;
 }
