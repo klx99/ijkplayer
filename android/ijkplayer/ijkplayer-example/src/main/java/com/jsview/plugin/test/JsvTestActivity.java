@@ -43,8 +43,8 @@ public class JsvTestActivity extends AppCompatActivity {
         fakeForgeView = findViewById(R.id.fake_forge_view);
         fakeForgeView.setEGLContextClientVersion(2);
         fakeForgeView.setRenderer(fakeForgeRenderer);
-        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -77,6 +77,7 @@ public class JsvTestActivity extends AppCompatActivity {
             }
 
             mediaPlayerList.add(mp);
+            fakeVideoRendererList.add(new JsvFakeVideoRenderer(mp, fakeForgeRenderer, idx));
         }
     }
 
@@ -93,26 +94,6 @@ public class JsvTestActivity extends AppCompatActivity {
             }
         };
         mp.setOnVideoSyncListener(videoSyncListener);
-
-//        JsvFakeForgeRenderer.OnDrawFrameListener drawFrameListener = new JsvFakeForgeRenderer.OnDrawFrameListener() {
-//            @Override
-//            public void onDrawFrame(Object key, final float[] mvpMatrix) {
-//                Integer idx = (Integer) key;
-//                IjkMediaPlayer mp = mediaPlayerList.get(idx);
-//
-//                float[] matrix = mvpMatrix.clone();
-//                if(idx > 0) { // 第0个视频全屏播放
-//                    float offset = 2.0f / MediaPlayerCount;
-//                    float center = MediaPlayerCount / 2.0f;
-//                    Matrix.scaleM(matrix, 0, 0.5f, 0.5f, 1);
-//                    Matrix.translateM(matrix, 0, offset * (idx - center), offset * (idx - center), 0);
-//                }
-//
-//                mp.native_jsvDrawFrame(matrix);
-//            }
-//        };
-//        fakeForgeRenderer.appendOnDrawFrameListener(idx, drawFrameListener);
-        fakeVideoRenderer = new JsvFakeVideoRenderer(mp, fakeForgeRenderer);
 
         if(idx == 0) {
             hudViewHolder.setMediaPlayer(mp);
@@ -174,18 +155,19 @@ public class JsvTestActivity extends AppCompatActivity {
     private JsvFakeVideoRenderer fakeVideoRenderer;
 
     private ArrayList<IjkMediaPlayer> mediaPlayerList = new ArrayList();
+    private ArrayList<JsvFakeVideoRenderer> fakeVideoRendererList = new ArrayList();
 
     private static final int UseMediaCodec = 1;
 //     private static final String OverlayFormat = "fcc-jsv0";
 //    private static final String OverlayFormat = "fcc-jsv1";
     private static final String OverlayFormat = "fcc-jsv2";
-    private static final int MediaPlayerCount = 1;
+    public static final int MediaPlayerCount = 2;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
-          "/data/local/tmp/test.mp4",
-//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
-//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
-//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",
-//        "http://39.135.138.58:18890/PLTV/88888888/224/3221225644/index.m3u8",
+//          "/data/local/tmp/test.mp4",
+        "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
+        "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
+        "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",
+        "http://39.135.138.58:18890/PLTV/88888888/224/3221225644/index.m3u8",
 //        "http://192.168.1.99/test.mp4",
 //        "http://192.168.1.99/test.mp4",
 //        "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear1/prog_index.m3u8",
