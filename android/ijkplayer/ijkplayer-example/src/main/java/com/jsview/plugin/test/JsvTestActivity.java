@@ -2,18 +2,16 @@ package com.jsview.plugin.test;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.AudioManager;
-import android.media.MediaCodec;
-import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.TableLayout;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.jsview.plugin.JsvSharedSurfaceView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,15 +34,13 @@ public class JsvTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.jsv_test_activity);
 
-        fakeForgeRenderer = new JsvFakeForgeRenderer(this);
+        FrameLayout rootView = findViewById(R.id.root_view);
+
+        jsvSharedSurfaceView = new JsvSharedSurfaceView(this);
+        rootView.addView(jsvSharedSurfaceView, 0);
 
         TableLayout hudView = findViewById(R.id.hud_view);
         hudViewHolder = new InfoHudViewHolder(this, hudView);
-        fakeForgeView = findViewById(R.id.fake_forge_view);
-        fakeForgeView.setEGLContextClientVersion(2);
-        fakeForgeView.setRenderer(fakeForgeRenderer);
-//        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        fakeForgeView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -56,6 +52,13 @@ public class JsvTestActivity extends AppCompatActivity {
         super.onStart();
 
         startPlayers(MediaPlayerCount < VideoUrlList.size() ? MediaPlayerCount : VideoUrlList.size());
+
+        jsvSharedSurfaceView.appendRenderer("triangle", (key) -> {
+            if(triangle == null) {
+                triangle = new Triangle(this, Color.GREEN);
+            }
+            triangle.onDrawFrame();
+        });
     }
 
     @Override
@@ -77,7 +80,6 @@ public class JsvTestActivity extends AppCompatActivity {
             }
 
             mediaPlayerList.add(mp);
-            fakeVideoRendererList.add(new JsvFakeVideoRenderer(mp, fakeForgeRenderer, idx));
         }
     }
 
@@ -87,13 +89,14 @@ public class JsvTestActivity extends AppCompatActivity {
             Log.e(TAG, "Failed to start IjkMediaPlayer: " + idx);
         }
 
-        IjkMediaPlayer.OnVideoSyncListener videoSyncListener = new IjkMediaPlayer.OnVideoSyncListener () {
-            @Override
-            public void onVideoSync(IMediaPlayer mp) {
-                fakeForgeView.requestRender();
-            }
-        };
-        mp.setOnVideoSyncListener(videoSyncListener);
+        mp.setOnVideoSyncListener((player) -> {
+            jsvSharedSurfaceView.requestRender();
+        });
+
+        jsvSharedSurfaceView.appendRenderer(mp, (key) -> {
+            IjkMediaPlayer player = (IjkMediaPlayer) key;
+            player.jsvDrawFrame();
+        });
 
         if(idx == 0) {
             hudViewHolder.setMediaPlayer(mp);
@@ -150,20 +153,18 @@ public class JsvTestActivity extends AppCompatActivity {
     }
 
     private InfoHudViewHolder hudViewHolder;
-    private GLSurfaceView fakeForgeView;
-    private JsvFakeForgeRenderer fakeForgeRenderer;
-    private JsvFakeVideoRenderer fakeVideoRenderer;
+    private JsvSharedSurfaceView jsvSharedSurfaceView;
+    private Triangle triangle;
 
     private ArrayList<IjkMediaPlayer> mediaPlayerList = new ArrayList();
-    private ArrayList<JsvFakeVideoRenderer> fakeVideoRendererList = new ArrayList();
 
     private static final int UseMediaCodec = 1;
 //     private static final String OverlayFormat = "fcc-jsv0";
 //    private static final String OverlayFormat = "fcc-jsv1";
     private static final String OverlayFormat = "fcc-jsv2";
-    public static final int MediaPlayerCount = 2;
+    public static final int MediaPlayerCount = 1;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
-//          "/data/local/tmp/test.mp4",
+        "/data/local/tmp/test.mp4",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",

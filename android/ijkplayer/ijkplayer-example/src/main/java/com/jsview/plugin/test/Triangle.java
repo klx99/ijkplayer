@@ -17,7 +17,7 @@ import java.nio.FloatBuffer;
 import static com.jsview.plugin.test.JsvTestActivity.TAG;
 
 public class Triangle {
-    Triangle(Context context, int color) {
+    public Triangle(Context context, int color) {
         mContext = context;
         mTriangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
                 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -47,7 +47,11 @@ public class Triangle {
         mTextureID = getImageTexture(color);
     }
 
-    void onDrawFrame(final float[] mvpMatrix) {
+    public void onDrawFrame() {
+        float[] mvpMatrix = new float[16];
+        Matrix.setIdentityM(mvpMatrix, 0);
+        Matrix.scaleM(mvpMatrix, 0, 0.3f, 0.3f, 1);
+
         GLES20.glUseProgram(mProgram);
         checkGlError("glUseProgram");
 

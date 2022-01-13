@@ -29,6 +29,7 @@ import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.opengl.Matrix;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1286,8 +1287,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static native void native_setLogLevel(int level);
 
     // JsView Added >>>
-
-    // JsView Added >>>
     public interface OnVideoSyncListener {
         void onVideoSync(IMediaPlayer mp);
     }
@@ -1312,8 +1311,24 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     }
 
-    public native int native_jsvDrawFrame(float[] mvpMatrix);
+    public void updateMvpMatrix(float[] matrix) {
+        mvpMatrix = matrix;
+    }
 
+    public int jsvDrawFrame()
+    {
+        if(mvpMatrix == null) {
+            // 设置默认matrix
+            mvpMatrix = new float[16];
+            Matrix.setIdentityM(mvpMatrix, 0);
+        }
+
+        return native_jsvDrawFrame(mvpMatrix);
+    }
+
+    private native int native_jsvDrawFrame(float[] mvpMatrix);
+
+    private float[] mvpMatrix;
     private OnVideoSyncListener videoSyncListener;
 
     public native long native_lockPlayerHandler();

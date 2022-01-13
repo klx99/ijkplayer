@@ -5121,17 +5121,14 @@ int ffp_jsv2_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
     }
 
     int videoFormat, videoWidth, videoHeight;
-    int ret = ffp->jsv_context->mediaCodecHandler.getFrameFormatHandler(
-            ffp->jsv_context->mediaCodecHandler.mediaPlayerHandler,
-            &videoFormat, &videoWidth, &videoHeight);
+    int ret = ffp_jsv2_get_frame_format(ffp,
+                                        &videoFormat, &videoWidth, &videoHeight);
     if(ret < 0) {
         return ret;
     }
 
     uint8_t* data = NULL;
-    ret = ffp->jsv_context->mediaCodecHandler.lockFrameBufferHandler(
-            ffp->jsv_context->mediaCodecHandler.mediaPlayerHandler,
-            &data);
+    ret = ffp_jsv2_lock_frame_buffer(ffp, &data);
     if(ret < 0) {
         return ret;
     }
@@ -5141,8 +5138,7 @@ int ffp_jsv2_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
                                        videoFormat, videoWidth, videoHeight,
                                        data, dataSize);
 
-    ffp->jsv_context->mediaCodecHandler.unlockFrameBufferHandler(
-            ffp->jsv_context->mediaCodecHandler.mediaPlayerHandler);
+    ffp_jsv2_unlock_frame_buffer(ffp);
 
     if(ret < 0) {
         return -1;

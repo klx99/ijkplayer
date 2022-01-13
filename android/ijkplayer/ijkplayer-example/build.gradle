@@ -33,6 +33,10 @@ android {
             }
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 //    productFlavors {
 //        all32 { minSdkVersion 9 }
 //        all64 { minSdkVersion 21 }

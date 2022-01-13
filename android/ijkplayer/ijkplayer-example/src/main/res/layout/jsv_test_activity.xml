@@ -8,17 +8,17 @@
     android:layout_height="match_parent">
 
     <!-- The main content view -->
-    <FrameLayout
+    <FrameLayout android:id="@+id/root_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#0099cc">
 
-        <android.opengl.GLSurfaceView
-            android:id="@+id/fake_forge_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center">
-        </android.opengl.GLSurfaceView>
+<!--        <android.opengl.GLSurfaceView-->
+<!--            android:id="@+id/fake_forge_view"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_gravity="center">-->
+<!--        </android.opengl.GLSurfaceView>-->
 
         <TextView
             android:layout_width="wrap_content"
