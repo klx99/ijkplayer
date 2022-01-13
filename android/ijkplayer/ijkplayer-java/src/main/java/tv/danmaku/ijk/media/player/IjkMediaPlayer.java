@@ -66,7 +66,7 @@ import tv.danmaku.ijk.media.player.pragma.DebugLog;
  *
  *         Java wrapper of ffplay.
  */
-public final class IjkMediaPlayer extends AbstractMediaPlayer {
+public class IjkMediaPlayer extends AbstractMediaPlayer {
     private final static String TAG = IjkMediaPlayer.class.getName();
 
     private static final int MEDIA_NOP = 0; // interface test message
@@ -1287,12 +1287,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static native void native_setLogLevel(int level);
 
     // JsView Added >>>
-    public interface OnVideoSyncListener {
+    protected interface OnVideoSyncListener {
         void onVideoSync(IMediaPlayer mp);
     }
-    public void setOnVideoSyncListener(OnVideoSyncListener listener) {
-        videoSyncListener = listener;
-    }
+
+    protected native int native_jsvDrawFrame(float[] mvpMatrix);
+
     @CalledByNative
     private static void onVideoSync(Object weakThiz) {
         if (weakThiz == null || !(weakThiz instanceof WeakReference<?>)) {
@@ -1311,36 +1311,6 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     }
 
-    public void updateMvpMatrix(float[] matrix) {
-        mvpMatrix = matrix;
-    }
-
-    public int jsvDrawFrame()
-    {
-        if(mvpMatrix == null) {
-            // 设置默认matrix
-            mvpMatrix = new float[16];
-            Matrix.setIdentityM(mvpMatrix, 0);
-        }
-
-        return native_jsvDrawFrame(mvpMatrix);
-    }
-
-    private native int native_jsvDrawFrame(float[] mvpMatrix);
-
-    private float[] mvpMatrix;
-    private OnVideoSyncListener videoSyncListener;
-
-    public native long native_lockPlayerHandler();
-    public native void native_unlockPlayerHandler(long handler);
-    public native long native_getFrameFormatHandler();
-    public native long native_lockFrameBufferHandler();
-    public native long native_unlockFrameBufferHandler();
-
-    public static native void native_testPlayerNativeHandlers(long playerHandler,
-                                                       long getFrameFormatHandler,
-                                                       long lockFrameBufferHandler,
-                                                       long unlockFrameBufferHandler);
-    public static native void native_testDrawFrame(long playerHandler, float[] mvpMatrix);
+    protected OnVideoSyncListener videoSyncListener;
     // JsView Added <<<
 }

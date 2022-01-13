@@ -221,18 +221,6 @@ void            ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, in
 // JsView Added >>>
 int             ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size);
 void            ijkmp_set_video_sync_callback(IjkMediaPlayer *mp, void(*callback)(void*), void *opaque);
-
-int64_t         ijkmp_safe_ref(IjkMediaPlayer *mp);
-int             ijkmp_safe_unref(int64_t imp);
-int             ijkmp_get_frame_format(int64_t imp, int* videoFormat, int* videoWidth, int* videoHeight);
-int             ijkmp_lock_frame_buffer(int64_t imp, uint8_t** data);
-void            ijkmp_unlock_frame_buffer(int64_t imp);
-
-void            test_native_handlers(int64_t imp,
-                                     int64_t getFrameFormatHandler,
-                                     int64_t lockFrameBufferHandler,
-                                     int64_t unlockFrameBufferHandler);
-void            test_draw_frame(int64_t imp, float *mvp_matrix, int size);
 // JsView Added <<<
 
 #endif
