@@ -9,15 +9,9 @@
 #include "JsvVideoRenderer.hpp"
 
 #include <android/log.h>
-//#include <EGL/eglext.h>
-//#include <EGL/eglplatform.h>
 #include <GLES2/gl2.h>
 
 #include <unistd.h>
-
-extern "C" {
-#include <libavutil/frame.h>
-}
 
 
 namespace jsview {
@@ -71,12 +65,12 @@ int JsvVideoRenderer::prepare()
 
     auto program = getProgram();
 
-    glumMVP = glGetUniformLocation(program, "um_MVP");
+    glMVP = glGetUniformLocation(program, "um_MVP");
 
     //获取顶点坐标字段
-    glavPosition = glGetAttribLocation(program, "av_Position");
+    glAvPosition = glGetAttribLocation(program, "av_Position");
     //获取纹理坐标字段
-    glafPosition = glGetAttribLocation(program, "af_Position");
+    glAfPosition = glGetAttribLocation(program, "af_Position");
     //获取yuv字段
     glSamplerY = glGetUniformLocation(program, "sampler_y");
     glSamplerU = glGetUniformLocation(program, "sampler_u");
@@ -99,92 +93,6 @@ int JsvVideoRenderer::prepare()
     return 0;
 }
 
-int JsvVideoRenderer::write(AVFrame* frame)
-{
-    auto creater = []() -> AVFrame* {
-        return av_frame_alloc();
-    };
-    auto deleter = [](AVFrame* ptr) -> void {
-        av_frame_free(&ptr);
-    };
-    auto sharedFrame = std::shared_ptr<AVFrame>(creater(), deleter);
-
-    av_frame_move_ref(sharedFrame.get(), frame);
-
-    {
-        std::lock_guard <std::mutex> lock(mutex);
-        this->lastFrame = sharedFrame;
-    }
-
-    return 0;
-}
-
-int JsvVideoRenderer::draw(float mvpMatrix[], int size)
-{
-    if(!this->lastFrame) {
-        return 0;
-    }
-
-    using namespace std::chrono;
-    int64_t startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-
-    auto program = getProgram();
-
-    glUseProgram(program);
-
-    glUniformMatrix4fv(glumMVP, 1, GL_FALSE, mvpMatrix);
-
-    glEnableVertexAttribArray(glavPosition);
-    glVertexAttribPointer(glavPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, VertexData);
-
-    glEnableVertexAttribArray(glafPosition);
-    glVertexAttribPointer(glafPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
-
-//    EGLint eglImageAttributes[] = {EGL_WIDTH, frame->width, EGL_HEIGHT, frame->height,
-//                                   EGL_IMAGE_FORMAT_FSL, EGL_FORMAT_YUV_YV12_FSL, EGL_NONE};
-//    auto eglImage = eglCreateImageKHR(eglDisplay, EGL_NO_CONTEXT, EGL_NEW_IMAGE_FSL, NULL, eglImageAttributes);
-//    struct EGLImageInfoFSL eglImageInfo;
-//    eglQueryImageFSL(eglDisplay, eglImage, EGL_CLIENTBUFFER_TYPE_FSL, (EGLint *)&eglImageInfo);
-
-    std::shared_ptr<AVFrame> sharedFrame;
-    {
-        std::lock_guard <std::mutex> lock(mutex);
-        sharedFrame = this->lastFrame;
-    }
-
-    //激活纹理0来绑定y数据
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, glTextureYUV[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sharedFrame->width, sharedFrame->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, sharedFrame->data[0]);
-
-    //激活纹理1来绑定u数据
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, glTextureYUV[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sharedFrame->width / 2, sharedFrame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, sharedFrame->data[1]);
-
-    //激活纹理2来绑定u数据
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, glTextureYUV[2]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sharedFrame->width / 2, sharedFrame->height / 2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, sharedFrame->data[2]);
-
-    //给fragment_shader里面yuv变量设置值   0 1 2 标识纹理x
-    glUniform1i(glSamplerY, 0);
-    glUniform1i(glSamplerU, 1);
-    glUniform1i(glSamplerV, 2);
-
-    //绘制
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, VertexCount);
-
-    glDisableVertexAttribArray(glafPosition);
-    glDisableVertexAttribArray(glavPosition);
-
-//    int64_t endTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-//    int64_t deltaTime = endTime - startTime;
-//    __android_log_print(ANDROID_LOG_INFO, "JsView", "%s time: start/end=%lld/%lld, delta=%lld", __PRETTY_FUNCTION__, startTime, endTime, deltaTime);
-
-    return 0;
-}
-
 int JsvVideoRenderer::drawWithData(float mvpMatrix[], int matrixSize,
                                    int colorFormat, int width, int height,
                                    uint8_t* data, int dataSize)
@@ -193,13 +101,13 @@ int JsvVideoRenderer::drawWithData(float mvpMatrix[], int matrixSize,
 
     glUseProgram(program);
 
-    glUniformMatrix4fv(glumMVP, 1, GL_FALSE, mvpMatrix);
+    glUniformMatrix4fv(glMVP, 1, GL_FALSE, mvpMatrix);
 
-    glEnableVertexAttribArray(glavPosition);
-    glVertexAttribPointer(glavPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, VertexData);
+    glEnableVertexAttribArray(glAvPosition);
+    glVertexAttribPointer(glAvPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, VertexData);
 
-    glEnableVertexAttribArray(glafPosition);
-    glVertexAttribPointer(glafPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
+    glEnableVertexAttribArray(glAfPosition);
+    glVertexAttribPointer(glAfPosition, CoordsPerVertex, GL_FLOAT, false, VertexStride, TextureData);
 
     //激活纹理0来绑定y数据
     glActiveTexture(GL_TEXTURE0);
@@ -224,8 +132,8 @@ int JsvVideoRenderer::drawWithData(float mvpMatrix[], int matrixSize,
     //绘制
     glDrawArrays(GL_TRIANGLE_STRIP, 0, VertexCount);
 
-    glDisableVertexAttribArray(glafPosition);
-    glDisableVertexAttribArray(glavPosition);
+    glDisableVertexAttribArray(glAfPosition);
+    glDisableVertexAttribArray(glAvPosition);
 
     return 0;
 }

@@ -14,15 +14,17 @@ public:
     static void CheckGLError(const char* funcName);
 
 /*** class function and variable ***/
+    explicit JsvGLES2() = default;
+    virtual ~JsvGLES2() = default;
+
+    virtual const char* getVertexShaderSource() = 0;
+    virtual const char* getFragmentShaderSource() = 0;
 
     virtual int prepare();
 
     virtual uint32_t getProgram() {
         return *program;
     }
-
-    virtual const char* getVertexShaderSource() = 0;
-    virtual const char* getFragmentShaderSource() = 0;
 
 private:
 /*** type define ***/

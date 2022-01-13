@@ -1,10 +1,6 @@
 #pragma once
 
-#include <mutex>
-#include <EGL/egl.h>
 #include "JsvGLES2.hpp"
-
-struct AVFrame;
 
 namespace jsview {
 namespace plugin {
@@ -17,16 +13,16 @@ public:
     static constexpr const int BLOCK_COUNT = 3;
 
 /*** class function and variable ***/
-    virtual int prepare();
-    int write(AVFrame* frame);
-
-    int draw(float mvpMatrix[], int size);
-    int drawWithData(float mvpMatrix[], int matrixSize,
-                     int colorFormat, int width, int height,
-                     uint8_t* data, int dataSize);
+    explicit JsvVideoRenderer() = default;
+    virtual ~JsvVideoRenderer() = default;
 
     virtual const char* getVertexShaderSource();
     virtual const char* getFragmentShaderSource();
+
+    virtual int prepare();
+    int drawWithData(float mvpMatrix[], int matrixSize,
+                     int colorFormat, int width, int height,
+                     uint8_t* data, int dataSize);
 
 private:
 /*** type define ***/
@@ -40,16 +36,11 @@ private:
     static const float TextureData[];
 
 /*** class function and variable ***/
-    std::mutex mutex;
-    std::shared_ptr<AVFrame> lastFrame;
-
-//    EGLDisplay eglDisplay;
-
-    int glumMVP;
+    int glMVP;
     //顶点位置
-    int glavPosition;
+    int glAvPosition;
     //纹理位置
-    int glafPosition;
+    int glAfPosition;
 
     //shader  yuv变量
     int glSamplerY;

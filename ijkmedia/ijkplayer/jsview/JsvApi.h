@@ -9,27 +9,15 @@ extern "C" {
 #include <libavutil/frame.h>
 
 typedef struct {
-    int64_t mediaPlayerHandler;
-    int  (*getFrameFormatHandler)(int64_t imp, int* videoFormat, int* videoWidth, int* videoHeight);
-    int  (*lockFrameBufferHandler)(int64_t imp, uint8_t** data);
-    void (*unlockFrameBufferHandler)(int64_t imp);
-} MediaCodecHandler;
-
-typedef struct {
     void* videoRenderer;
     bool videoPrepared;
 
     void (*videoSyncCallback)(void*);
     void *videoSyncData;
-
-    MediaCodecHandler mediaCodecHandler;
 } JsvContext;
 
 JsvContext* NewJsvContext();
 void DeleteJsvContext(JsvContext** context);
-
-void WriteToJsvVideoRenderer(JsvContext* context, AVFrame *frame);
-int DrawJsvVideoRenderer(JsvContext* context, float mvpMatrix[], int size);
 
 int DrawJsvVideoRendererWithData(JsvContext* context,
                                  float mvpMatrix[], int matrixSize,
