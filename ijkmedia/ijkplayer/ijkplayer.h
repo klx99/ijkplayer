@@ -220,6 +220,7 @@ void            ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, in
 
 // JsView Added >>>
 int             ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size);
+int             ijkmp_jsv_color_format(IjkMediaPlayer *mp);
 void            ijkmp_set_video_sync_callback(IjkMediaPlayer *mp, void(*callback)(void*), void *opaque);
 // JsView Added <<<
 

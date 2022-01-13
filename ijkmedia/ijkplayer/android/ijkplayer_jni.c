@@ -1166,6 +1166,17 @@ IjkMediaPlayer_native_jsvDrawFrame(JNIEnv *env, jobject thiz, jfloatArray mvp_ma
 
     return ret;
 }
+
+static jint
+IjkMediaPlayer_native_jsvGetColorFormat(JNIEnv *env, jobject thiz) {
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+
+    int ret = ijkmp_jsv_color_format(mp);
+
+    ijkmp_dec_ref_p(&mp);
+
+    return ret;
+}
 // JsView Added <<<
 
 
@@ -1219,7 +1230,8 @@ static JNINativeMethod g_methods[] = {
     { "native_setLogLevel",     "(I)V",                     (void *) IjkMediaPlayer_native_setLogLevel },
     { "_setFrameAtTime",        "(Ljava/lang/String;JJII)V", (void *) IjkMediaPlayer_setFrameAtTime },
 
-    { "native_jsvDrawFrame",    "([F)I",                    (void *) IjkMediaPlayer_native_jsvDrawFrame }, // JsView Added
+    { "native_jsvDrawFrame",      "([F)I",                  (void *) IjkMediaPlayer_native_jsvDrawFrame }, // JsView Added
+    { "native_jsvGetColorFormat", "()I",                    (void *) IjkMediaPlayer_native_jsvGetColorFormat }, // JsView Added
 };
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)

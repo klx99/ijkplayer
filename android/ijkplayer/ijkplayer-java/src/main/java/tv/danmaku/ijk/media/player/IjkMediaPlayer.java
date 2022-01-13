@@ -1292,6 +1292,7 @@ public class IjkMediaPlayer extends AbstractMediaPlayer {
     }
 
     protected native int native_jsvDrawFrame(float[] mvpMatrix);
+    protected native int native_jsvGetColorFormat();
 
     @CalledByNative
     private static void onVideoSync(Object weakThiz) {

@@ -3,6 +3,7 @@ package com.jsview.plugin;
 import android.opengl.Matrix;
 import android.text.TextUtils;
 
+import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 public class JsvSharedMediaPlayer extends IjkMediaPlayer {
@@ -25,6 +26,10 @@ public class JsvSharedMediaPlayer extends IjkMediaPlayer {
         }
 
         return super.native_jsvDrawFrame(mvpMatrix);
+    }
+
+    public int getColorFormat() {
+        return super.native_jsvGetColorFormat();
     }
 
     @Override

@@ -5077,10 +5077,10 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 // JsView Added >>>
 int jsvh_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight)
 {
-    if (!ffp || !ffp->jsv_context
-        || ffp->jsv_mediacodec_info.video_color_format <= 0
-        || ffp->jsv_mediacodec_info.videoWidth <= 0
-        || ffp->jsv_mediacodec_info.videoHeight <= 0) {
+    if (!ffp
+    || ffp->jsv_mediacodec_info.video_color_format <= 0
+    || ffp->jsv_mediacodec_info.videoWidth <= 0
+    || ffp->jsv_mediacodec_info.videoHeight <= 0) {
         return -1;
     }
 
@@ -5179,6 +5179,17 @@ int ffp_jsvh_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
     if(ret < 0) {
         return -1;
     }
+
+    return ret;
+}
+
+int ffp_jsvh_color_format(FFPlayer *ffp)
+{
+    if (!ffp) {
+        return -1;
+    }
+
+    int ret = ffp->jsv_mediacodec_info.video_color_format;
 
     return ret;
 }

@@ -13,13 +13,6 @@
         android:layout_height="match_parent"
         android:background="#0099cc">
 
-<!--        <android.opengl.GLSurfaceView-->
-<!--            android:id="@+id/fake_forge_view"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:layout_gravity="center">-->
-<!--        </android.opengl.GLSurfaceView>-->
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,6 +21,16 @@
             android:textSize="16sp"
             android:textColor="#00FF00"
             android:text="Hello JsView!" />
+
+        <TextView
+            android:id="@+id/log_view"
+            android:layout_marginTop="40sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:background="@color/ijk_transparent_dark"
+            android:textColor="#FFFFFF"
+            android:padding="8dp" />
 
         <TableLayout
             android:id="@+id/hud_view"

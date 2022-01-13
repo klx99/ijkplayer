@@ -6,9 +6,12 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.TableLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -35,10 +38,14 @@ public class JsvTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.jsv_test_activity);
 
+        mainHandler = new Handler(Looper.getMainLooper());
+
         FrameLayout rootView = findViewById(R.id.root_view);
 
         jsvSharedSurfaceView = new JsvSharedSurfaceView(this);
         rootView.addView(jsvSharedSurfaceView, 0);
+
+        logView = findViewById(R.id.log_view);
 
         TableLayout hudView = findViewById(R.id.hud_view);
         hudViewHolder = new InfoHudViewHolder(this, hudView);
@@ -101,6 +108,12 @@ public class JsvTestActivity extends AppCompatActivity {
 
         mp.setOnVideoSyncListener((player) -> {
             jsvSharedSurfaceView.requestRender();
+
+            mainHandler.post(() -> {
+                String log = "video fmt:" + ((JsvSharedMediaPlayer)player).getColorFormat();
+                log += ", w/h:" + player.getVideoWidth() + "/" + player.getVideoHeight();
+                logView.setText(log);
+            });
         });
 
         jsvSharedSurfaceView.appendRenderer(mp, (key) -> {
@@ -159,6 +172,8 @@ public class JsvTestActivity extends AppCompatActivity {
         return mp;
     }
 
+    private Handler mainHandler;
+    private TextView logView;
     private InfoHudViewHolder hudViewHolder;
     private JsvSharedSurfaceView jsvSharedSurfaceView;
     private Triangle triangle;
