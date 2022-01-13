@@ -562,8 +562,8 @@ inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
 typedef struct {
     pthread_mutex_t mutex;
 
-    int videoWidth;
-    int videoHeight;
+    int video_width;
+    int video_height;
     int video_color_format;
 
     Frame *vp;

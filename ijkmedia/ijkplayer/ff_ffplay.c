@@ -5075,18 +5075,18 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 }
 
 // JsView Added >>>
-int jsvh_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight)
+int jsvh_get_frame_format(FFPlayer *ffp, int* video_format, int* video_width, int* video_height)
 {
     if (!ffp
     || ffp->jsv_mediacodec_info.video_color_format <= 0
-    || ffp->jsv_mediacodec_info.videoWidth <= 0
-    || ffp->jsv_mediacodec_info.videoHeight <= 0) {
+    || ffp->jsv_mediacodec_info.video_width <= 0
+    || ffp->jsv_mediacodec_info.video_height <= 0) {
         return -1;
     }
 
-    *videoFormat = ffp->jsv_mediacodec_info.video_color_format;
-    *videoWidth = ffp->jsv_mediacodec_info.videoWidth;
-    *videoHeight = ffp->jsv_mediacodec_info.videoHeight;
+    *video_format = ffp->jsv_mediacodec_info.video_color_format;
+    *video_width = ffp->jsv_mediacodec_info.video_width;
+    *video_height = ffp->jsv_mediacodec_info.video_height;
 
     return 0;
 }
@@ -5157,8 +5157,8 @@ int ffp_jsvh_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
         return -1;
     }
 
-    int videoFormat, videoWidth, videoHeight;
-    int ret = jsvh_get_frame_format(ffp, &videoFormat, &videoWidth, &videoHeight);
+    int video_format, video_width, video_height;
+    int ret = jsvh_get_frame_format(ffp, &video_format, &video_width, &video_height);
     if(ret < 0) {
         return ret;
     }
@@ -5171,7 +5171,7 @@ int ffp_jsvh_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
     int dataSize = ret;
 
     ret = DrawJsvVideoRendererWithData(ffp->jsv_context, mvp_matrix, size,
-                                       videoFormat, videoWidth, videoHeight,
+                                       video_format, video_width, video_height,
                                        data, dataSize);
 
     jsvh_unlock_frame_buffer(ffp);
@@ -5202,6 +5202,21 @@ void ffp_set_video_sync_callback(FFPlayer *ffp, void(*callback)(void*), void *op
 
     ffp->jsv_context->videoSyncCallback = callback;
     ffp->jsv_context->videoSyncData = opaque;
+}
+
+int ffp_update_video_info(FFPlayer *ffp, int video_width, int video_height, int video_color_format)
+{
+    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
+    ffp->jsv_mediacodec_info.video_width = video_width;
+    ffp->jsv_mediacodec_info.video_height = video_height;
+    ffp->jsv_mediacodec_info.video_color_format = video_color_format;
+    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
+
+    if(ffp->jsv_context->videoRenderer == NULL) {
+        MakeJsvVideoRenderer(ffp->jsv_context, video_color_format);
+    }
+
+    return 0;
 }
 
 int ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial,

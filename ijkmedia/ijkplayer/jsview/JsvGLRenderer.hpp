@@ -6,7 +6,7 @@
 namespace jsview {
 namespace plugin {
 
-class JsvGLES2 {
+class JsvGLRenderer {
 public:
 /*** type define ***/
 
@@ -14,13 +14,14 @@ public:
     static void CheckGLError(const char* funcName);
 
 /*** class function and variable ***/
-    explicit JsvGLES2() = default;
-    virtual ~JsvGLES2() = default;
+    explicit JsvGLRenderer() = default;
+    virtual ~JsvGLRenderer() = default;
 
     virtual const char* getVertexShaderSource() = 0;
     virtual const char* getFragmentShaderSource() = 0;
 
     virtual int prepare();
+    virtual int hasPrepared() = 0;
 
     virtual uint32_t getProgram() {
         return *program;

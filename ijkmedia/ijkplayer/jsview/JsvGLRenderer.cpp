@@ -6,7 +6,7 @@
 //  Copyright © 2021 mengxk. All rights reserved.
 //
 
-#include "JsvGLES2.hpp"
+#include "JsvGLRenderer.hpp"
 
 #include <android/log.h>
 #include <GLES2/gl2.h>
@@ -21,7 +21,7 @@ namespace plugin {
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
-std::shared_ptr<uint32_t> JsvGLES2::MakeGLProgram(std::shared_ptr<uint32_t> vertexShader,
+std::shared_ptr<uint32_t> JsvGLRenderer::MakeGLProgram(std::shared_ptr<uint32_t> vertexShader,
                                                     std::shared_ptr<uint32_t> fragmentShader)
 {
     auto creater = [&]() -> uint32_t* {
@@ -61,7 +61,7 @@ std::shared_ptr<uint32_t> JsvGLES2::MakeGLProgram(std::shared_ptr<uint32_t> vert
 
 }
 
-std::shared_ptr<uint32_t> JsvGLES2::LoadGLShader(uint32_t shaderType,
+std::shared_ptr<uint32_t> JsvGLRenderer::LoadGLShader(uint32_t shaderType,
                                                    const char *shaderSource)
 {
     assert(shaderSource);
@@ -100,12 +100,12 @@ std::shared_ptr<uint32_t> JsvGLES2::LoadGLShader(uint32_t shaderType,
     return shader;
 }
 
-void JsvGLES2::PrintGLShaderInfo(std::shared_ptr<uint32_t> shader)
+void JsvGLRenderer::PrintGLShaderInfo(std::shared_ptr<uint32_t> shader)
 {
     // TODO
 }
 
-void JsvGLES2::CheckGLError(const char* funcName) {
+void JsvGLRenderer::CheckGLError(const char* funcName) {
     for (GLint error = glGetError(); error; error = glGetError()) {
         __android_log_print(ANDROID_LOG_ERROR, "JsView", "GLError: after %s(), errorCode: 0x%x", funcName, error);
     }
@@ -114,7 +114,7 @@ void JsvGLES2::CheckGLError(const char* funcName) {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-int JsvGLES2::prepare()
+int JsvGLRenderer::prepare()
 {
     auto vertexShaderSource = getVertexShaderSource();
     vertexShader = LoadGLShader(GL_VERTEX_SHADER, vertexShaderSource);

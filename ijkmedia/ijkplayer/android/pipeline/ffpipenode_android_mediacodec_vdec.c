@@ -1144,11 +1144,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
 
                 // JsView Added >>>
                 if(ffp->overlay_format == SDL_FCC_JSVH) {
-                    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
-                    ffp->jsv_mediacodec_info.videoWidth = width;
-                    ffp->jsv_mediacodec_info.videoHeight = height;
-                    ffp->jsv_mediacodec_info.video_color_format = color_format;
-                    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
+                    ffp_update_video_info(ffp, width, height, color_format);
                 }
                 // JsView Added <<<
         }
@@ -1334,11 +1330,7 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
 
                 // JsView Added >>>
                 if(ffp->overlay_format == SDL_FCC_JSVH) {
-                    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
-                    ffp->jsv_mediacodec_info.videoWidth = width;
-                    ffp->jsv_mediacodec_info.videoHeight = height;
-                    ffp->jsv_mediacodec_info.video_color_format = color_format;
-                    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
+                    ffp_update_video_info(ffp, width, height, color_format);
                 }
                 // JsView Added <<<
         }

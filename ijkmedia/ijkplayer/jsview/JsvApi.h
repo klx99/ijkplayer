@@ -10,7 +10,6 @@ extern "C" {
 
 typedef struct {
     void* videoRenderer;
-    bool videoPrepared;
 
     void (*videoSyncCallback)(void*);
     void *videoSyncData;
@@ -18,6 +17,7 @@ typedef struct {
 
 JsvContext* NewJsvContext();
 void DeleteJsvContext(JsvContext** context);
+int MakeJsvVideoRenderer(JsvContext* context, int colorFormat);
 
 int DrawJsvVideoRendererWithData(JsvContext* context,
                                  float mvpMatrix[], int matrixSize,

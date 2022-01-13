@@ -15,7 +15,6 @@
 JsvContext* NewJsvContext()
 {
     JsvContext* context = new JsvContext();
-    context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
 
     return context;
 }
@@ -32,6 +31,37 @@ void DeleteJsvContext(JsvContext** context)
     }
 
     *context = nullptr;
+}
+
+int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
+{
+    if(context == nullptr) {
+        __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to make video renderer, context has been deleted.");
+        return -1;
+    }
+    if(context->videoRenderer != nullptr) {
+        __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to make video renderer, video renderer has been created.");
+        return -1;
+    }
+
+    enum SupportColorFormat : int32_t { // Same as MediaCodecInfo.CodecCapabilities
+        ColorFormat_YUV420Planar = 19,
+        ColorFormat_YUV420SemiPlanar = 21,
+        ColorFormat_YCbYCr = 25
+    };
+
+    switch (colorFormat) {
+    case ColorFormat_YCbYCr:
+        context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
+        break;
+
+    case ColorFormat_YUV420Planar:
+    case ColorFormat_YUV420SemiPlanar:
+    default:
+        context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
+    }
+
+    return 0;
 }
 
 int DrawJsvVideoRendererWithData(JsvContext* context,
@@ -51,13 +81,12 @@ int DrawJsvVideoRendererWithData(JsvContext* context,
 
     auto videoRenderer = reinterpret_cast<jsview::plugin::JsvVideoRenderer*>(context->videoRenderer);
 
-    if(context->videoPrepared == false) {
+    if(videoRenderer->hasPrepared() == false) {
         int ret = videoRenderer->prepare();
         if(ret < 0) {
             __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to prepare video renderer.");
             return ret;
         }
-        context->videoPrepared = true;
     }
     int ret = videoRenderer->drawWithData(mvpMatrix, matrixSize,
                                           colorFormat, width, height,

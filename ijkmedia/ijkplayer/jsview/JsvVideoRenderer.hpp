@@ -1,11 +1,11 @@
 #pragma once
 
-#include "JsvGLES2.hpp"
+#include "JsvGLRenderer.hpp"
 
 namespace jsview {
 namespace plugin {
 
-class JsvVideoRenderer : public JsvGLES2 {
+class JsvVideoRenderer : public JsvGLRenderer {
 public:
 /*** type define ***/
 
@@ -16,10 +16,11 @@ public:
     explicit JsvVideoRenderer() = default;
     virtual ~JsvVideoRenderer() = default;
 
-    virtual const char* getVertexShaderSource();
-    virtual const char* getFragmentShaderSource();
+    virtual const char* getVertexShaderSource() override;
+    virtual const char* getFragmentShaderSource() override;
 
-    virtual int prepare();
+    virtual int prepare() override;
+    virtual int hasPrepared() override;
     int drawWithData(float mvpMatrix[], int matrixSize,
                      int colorFormat, int width, int height,
                      uint8_t* data, int dataSize);
@@ -36,17 +37,19 @@ private:
     static const float TextureData[];
 
 /*** class function and variable ***/
-    int glMVP;
+    bool prepared = false;
+
+    int glMVP = -1;
     //顶点位置
-    int glAvPosition;
+    int glAvPosition = -1;
     //纹理位置
-    int glAfPosition;
+    int glAfPosition = -1;
 
     //shader  yuv变量
-    int glSamplerY;
-    int glSamplerU;
-    int glSamplerV;
-    uint32_t glTextureYUV[3];
+    int glSamplerY = -1;
+    int glSamplerU = -1;
+    int glSamplerV = -1;
+    uint32_t glTextureYUV[3] = {};
 
 };
 

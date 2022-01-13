@@ -58,7 +58,7 @@ int JsvVideoRenderer::prepare()
 //        return EGL_FALSE;
 //    }
 
-    int ret = JsvGLES2::prepare();
+    int ret = JsvGLRenderer::prepare();
     if(ret < 0) {
         return ret;
     }
@@ -90,8 +90,15 @@ int JsvVideoRenderer::prepare()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
+    prepared = true;
+
     return 0;
 }
+
+int JsvVideoRenderer::hasPrepared() {
+    return prepared;
+}
+
 
 int JsvVideoRenderer::drawWithData(float mvpMatrix[], int matrixSize,
                                    int colorFormat, int width, int height,

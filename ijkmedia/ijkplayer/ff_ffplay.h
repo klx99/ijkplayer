@@ -125,6 +125,7 @@ int ffp_jsvh_color_format(FFPlayer *ffp);
 void ffp_set_video_sync_callback(FFPlayer *ffp, void(*callback)(void*), void *opaque);
 
 int ffp_jsvh_cache_frame(FFPlayer *ffp, Frame *frame);
+int ffp_update_video_info(FFPlayer *ffp, int video_width, int video_height, int video_color_format);
 int ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial,
                                   int output_buffer_index, int output_buffer_offset, int output_buffer_size);
 // JsView Added <<<
