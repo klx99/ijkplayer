@@ -6,7 +6,7 @@
 //  Copyright © 2021 mengxk. All rights reserved.
 //
 
-#include "JsvVideoRenderer.hpp"
+#include "JsvRendererYCbYCr.hpp"
 
 #include <android/log.h>
 #include <GLES2/gl2.h>
@@ -21,22 +21,22 @@ namespace plugin {
 /***** static variables initialize *************/
 /***********************************************/
 //每一次取点的时候取几个点
-const int JsvVideoRenderer::CoordsPerVertex = 3;
+const int JsvRendererYCbYCr::CoordsPerVertex = 3;
 
 //顶点坐标
-const float JsvVideoRenderer::VertexData[] = {   // in counterclockwise order:
+const float JsvRendererYCbYCr::VertexData[] = {   // in counterclockwise order:
         -1.0f, -1.0f, 0.0f, // bottom left
         1.0f, -1.0f, 0.0f, // bottom right
         -1.0f, 1.0f, 0.0f, // top left
         1.0f, 1.0f, 0.0f,  // top right
 };
 
-const int JsvVideoRenderer::VertexCount = sizeof(VertexData) / sizeof(*VertexData) / CoordsPerVertex;
+const int JsvRendererYCbYCr::VertexCount = sizeof(VertexData) / sizeof(*VertexData) / CoordsPerVertex;
 //每一次取的总的点 大小
-const int JsvVideoRenderer::VertexStride = CoordsPerVertex * 4; // 4 bytes per vertex
+const int JsvRendererYCbYCr::VertexStride = CoordsPerVertex * 4; // 4 bytes per vertex
 
 //纹理坐标
-const float JsvVideoRenderer::TextureData[] = {   // in counterclockwise order:
+const float JsvRendererYCbYCr::TextureData[] = {   // in counterclockwise order:
         0.0f, 1.0f, 0.0f, // bottom left
         1.0f, 1.0f, 0.0f, // bottom right
         0.0f, 0.0f, 0.0f, // top left
@@ -50,7 +50,7 @@ const float JsvVideoRenderer::TextureData[] = {   // in counterclockwise order:
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-int JsvVideoRenderer::prepare()
+int JsvRendererYCbYCr::prepare()
 {
 //    eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 //    if (eglDisplay == EGL_NO_DISPLAY) {
@@ -95,12 +95,12 @@ int JsvVideoRenderer::prepare()
     return 0;
 }
 
-int JsvVideoRenderer::hasPrepared() {
+int JsvRendererYCbYCr::hasPrepared() {
     return prepared;
 }
 
 
-int JsvVideoRenderer::drawFrame(float mvpMatrix[16],
+int JsvRendererYCbYCr::drawFrame(float mvpMatrix[16],
                                 int width, int height,
                                 uint8_t* data, int dataSize)
 {
@@ -145,7 +145,7 @@ int JsvVideoRenderer::drawFrame(float mvpMatrix[16],
     return 0;
 }
 
-const char* JsvVideoRenderer::getVertexShaderSource()
+const char* JsvRendererYCbYCr::getVertexShaderSource()
 {
     static constexpr const char* source =
         "uniform mat4 um_MVP;"
@@ -160,7 +160,7 @@ const char* JsvVideoRenderer::getVertexShaderSource()
 return source;
 }
 
-const char* JsvVideoRenderer::getFragmentShaderSource()
+const char* JsvRendererYCbYCr::getFragmentShaderSource()
 {
     static constexpr const char* source =
         "precision mediump float;"//精度 为float

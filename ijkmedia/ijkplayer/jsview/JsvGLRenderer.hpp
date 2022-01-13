@@ -19,9 +19,13 @@ public:
 
     virtual const char* getVertexShaderSource() = 0;
     virtual const char* getFragmentShaderSource() = 0;
+    virtual int hasPrepared() = 0;
 
     virtual int prepare();
-    virtual int hasPrepared() = 0;
+
+    virtual int drawFrame(float mvpMatrix[16],
+                          int width, int height,
+                          uint8_t* data, int dataSize) = 0;
 
     virtual uint32_t getProgram() {
         return *program;

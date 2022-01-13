@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <android/log.h>
+#include "JsvRendererYCbYCr.hpp"
 #include "JsvVideoRenderer.hpp"
 
 JsvContext* NewJsvContext()
@@ -26,7 +27,7 @@ void DeleteJsvContext(JsvContext** context)
     }
 
     if((*context)->videoRenderer != nullptr) {
-        auto videoRenderer = reinterpret_cast<jsview::plugin::JsvVideoRenderer*>((*context)->videoRenderer);
+        auto videoRenderer = reinterpret_cast<jsview::plugin::JsvGLRenderer*>((*context)->videoRenderer);
         delete videoRenderer;
     }
 
@@ -52,7 +53,7 @@ int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
 
     switch (colorFormat) {
     case ColorFormat_YCbYCr:
-        context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
+        context->videoRenderer = new jsview::plugin::JsvRendererYCbYCr();
         break;
 
     case ColorFormat_YUV420Planar:
@@ -79,7 +80,7 @@ int DrawJsvVideoRendererWithData(JsvContext* context,
         return -1;
     }
 
-    auto videoRenderer = reinterpret_cast<jsview::plugin::JsvVideoRenderer*>(context->videoRenderer);
+    auto videoRenderer = reinterpret_cast<jsview::plugin::JsvGLRenderer*>(context->videoRenderer);
 
     if(videoRenderer->hasPrepared() == false) {
         int ret = videoRenderer->prepare();
@@ -88,9 +89,9 @@ int DrawJsvVideoRendererWithData(JsvContext* context,
             return ret;
         }
     }
-    int ret = videoRenderer->drawWithData(mvpMatrix, matrixSize,
-                                          colorFormat, width, height,
-                                          data, dataSize);
+    int ret = videoRenderer->drawFrame(mvpMatrix,
+                                       width, height,
+                                       data, dataSize);
     if(ret < 0) {
         __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw to video renderer.");
         return ret;

@@ -5,7 +5,7 @@
 namespace jsview {
 namespace plugin {
 
-class JsvVideoRenderer : public JsvGLRenderer {
+class JsvRendererYCbYCr : public JsvGLRenderer {
 public:
 /*** type define ***/
 
@@ -13,8 +13,8 @@ public:
     static constexpr const int BLOCK_COUNT = 3;
 
 /*** class function and variable ***/
-    explicit JsvVideoRenderer() = default;
-    virtual ~JsvVideoRenderer() = default;
+    explicit JsvRendererYCbYCr() = default;
+    virtual ~JsvRendererYCbYCr() = default;
 
     virtual const char* getVertexShaderSource() override;
     virtual const char* getFragmentShaderSource() override;
