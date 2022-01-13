@@ -31,13 +31,13 @@ public class JsvSharedMediaPlayer extends IjkMediaPlayer {
     public void setOption(int category, String name, String value) {
         super.setOption(category, name, value);
 
-        if(TextUtils.equals(value, OverlayFormatFccJSV2)) {
+        if(TextUtils.equals(value, OverlayFormatFccJSVH)) {
             super.setOption(category, "opensles", 1);
             super.setOption(category, "mediacodec", 1);
         }
     }
 
-    public static final String OverlayFormatFccJSV2 = "fcc-jsv2";
+    public static final String OverlayFormatFccJSVH = "fcc-jsvh"; // JsView Hardware MediaCodec
 
     private float[] mvpMatrix;
 }

@@ -145,21 +145,10 @@ static int func_display_overlay_l(SDL_Vout *vout, SDL_VoutOverlay *overlay)
     ANativeWindow *native_window = opaque->native_window;
 
     // JsView Added >>>
-    if (vout->overlay_format == SDL_FCC_JSV0 && opaque->egl) {
-        if (overlay->format != SDL_FCC_YV12) {
-#define FCC2CH(code) ((uint8_t)code), ((uint8_t)(code >> 8)), ((uint8_t)(code >> 16)), ((uint8_t)(code >> 24))
-            __android_log_print(ANDROID_LOG_ERROR, "JsView",
-                                "Failed to draw video format: 0x%x (%c%c%c%c)", overlay->format,
-                                FCC2CH(overlay->format));
-            return EGL_FALSE;
-        }
-
-        return JSV_GLES2_display(opaque->egl, overlay);
-    } else if (vout->overlay_format == SDL_FCC_JSV2
+    if (vout->overlay_format == SDL_FCC_JSVH
     && overlay->format == SDL_FCC__AMC) {
         IJK_EGL_terminate(opaque->egl);
         return SDL_VoutOverlayAMediaCodec_releaseFrame_l(overlay, NULL, true);
-//        return overlay->opaque.
     }
     // JsView Added <<<
 

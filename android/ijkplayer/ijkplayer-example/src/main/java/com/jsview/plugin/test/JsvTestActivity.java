@@ -119,7 +119,7 @@ public class JsvTestActivity extends AppCompatActivity {
         JsvSharedMediaPlayer mp = new JsvSharedMediaPlayer();
 
         mp.native_setLogLevel(JsvSharedMediaPlayer.IJK_LOG_DEBUG);
-        mp.setOption(JsvSharedMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", JsvSharedMediaPlayer.OverlayFormatFccJSV2);
+        mp.setOption(JsvSharedMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", JsvSharedMediaPlayer.OverlayFormatFccJSVH);
         mp.setOption(JsvSharedMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
         mp.setOption(JsvSharedMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
         mp.setOption(JsvSharedMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
@@ -165,11 +165,9 @@ public class JsvTestActivity extends AppCompatActivity {
 
     private ArrayList<JsvSharedMediaPlayer> mediaPlayerList = new ArrayList();
 
-    private static final int UseMediaCodec = 1;
-//     private static final String OverlayFormat = "fcc-jsv0";
-//    private static final String OverlayFormat = "fcc-jsv1";
     public static final int MediaPlayerCount = 1;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
+//        "/data/local/tmp/1080p60.mp4",
         "/data/local/tmp/test.mp4",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",

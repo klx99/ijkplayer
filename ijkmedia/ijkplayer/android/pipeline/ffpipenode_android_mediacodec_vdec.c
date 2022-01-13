@@ -127,7 +127,7 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     SDL_AMediaCodec              *acodec   = NULL;
 
     if (opaque->jsurface == NULL
-    && opaque->ffp->overlay_format != SDL_FCC_JSV2) { // JsView Added
+    && opaque->ffp->overlay_format != SDL_FCC_JSVH) { // JsView Added
         // we don't need real codec if we don't have a surface
         acodec = SDL_AMediaCodecDummy_create();
     } else {
@@ -1143,7 +1143,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
                 crop_left, crop_top, crop_right, crop_bottom);
 
                 // JsView Added >>>
-                if(ffp->overlay_format == SDL_FCC_JSV2) {
+                if(ffp->overlay_format == SDL_FCC_JSVH) {
                     pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
                     ffp->jsv_mediacodec_info.videoWidth = width;
                     ffp->jsv_mediacodec_info.videoHeight = height;
@@ -1164,7 +1164,7 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
         goto done;
     } else if (output_buffer_index >= 0) {
         // JsView Added >>>
-        if(ffp->overlay_format == SDL_FCC_JSV2) {
+        if(ffp->overlay_format == SDL_FCC_JSVH) {
             *index = output_buffer_index;
             *offset = bufferInfo.offset;
             *size = bufferInfo.size;
@@ -1333,7 +1333,7 @@ static int drain_output_buffer2_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t tim
                 crop_left, crop_top, crop_right, crop_bottom);
 
                 // JsView Added >>>
-                if(ffp->overlay_format == SDL_FCC_JSV2) {
+                if(ffp->overlay_format == SDL_FCC_JSVH) {
                     pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
                     ffp->jsv_mediacodec_info.videoWidth = width;
                     ffp->jsv_mediacodec_info.videoHeight = height;
@@ -1674,7 +1674,7 @@ static int func_run_sync(IJKFF_Pipenode *node)
                 }
             }
             // JsView Added >>>
-            if(ffp->overlay_format == SDL_FCC_JSV2) {
+            if(ffp->overlay_format == SDL_FCC_JSVH) {
                 ret = ffp_queue_picture_with_index(ffp, frame, pts, duration, av_frame_get_pkt_pos(frame), is->viddec.pkt_serial,
                                                    output_buffer_index, output_buffer_offset, output_buffer_size);
             // JsView Added <<<
@@ -1990,7 +1990,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mediacodec(FFPlayer
     }
     node->func_flush    = func_flush;
     // JsView Added >>>
-    if(ffp->overlay_format == SDL_FCC_JSV2) {
+    if(ffp->overlay_format == SDL_FCC_JSVH) {
         node->func_ref_mediacodec_buffer = func_ref_mediacodec_buffer;
         node->func_unref_mediacodec_buffer = func_unref_mediacodec_buffer;
     }

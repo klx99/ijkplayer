@@ -66,9 +66,6 @@
         <item>fcc-rv32</item>
         <item>fcc-yv12</item>
         <item>fcc-_es2</item>
-        <item>fcc-jsv0</item>
-        <item>fcc-jsv1</item>
-        <item>fcc-jsv2</item>
     </string-array>
     <string-array name="pref_entry_summaries_pixel_format">
         <item>Auto Select</item>

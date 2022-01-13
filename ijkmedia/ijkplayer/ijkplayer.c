@@ -802,7 +802,7 @@ int ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size)
 {
     assert(mp);
 
-    int ret = ffp_jsv_draw_frame(mp->ffplayer, mvp_matrix, size);
+    int ret = ffp_jsvh_draw_frame(mp->ffplayer, mvp_matrix, size);
 
     return ret;
 }

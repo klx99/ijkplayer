@@ -116,32 +116,6 @@ static AVPacket flush_pkt;
 #define IJKVERSION_GET_MINOR(x)     ((x >>  8) & 0xFF)
 #define IJKVERSION_GET_MICRO(x)     ((x      ) & 0xFF)
 
-// JsView Added >>>
-static int64_t prevDisplayTime;
-void print_display_fps() {
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &now);
-    int64_t nowTime = (now.tv_sec) * 1000 + now.tv_nsec / 1000000;
-
-    int64_t deltaTime = nowTime - prevDisplayTime;
-    prevDisplayTime = nowTime;
-
-//    __android_log_print(ANDROID_LOG_INFO, "JsView", "%s() cost time(ms): %lld", __func__, deltaTime);
-}
-
-static int64_t prevDisplayTime;
-void print_decode_fps() {
-    struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC_RAW, &now);
-    int64_t nowTime = (now.tv_sec) * 1000 + now.tv_nsec / 1000000;
-
-    int64_t deltaTime = nowTime - prevDisplayTime;
-    prevDisplayTime = nowTime;
-
-    __android_log_print(ANDROID_LOG_INFO, "JsView", "%s() cost time(ms): %lld", __func__, deltaTime);
-}
-// JsView Added <<<
-
 #if CONFIG_AVFILTER
 static inline
 int cmp_audio_fmts(enum AVSampleFormat fmt1, int64_t channel_count1,
@@ -935,10 +909,8 @@ static void video_image_display2(FFPlayer *ffp)
             }
         }
         // JsView Added >>>, 等到GL线程去描画
-        if(ffp->overlay_format == SDL_FCC_JSV1) {
-            ffp_jsv1_cache_frame(ffp, vp->frame);
-        } else if(ffp->overlay_format == SDL_FCC_JSV2) {
-            ffp_jsv2_cache_frame(ffp, vp);
+        if(ffp->overlay_format == SDL_FCC_JSVH) {
+            ffp_jsvh_cache_frame(ffp, vp);
         } else
         // JsView Added <<<
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
@@ -1097,12 +1069,6 @@ static void stream_close(FFPlayer *ffp)
 /* display the current picture, if any */
 static void video_display2(FFPlayer *ffp)
 {
-    // JsView Added >>>
-    if(ffp->overlay_format == SDL_FCC_JSV0) { // 留待forge线程描画
-        return;
-    }
-    // JsView Added <<<
-
     VideoState *is = ffp->is;
     if (is->video_st)
         video_image_display2(ffp);
@@ -1697,14 +1663,11 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
 #endif
         // FIXME: set swscale options
         // JsView Added >>>, 等到GL线程去描画
-        if(ffp->overlay_format == SDL_FCC_JSV2) {
+        if(ffp->overlay_format == SDL_FCC_JSVH) {
             vp->output_buffer_index = output_buffer_index;
             vp->output_buffer_offset = output_buffer_offset;
             vp->output_buffer_size = output_buffer_size;
         }
-        if(ffp->overlay_format == SDL_FCC_JSV1) {
-            av_frame_move_ref(vp->frame, src_frame);
-        } else // 包括SDL_FCC_JSV2
         // JsView Added <<<
         if (SDL_VoutFillFrameYUVOverlay(vp->bmp, src_frame) < 0) {
             av_log(NULL, AV_LOG_FATAL, "Cannot initialize the conversion context\n");
@@ -4247,9 +4210,7 @@ void ffp_set_option_intptr(FFPlayer *ffp, int opt_category, const char *name, ui
 void ffp_set_overlay_format(FFPlayer *ffp, int chroma_fourcc)
 {
     switch (chroma_fourcc) {
-        case SDL_FCC_JSV0: // JsView Added
-        case SDL_FCC_JSV1: // JsView Added
-        case SDL_FCC_JSV2: // JsView Added
+        case SDL_FCC_JSVH: // JsView Added
         case SDL_FCC__GLES2:
         case SDL_FCC_I420:
         case SDL_FCC_YV12:
@@ -5114,104 +5075,47 @@ IjkMediaMeta *ffp_get_meta_l(FFPlayer *ffp)
 }
 
 // JsView Added >>>
-int ffp_jsv2_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
+int jsvh_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight)
 {
-    if (!ffp || !ffp->jsv_context) {
+    if (!ffp || !ffp->jsv_context
+        || ffp->jsv_mediacodec_info.video_color_format <= 0
+        || ffp->jsv_mediacodec_info.videoWidth <= 0
+        || ffp->jsv_mediacodec_info.videoHeight <= 0) {
         return -1;
     }
 
-    int videoFormat, videoWidth, videoHeight;
-    int ret = ffp_jsv2_get_frame_format(ffp,
-                                        &videoFormat, &videoWidth, &videoHeight);
-    if(ret < 0) {
-        return ret;
-    }
+    *videoFormat = ffp->jsv_mediacodec_info.video_color_format;
+    *videoWidth = ffp->jsv_mediacodec_info.videoWidth;
+    *videoHeight = ffp->jsv_mediacodec_info.videoHeight;
 
-    uint8_t* data = NULL;
-    ret = ffp_jsv2_lock_frame_buffer(ffp, &data);
-    if(ret < 0) {
-        return ret;
-    }
-    int dataSize = ret;
-
-    ret = DrawJsvVideoRendererWithData(ffp->jsv_context, mvp_matrix, size,
-                                       videoFormat, videoWidth, videoHeight,
-                                       data, dataSize);
-
-    ffp_jsv2_unlock_frame_buffer(ffp);
-
-    if(ret < 0) {
-        return -1;
-    }
-
-    return ret;
+    return 0;
 }
 
-int ffp_jsv1_cache_frame(FFPlayer *ffp, AVFrame *frame)
+int jsvh_lock_frame_buffer(FFPlayer *ffp, uint8_t** data)
+{
+    if (!ffp || !ffp->jsv_context
+        || ffp->jsv_mediacodec_info.output_buffer_data == NULL) {
+        return -1;
+    }
+
+    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
+
+    *data = ffp->jsv_mediacodec_info.output_buffer_data;
+    int size = ffp->jsv_mediacodec_info.output_buffer_size;
+
+    return size;
+}
+
+void jsvh_unlock_frame_buffer(FFPlayer *ffp)
 {
     if (!ffp || !ffp->jsv_context)
-        return NULL;
-
-    WriteToJsvVideoRenderer(ffp->jsv_context, frame);
-
-    return 0;
-}
-
-int ffp_jsv1_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
-{
-    if (!ffp || !ffp->jsv_context) {
-        return -1;
-    }
-
-    int ret = DrawJsvVideoRenderer(ffp->jsv_context, mvp_matrix, size);
-    if(ret < 0) {
-        return -1;
-    }
-
-    return ret;
-}
-
-// 使用ijk自带的YV12shader，不出图。
-int ffp_jsv0_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
-{
-    if (!ffp || !ffp->jsv_context) {
-        return -1;
-    }
-
-    VideoState *is = ffp->is;
-    if (is->video_st) {
-        video_image_display2(ffp);
-    }
-
-    return 0;
-}
-
-int ffp_jsv_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
-{
-    int ret = -1;
-
-    if(ffp->overlay_format == SDL_FCC_JSV0) {
-        ret = ffp_jsv0_draw_frame(ffp, mvp_matrix, size);
-    } else if(ffp->overlay_format == SDL_FCC_JSV1) {
-        ret = ffp_jsv1_draw_frame(ffp, mvp_matrix, size);
-    } else if(ffp->overlay_format == SDL_FCC_JSV2) {
-        ret = ffp_jsv2_draw_frame(ffp, mvp_matrix, size);
-    }
-
-    return ret;
-}
-
-void ffp_set_video_sync_callback(FFPlayer *ffp, void(*callback)(void*), void *opaque)
-{
-    if (!ffp || !ffp->jsv_context) {
         return;
-    }
 
-    ffp->jsv_context->videoSyncCallback = callback;
-    ffp->jsv_context->videoSyncData = opaque;
+    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
 }
 
-int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
+
+int ffp_jsvh_cache_frame(FFPlayer *ffp, Frame *vp)
 {
     if (!ffp || !ffp->jsv_context)
         return -1;
@@ -5247,43 +5151,46 @@ int ffp_jsv2_cache_frame(FFPlayer *ffp, Frame *vp)
     return mediaCodecInfo->output_buffer_size;
 }
 
-int ffp_jsv2_get_frame_format(FFPlayer *ffp, int* videoFormat, int* videoWidth, int* videoHeight)
+int ffp_jsvh_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
 {
-    if (!ffp || !ffp->jsv_context
-    || ffp->jsv_mediacodec_info.video_color_format <= 0
-    || ffp->jsv_mediacodec_info.videoWidth <= 0
-    || ffp->jsv_mediacodec_info.videoHeight <= 0) {
+    if (!ffp || !ffp->jsv_context) {
         return -1;
     }
 
-    *videoFormat = ffp->jsv_mediacodec_info.video_color_format;
-    *videoWidth = ffp->jsv_mediacodec_info.videoWidth;
-    *videoHeight = ffp->jsv_mediacodec_info.videoHeight;
+    int videoFormat, videoWidth, videoHeight;
+    int ret = jsvh_get_frame_format(ffp, &videoFormat, &videoWidth, &videoHeight);
+    if(ret < 0) {
+        return ret;
+    }
 
-    return 0;
-}
+    uint8_t* data = NULL;
+    ret = jsvh_lock_frame_buffer(ffp, &data);
+    if(ret < 0) {
+        return ret;
+    }
+    int dataSize = ret;
 
-int ffp_jsv2_lock_frame_buffer(FFPlayer *ffp, uint8_t** data)
-{
-    if (!ffp || !ffp->jsv_context
-    || ffp->jsv_mediacodec_info.output_buffer_data == NULL) {
+    ret = DrawJsvVideoRendererWithData(ffp->jsv_context, mvp_matrix, size,
+                                       videoFormat, videoWidth, videoHeight,
+                                       data, dataSize);
+
+    jsvh_unlock_frame_buffer(ffp);
+
+    if(ret < 0) {
         return -1;
     }
 
-    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
-
-    *data = ffp->jsv_mediacodec_info.output_buffer_data;
-    int size = ffp->jsv_mediacodec_info.output_buffer_size;
-
-    return size;
+    return ret;
 }
 
-void ffp_jsv2_unlock_frame_buffer(FFPlayer *ffp)
+void ffp_set_video_sync_callback(FFPlayer *ffp, void(*callback)(void*), void *opaque)
 {
-    if (!ffp || !ffp->jsv_context)
+    if (!ffp || !ffp->jsv_context) {
         return;
+    }
 
-    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
+    ffp->jsv_context->videoSyncCallback = callback;
+    ffp->jsv_context->videoSyncData = opaque;
 }
 
 int ffp_queue_picture_with_index(FFPlayer *ffp, AVFrame *src_frame, double pts, double duration, int64_t pos, int serial,
