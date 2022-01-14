@@ -34,9 +34,9 @@ private:
     bool prepared = false;
 
     //shader  yuv变量
-    int glSamplers[SamplerCount] = {-1};
-    int glColorConversion = -1;
-    uint32_t glTextures[SamplerCount] = {0};
+    int glvarSamplers[SamplerCount] = {-1};
+    int glvarColorConversion = -1;
+    std::shared_ptr<std::vector<uint32_t>> glvarTextures;
 
 };
 

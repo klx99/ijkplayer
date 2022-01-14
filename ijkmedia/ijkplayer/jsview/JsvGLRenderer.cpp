@@ -41,6 +41,28 @@ const int JsvGLRenderer::VertexStride = CoordsPerVertex * 4; // 4 bytes per vert
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+std::shared_ptr<std::vector<uint32_t>> JsvGLRenderer::MakeTextures(int count)
+{
+    assert(shaderSource);
+
+    auto creater = [&count]() -> std::vector<uint32_t>* {
+        auto ptr = new std::vector<uint32_t>(count, 0);
+        glGenTextures(count, ptr->data());
+        return ptr;
+    };
+    auto deleter = [count](std::vector<uint32_t>* ptr) -> void {
+        glDeleteTextures(count, ptr->data());
+        delete ptr;
+    };
+    auto textures  = std::shared_ptr<std::vector<uint32_t>>(creater(), deleter);
+    CheckGLError("glCreateShader");
+//    if (shader == nullptr) {
+//        return nullptr;
+//    }
+
+    return textures;
+}
+
 const float* JsvGLRenderer::GetBt709ColorMat3()
 {
     static constexpr const GLfloat bt709[] = {
@@ -159,6 +181,17 @@ void JsvGLRenderer::PrintGLString(const char* name, GLenum value) {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
+JsvGLRenderer::JsvGLRenderer()
+{
+}
+
+JsvGLRenderer::~JsvGLRenderer()
+{
+    vertexShader.reset();
+    fragmentShader.reset();
+    program.reset();
+}
+
 const char* JsvGLRenderer::getVertexShaderSource()
 {
     static constexpr const char* source =

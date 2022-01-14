@@ -36,16 +36,16 @@ int JsvRendererYuv420sp::prepare() {
 
     auto program = getProgram();
 
-    glSamplers[0] = glGetUniformLocation(program, "us2_SamplerY");
-    glSamplers[1] = glGetUniformLocation(program, "us2_SamplerUV");
-    glColorConversion = glGetUniformLocation(program, "um3_ColorConversion");
+    glvarSamplers[0] = glGetUniformLocation(program, "us2_SamplerY");
+    glvarSamplers[1] = glGetUniformLocation(program, "us2_SamplerUV");
+    glvarColorConversion = glGetUniformLocation(program, "um3_ColorConversion");
     CheckGLError("glGetUniformLocation");
 
     //创建3个纹理
-    glGenTextures(SamplerCount, glTextures);
+    glvarTextures = JsvGLRenderer::MakeTextures(SamplerCount);
 
     //绑定纹理
-    for (int id : glTextures) {
+    for (auto& id : *glvarTextures) {
         glBindTexture(GL_TEXTURE_2D, id);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -79,7 +79,7 @@ int JsvRendererYuv420sp::drawFrame(float mvpMat4[16],
     };
     for (int idx = 0; idx < SamplerCount; idx++) {
         glActiveTexture(GL_TEXTURE0 + idx);
-        glBindTexture(GL_TEXTURE_2D, glTextures[idx]);
+        glBindTexture(GL_TEXTURE_2D, (*glvarTextures)[idx]);
         glTexImage2D(GL_TEXTURE_2D,
                      0, texInfo[idx].format,
                      texInfo[idx].width, texInfo[idx].height,
@@ -87,11 +87,11 @@ int JsvRendererYuv420sp::drawFrame(float mvpMat4[16],
                      GL_UNSIGNED_BYTE, data + texInfo[idx].offset);
         CheckGLError("glTexImage2D");
 
-        glUniform1i(glSamplers[idx], idx);
+        glUniform1i(glvarSamplers[idx], idx);
         CheckGLError("glUniform1i");
     }
 
-    glUniformMatrix3fv(glColorConversion, 1, GL_FALSE, GetBt709ColorMat3());
+    glUniformMatrix3fv(glvarColorConversion, 1, GL_FALSE, GetBt709ColorMat3());
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, VertexCount);
 
@@ -122,8 +122,8 @@ const char* JsvRendererYuv420sp::getFragmentShaderSource()
         "    mediump vec3 yuv;"
         "    lowp    vec3 rgb;"
         ""
-        "    yuv.x  = (texture2D(us2_SamplerY,  vv2_Texcoord).r  - 0.062745);" // 0.062745 = (16.0 / 255.0)
-        "    yuv.yz = (texture2D(us2_SamplerUV,  vv2_Texcoord).ra - vec2(0.5, 0.5));"
+        "    yuv.x  = texture2D(us2_SamplerY,  vv2_Texcoord).r  - 0.062745;" // 0.062745 = (16.0 / 255.0)
+        "    yuv.yz = texture2D(us2_SamplerUV, vv2_Texcoord).ra - vec2(0.5, 0.5);"
         "    rgb = um3_ColorConversion * yuv;"
         "    gl_FragColor = vec4(rgb, 1);"
         "}";

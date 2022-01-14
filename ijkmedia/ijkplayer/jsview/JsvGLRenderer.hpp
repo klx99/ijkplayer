@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 #include <GLES2/gl2.h>
 
 namespace jsview {
@@ -20,14 +21,16 @@ public:
 /*** static function and variable ***/
     const float* GetBt709ColorMat3();
 
+    static std::shared_ptr<std::vector<uint32_t>> MakeTextures(int count);
+
     static void CheckGLError(const char* funcName);
     static void PrintGLString(const char* name, GLenum value);
 
     static const int VertexCount;
 
 /*** class function and variable ***/
-    explicit JsvGLRenderer() = default;
-    virtual ~JsvGLRenderer() = default;
+    explicit JsvGLRenderer();
+    virtual ~JsvGLRenderer();
 
     virtual const char* getVertexShaderSource();
     virtual const char* getFragmentShaderSource() = 0;
