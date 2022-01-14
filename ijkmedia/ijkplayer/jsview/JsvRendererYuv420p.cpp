@@ -6,7 +6,7 @@
 //  Copyright © 2021 mengxk. All rights reserved.
 //
 
-#include "JsvRendererYuv420sp.hpp"
+#include "JsvRendererYuv420p.hpp"
 
 #include <android/log.h>
 #include <GLES2/gl2.h>
@@ -28,7 +28,7 @@ namespace plugin {
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
-int JsvRendererYuv420sp::prepare() {
+int JsvRendererYuv420p::prepare() {
     int ret = JsvGLRenderer::prepare();
     if (ret < 0) {
         return ret;
@@ -37,7 +37,8 @@ int JsvRendererYuv420sp::prepare() {
     auto program = getProgram();
 
     glSamplers[0] = glGetUniformLocation(program, "us2_SamplerY");
-    glSamplers[1] = glGetUniformLocation(program, "us2_SamplerUV");
+    glSamplers[1] = glGetUniformLocation(program, "us2_SamplerU");
+    glSamplers[2] = glGetUniformLocation(program, "us2_SamplerV");
     glColorConversion = glGetUniformLocation(program, "um3_ColorConversion");
     CheckGLError("glGetUniformLocation");
 
@@ -60,12 +61,12 @@ int JsvRendererYuv420sp::prepare() {
     return 0;
 }
 
-int JsvRendererYuv420sp::hasPrepared() {
+int JsvRendererYuv420p::hasPrepared() {
     return prepared;
 }
 
 
-int JsvRendererYuv420sp::drawFrame(float mvpMat4[16],
+int JsvRendererYuv420p::drawFrame(float mvpMat4[16],
                                    int width, int height,
                                    uint8_t *data, int dataSize) {
     int ret = JsvGLRenderer::preDrawFrame(mvpMat4);
@@ -75,7 +76,8 @@ int JsvRendererYuv420sp::drawFrame(float mvpMat4[16],
 
     TexImageInfo texInfo[SamplerCount] = {
         {.format = GL_LUMINANCE, .width = width, .height = height, .offset = 0},
-        {.format = GL_LUMINANCE_ALPHA, .width = width / 2, .height = height / 2, .offset = width * height},
+        {.format = GL_LUMINANCE, .width = width / 2, .height = height / 2, .offset = width * height},
+        {.format = GL_LUMINANCE, .width = width / 2, .height = height / 2, .offset = width * height + width * height / 4},
     };
     for (int idx = 0; idx < SamplerCount; idx++) {
         glActiveTexture(GL_TEXTURE0 + idx);
@@ -103,27 +105,29 @@ int JsvRendererYuv420sp::drawFrame(float mvpMat4[16],
     return 0;
 }
 
-const char* JsvRendererYuv420sp::getVertexShaderSource()
+const char* JsvRendererYuv420p::getVertexShaderSource()
 {
     return JsvGLRenderer::getVertexShaderSource();
 }
 
-const char* JsvRendererYuv420sp::getFragmentShaderSource()
+const char* JsvRendererYuv420p::getFragmentShaderSource()
 {
     static constexpr const char* source =
         "precision highp float;"
         "varying   highp vec2 vv2_Texcoord;"
         "uniform         mat3 um3_ColorConversion;"
         "uniform   lowp  sampler2D us2_SamplerY;"
-        "uniform   lowp  sampler2D us2_SamplerUV;"
+        "uniform   lowp  sampler2D us2_SamplerU;"
+        "uniform   lowp  sampler2D us2_SamplerV;"
         ""
         "void main()"
         "{"
         "    mediump vec3 yuv;"
         "    lowp    vec3 rgb;"
         ""
-        "    yuv.x  = (texture2D(us2_SamplerY,  vv2_Texcoord).r  - 0.062745);" // 0.062745 = (16.0 / 255.0)
-        "    yuv.yz = (texture2D(us2_SamplerUV,  vv2_Texcoord).ra - vec2(0.5, 0.5));"
+        "    yuv.x = (texture2D(us2_SamplerY, vv2_Texcoord).r - 0.062745);" // 0.062745 = (16.0 / 255.0)
+        "    yuv.y = (texture2D(us2_SamplerU, vv2_Texcoord).r - 0.5);"
+        "    yuv.z = (texture2D(us2_SamplerV, vv2_Texcoord).r - 0.5);"
         "    rgb = um3_ColorConversion * yuv;"
         "    gl_FragColor = vec4(rgb, 1);"
         "}";

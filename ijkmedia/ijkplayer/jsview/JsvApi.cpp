@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <android/log.h>
+#include "JsvRendererYuv420p.hpp"
 #include "JsvRendererYuv420sp.hpp"
 #include "JsvVideoRenderer.hpp"
 
@@ -59,7 +60,7 @@ int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
     case ColorFormat_YUV420Planar:
     case ColorFormat_YUV420SemiPlanar:
     default:
-        context->videoRenderer = new jsview::plugin::JsvVideoRenderer();
+        context->videoRenderer = new jsview::plugin::JsvRendererYuv420p();
     }
 
     return 0;

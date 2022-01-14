@@ -10,7 +10,6 @@ public:
 /*** type define ***/
 
 /*** static function and variable ***/
-    static constexpr const int BLOCK_COUNT = 3;
 
 /*** class function and variable ***/
     explicit JsvRendererYuv420sp() = default;
