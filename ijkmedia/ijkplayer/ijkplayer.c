@@ -809,7 +809,9 @@ int ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size)
 
 int ijkmp_jsv_color_format(IjkMediaPlayer *mp)
 {
-    assert(mp);
+    if(mp == NULL) {
+        return -1;
+    }
 
     int ret = ffp_jsvh_color_format(mp->ffplayer);
 

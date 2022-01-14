@@ -17,13 +17,49 @@ namespace plugin {
 /***********************************************/
 /***** static variables initialize *************/
 /***********************************************/
+const int JsvGLRenderer::CoordsPerVertex = 2;
+
+const float JsvGLRenderer::PositionMat42[] = {
+        -1.0f, -1.0f, // bottom left
+        1.0f, -1.0f,  // bottom right
+        -1.0f, 1.0f,  // top left
+        1.0f, 1.0f,   // top right
+};
+
+const float JsvGLRenderer::TexCoordMat42[] = {
+        0.0f, 1.0f, // bottom left
+        1.0f, 1.0f, // bottom right
+        0.0f, 0.0f, // top left
+        1.0f, 0.0f, // top right
+};
+
+const int JsvGLRenderer::VertexCount =
+        sizeof(PositionMat42) / sizeof(*PositionMat42) / CoordsPerVertex;
+const int JsvGLRenderer::VertexStride = CoordsPerVertex * 4; // 4 bytes per vertex
+
 
 /***********************************************/
 /***** static function implement ***************/
 /***********************************************/
+const float* JsvGLRenderer::GetBt709ColorMat3()
+{
+    static constexpr const GLfloat bt709[] = {
+            1.164,  1.164,  1.164,
+            0.0,   -0.213,  2.112,
+            1.793, -0.533,  0.0,
+    };
+
+    return bt709;
+}
+
 std::shared_ptr<uint32_t> JsvGLRenderer::MakeGLProgram(std::shared_ptr<uint32_t> vertexShader,
                                                     std::shared_ptr<uint32_t> fragmentShader)
 {
+    PrintGLString("Version", GL_VERSION);
+    PrintGLString("Vendor", GL_VENDOR);
+    PrintGLString("Renderer", GL_RENDERER);
+    PrintGLString("Extensions", GL_EXTENSIONS);
+
     auto creater = [&]() -> uint32_t* {
         GLuint program = glCreateProgram();
         if(program == 0) { return nullptr; }
@@ -106,14 +142,41 @@ void JsvGLRenderer::PrintGLShaderInfo(std::shared_ptr<uint32_t> shader)
 }
 
 void JsvGLRenderer::CheckGLError(const char* funcName) {
-    for (GLint error = glGetError(); error; error = glGetError()) {
+    GLint error = 0;
+    for (error = glGetError(); error; error = glGetError()) {
         __android_log_print(ANDROID_LOG_ERROR, "JsView", "GLError: after %s(), errorCode: 0x%x", funcName, error);
     }
+    if(error) {
+//        throw std::runtime_error("Failed to run GLES.");
+    }
+}
+
+void JsvGLRenderer::PrintGLString(const char* name, GLenum value) {
+    const char *v = (const char *) glGetString(value);
+    __android_log_print(ANDROID_LOG_ERROR, "JsView", "[GLES2] %s = %s", name, v);
 }
 
 /***********************************************/
 /***** class public function implement  ********/
 /***********************************************/
+const char* JsvGLRenderer::getVertexShaderSource()
+{
+    static constexpr const char* source =
+        "precision highp float;"
+        "varying   highp vec2 vv2_Texcoord;"
+        "attribute highp vec4 av4_Position;"
+        "attribute highp vec2 av2_Texcoord;"
+        "uniform         mat4 um4_ModelViewProjection;"
+        ""
+        "void main()"
+        "{"
+        "    gl_Position  = um4_ModelViewProjection * av4_Position;"
+        "    vv2_Texcoord = av2_Texcoord.xy;"
+        "}";
+
+    return source;
+}
+
 int JsvGLRenderer::prepare()
 {
     auto vertexShaderSource = getVertexShaderSource();
@@ -134,7 +197,43 @@ int JsvGLRenderer::prepare()
         return -1;
     }
 
+    glMVP = glGetUniformLocation(*this->program, "um4_ModelViewProjection");
+    CheckGLError("glGetUniformLocation");
+    glPosition = glGetAttribLocation(*this->program, "av4_Position");
+    glTexCoord = glGetAttribLocation(*this->program, "av2_Texcoord");
+    CheckGLError("glGetAttribLocation");
+
     return 0;
+}
+
+int JsvGLRenderer::preDrawFrame(float mvpMat4[16])
+{
+    glUseProgram(*this->program);
+    CheckGLError("glUseProgram");
+
+    glUniformMatrix4fv(glMVP, 1, GL_FALSE, mvpMat4);
+    CheckGLError("glUniformMatrix4fv");
+
+    glEnableVertexAttribArray(glPosition);
+    glVertexAttribPointer(glPosition, CoordsPerVertex, GL_FLOAT, GL_FALSE, VertexStride, PositionMat42);
+    glEnableVertexAttribArray(glTexCoord);
+    glVertexAttribPointer(glTexCoord, CoordsPerVertex, GL_FLOAT, GL_FALSE, VertexStride, TexCoordMat42);
+    CheckGLError("glVertexAttribPointer");
+
+    return 0;
+}
+
+int JsvGLRenderer::postDrawFrame()
+{
+    glDisableVertexAttribArray(glPosition);
+    glDisableVertexAttribArray(glTexCoord);
+
+    return 0;
+}
+
+uint32_t JsvGLRenderer::getProgram()
+{
+    return *program;
 }
 
 /***********************************************/

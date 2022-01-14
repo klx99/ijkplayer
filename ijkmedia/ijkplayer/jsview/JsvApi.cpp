@@ -10,7 +10,7 @@
 
 #include <chrono>
 #include <android/log.h>
-#include "JsvRendererYCbYCr.hpp"
+#include "JsvRendererYuv420sp.hpp"
 #include "JsvVideoRenderer.hpp"
 
 JsvContext* NewJsvContext()
@@ -53,7 +53,7 @@ int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
 
     switch (colorFormat) {
     case ColorFormat_YCbYCr:
-        context->videoRenderer = new jsview::plugin::JsvRendererYCbYCr();
+        context->videoRenderer = new jsview::plugin::JsvRendererYuv420sp();
         break;
 
     case ColorFormat_YUV420Planar:
