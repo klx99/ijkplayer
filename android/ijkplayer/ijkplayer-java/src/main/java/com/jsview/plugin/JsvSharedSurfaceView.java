@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.view.ViewGroup;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,13 +19,24 @@ public class JsvSharedSurfaceView extends GLSurfaceView
         void onDrawFrame(Object key);
     }
 
-    public JsvSharedSurfaceView(Context context) {
-        super(context);
+    public static void SetParentView(Context context, ViewGroup parentView) {
+        ViewContext = context;
+        ParentView = parentView;
+    }
 
-        this.setEGLContextClientVersion(2);
-        this.setRenderer(this);
-//        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    public static JsvSharedSurfaceView GetInstance() {
+        if(ViewInstance == null) {
+            synchronized (JsvSharedSurfaceView.class) {
+                if (ViewInstance == null) {
+                    ViewInstance = new JsvSharedSurfaceView(ViewContext);
+                    ParentView.addView(ViewInstance, new ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+                }
+            }
+        }
+
+        return ViewInstance;
     }
 
     public void appendRenderer(Object key, Renderer renderer) {
@@ -63,9 +75,23 @@ public class JsvSharedSurfaceView extends GLSurfaceView
         }
     }
 
+    private JsvSharedSurfaceView(Context context) {
+        super(context);
+
+        this.setEGLContextClientVersion(2);
+        this.setRenderer(this);
+//        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    }
+
+
     private float[] projectionMatrix = new float[16];
     private float[] viewMatrix = new float[16];
     private float[] mvpMatrix = new float[16];
 
     private Map<Object, Renderer> rendererMap = Collections.synchronizedMap(new LinkedHashMap()); // 线程安全的有序map
+
+    private static Context ViewContext;
+    private static ViewGroup ParentView;
+    private static JsvSharedSurfaceView ViewInstance;
 }
