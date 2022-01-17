@@ -74,6 +74,10 @@ int JsvRendererYuv420p::drawFrame(float mvpMat4[16],
         return ret;
     }
 
+    if(dataSize == 3133440 // 1920 * 1080 * 1.5, y:1, uv:0.5
+    && width == 1920 && height > 1080) {
+        height = 1080;
+    }
     TexImageInfo texInfo[SamplerCount] = {
         {.format = GL_LUMINANCE, .width = width, .height = height, .offset = 0},
         {.format = GL_LUMINANCE, .width = width / 2, .height = height / 2, .offset = width * height},
