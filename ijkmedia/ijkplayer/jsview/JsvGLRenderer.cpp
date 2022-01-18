@@ -20,16 +20,16 @@ namespace plugin {
 const int JsvGLRenderer::CoordsPerVertex = 2;
 
 const float JsvGLRenderer::PositionMat42[] = {
-        -1.0f, -1.0f, // bottom left
-        1.0f, -1.0f,  // bottom right
-        -1.0f, 1.0f,  // top left
-        1.0f, 1.0f,   // top right
+        -0.0f, -1.0f, // bottom left
+        0.0f, -0.0f,  // bottom right
+        1.0f, -1.0f,  // top left
+        1.0f, 0.0f,   // top right
 };
 
 const float JsvGLRenderer::TexCoordMat42[] = {
         0.0f, 1.0f, // bottom left
-        1.0f, 1.0f, // bottom right
         0.0f, 0.0f, // top left
+        1.0f, 1.0f, // bottom right
         1.0f, 0.0f, // top right
 };
 
@@ -197,13 +197,13 @@ const char* JsvGLRenderer::getVertexShaderSource()
     static constexpr const char* source =
         "precision highp float;"
         "varying   highp vec2 vv2_Texcoord;"
-        "attribute highp vec4 av4_Position;"
+        "attribute highp vec2 av2_Position;"
         "attribute highp vec2 av2_Texcoord;"
         "uniform         mat4 um4_ModelViewProjection;"
         ""
         "void main()"
         "{"
-        "    gl_Position  = um4_ModelViewProjection * av4_Position;"
+        "    gl_Position  = um4_ModelViewProjection * vec4(av2_Position, 0.0, 1.0);"
         "    vv2_Texcoord = av2_Texcoord.xy;"
         "}";
 
@@ -232,7 +232,7 @@ int JsvGLRenderer::prepare()
 
     glMVP = glGetUniformLocation(*this->program, "um4_ModelViewProjection");
     CheckGLError("glGetUniformLocation");
-    glPosition = glGetAttribLocation(*this->program, "av4_Position");
+    glPosition = glGetAttribLocation(*this->program, "av2_Position");
     glTexCoord = glGetAttribLocation(*this->program, "av2_Texcoord");
     CheckGLError("glGetAttribLocation");
 

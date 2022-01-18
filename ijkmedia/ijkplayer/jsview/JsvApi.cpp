@@ -16,12 +16,7 @@
 JsvContext* NewJsvContext()
 {
     JsvContext* context = new JsvContext();
-    context->mvpMat4 = new float[16] { // 标准矩阵
-        1.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, 0.0, 1.0,
-    };
+    context->mvpMat4 = nullptr; // 空矩阵
 
     return context;
 }
@@ -114,7 +109,7 @@ int DrawJsvVideoRendererWithData(JsvContext* context,
         return -1;
     }
     if(context->mvpMat4 == nullptr) {
-        __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw frame to video renderer, mvp matrix has been deleted.");
+        __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw frame to video renderer, mvp matrix has not exists.");
         return -1;
     }
 
