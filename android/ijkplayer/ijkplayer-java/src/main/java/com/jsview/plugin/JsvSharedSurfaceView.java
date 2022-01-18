@@ -4,6 +4,8 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.Collections;
@@ -62,7 +64,7 @@ public class JsvSharedSurfaceView extends GLSurfaceView
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         Matrix.setLookAtM(viewMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
@@ -88,7 +90,11 @@ public class JsvSharedSurfaceView extends GLSurfaceView
     private JsvSharedSurfaceView(Context context) {
         super(context);
 
+        this.setZOrderOnTop(false);
+        this.setZOrderMediaOverlay(false);
+
         this.setEGLContextClientVersion(2);
+
         this.setRenderer(this);
 //        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
