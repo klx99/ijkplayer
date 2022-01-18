@@ -48,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.nio.FloatBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -1291,7 +1292,9 @@ public class IjkMediaPlayer extends AbstractMediaPlayer {
         void onVideoSync(IMediaPlayer mp);
     }
 
-    protected native int native_jsvDrawFrame(float[] mvpMatrix);
+    protected native int native_jsvSetMatrix4ByDirectBuffer(FloatBuffer mat4Buf);
+    protected native int native_jsvSetMatrix4(long mat4NativeAddr);
+    protected native int native_jsvDrawFrame();
     protected native int native_jsvGetColorFormat();
 
     @CalledByNative

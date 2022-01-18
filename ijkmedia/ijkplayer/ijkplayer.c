@@ -798,11 +798,20 @@ int ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block)
 }
 
 // JsView Added >>>
-int ijkmp_jsv_draw_frame(IjkMediaPlayer *mp, float *mvp_matrix, int size)
+int ijkmp_jsv_set_matrix4(IjkMediaPlayer *mp, int64_t mat4_handler)
 {
     assert(mp);
 
-    int ret = ffp_jsvh_draw_frame(mp->ffplayer, mvp_matrix, size);
+    int ret = ffp_jsvh_set_matrix4(mp->ffplayer, mat4_handler);
+
+    return ret;
+}
+
+int ijkmp_jsv_draw_frame(IjkMediaPlayer *mp)
+{
+    assert(mp);
+
+    int ret = ffp_jsvh_draw_frame(mp->ffplayer);
 
     return ret;
 }

@@ -3,6 +3,9 @@ package com.jsview.plugin;
 import android.opengl.Matrix;
 import android.text.TextUtils;
 
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
@@ -14,18 +17,16 @@ public class JsvSharedMediaPlayer extends IjkMediaPlayer {
         super.videoSyncListener = listener;
     }
 
-    public void setMvpMatrix(float[] matrix) {
-        mvpMatrix = matrix;
+    public void setMatrix4ByDirectBuffer(FloatBuffer mat4Buf) {
+        super.native_jsvSetMatrix4ByDirectBuffer(mat4Buf);
+    }
+
+    public void setMatrix4(long mat4NativeAddr) {
+        super.native_jsvSetMatrix4(mat4NativeAddr);
     }
 
     public int drawFrame() {
-        if(mvpMatrix == null) {
-            // 设置默认matrix
-            mvpMatrix = new float[16];
-            Matrix.setIdentityM(mvpMatrix, 0);
-        }
-
-        return super.native_jsvDrawFrame(mvpMatrix);
+        return super.native_jsvDrawFrame();
     }
 
     public int getColorFormat() {
@@ -43,6 +44,4 @@ public class JsvSharedMediaPlayer extends IjkMediaPlayer {
     }
 
     public static final String OverlayFormatFccJSVH = "fcc-jsvh"; // JsView Hardware MediaCodec
-
-    private float[] mvpMatrix;
 }

@@ -12,11 +12,16 @@
 #include <android/log.h>
 #include "JsvRendererYuv420p.hpp"
 #include "JsvRendererYuv420sp.hpp"
-#include "JsvVideoRenderer.hpp"
 
 JsvContext* NewJsvContext()
 {
     JsvContext* context = new JsvContext();
+    context->mvpMat4 = new float[16] { // 标准矩阵
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 1.0,
+    };
 
     return context;
 }
@@ -25,6 +30,10 @@ void DeleteJsvContext(JsvContext** context)
 {
     if(context == nullptr || *context) {
         return;
+    }
+
+    if((*context)->mvpMat4 != nullptr) {
+        delete[] (*context)->mvpMat4;
     }
 
     if((*context)->videoRenderer != nullptr) {
@@ -66,8 +75,29 @@ int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
     return 0;
 }
 
+int SetJsvVideoRendererMatrix4(JsvContext* context, float data[])
+{
+    if(context == nullptr) {
+        __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to set matrix to video renderer, context has been deleted.");
+        return -1;
+    }
+
+    float* newMat4 = new float[16] {
+        data[0],  data[1],  data[2],  data[3],
+        data[4],  data[5],  data[6],  data[7],
+        data[8],  data[9],  data[10], data[11],
+        data[12], data[13], data[14], data[15],
+    };
+    float* oldMat4 = context->mvpMat4;
+    context->mvpMat4 = newMat4;
+    if(oldMat4 != nullptr) {
+        delete[] oldMat4;
+    }
+
+    return 0;
+}
+
 int DrawJsvVideoRendererWithData(JsvContext* context,
-                                 float mvpMatrix[], int matrixSize,
                                  int colorFormat, int width, int height,
                                  uint8_t* data, int dataSize)
 
@@ -90,7 +120,7 @@ int DrawJsvVideoRendererWithData(JsvContext* context,
             return ret;
         }
     }
-    int ret = videoRenderer->drawFrame(mvpMatrix,
+    int ret = videoRenderer->drawFrame(context->mvpMat4,
                                        width, height,
                                        data, dataSize);
     if(ret < 0) {

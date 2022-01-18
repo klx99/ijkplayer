@@ -9,6 +9,7 @@ extern "C" {
 #include <libavutil/frame.h>
 
 typedef struct {
+    float* mvpMat4;
     void* videoRenderer;
 
     void (*videoSyncCallback)(void*);
@@ -19,8 +20,8 @@ JsvContext* NewJsvContext();
 void DeleteJsvContext(JsvContext** context);
 int MakeJsvVideoRenderer(JsvContext* context, int colorFormat);
 
+int SetJsvVideoRendererMatrix4(JsvContext* context, float data[]);
 int DrawJsvVideoRendererWithData(JsvContext* context,
-                                 float mvpMatrix[], int matrixSize,
                                  int colorFormat, int width, int height,
                                  uint8_t* data, int dataSize);
 

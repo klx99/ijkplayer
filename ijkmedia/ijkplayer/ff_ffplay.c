@@ -663,7 +663,8 @@ static void decoder_destroy(Decoder *d) {
 static void frame_queue_unref_item(Frame *vp)
 {
     av_frame_unref(vp->frame);
-    SDL_VoutUnrefYUVOverlay(vp->bmp);
+    if(vp->output_buffer_index < 0) // JsView Added >>>, overlay_format != SDL_FCC_JSVH
+        SDL_VoutUnrefYUVOverlay(vp->bmp);
     avsubtitle_free(&vp->sub);
 }
 
@@ -5151,7 +5152,18 @@ int ffp_jsvh_cache_frame(FFPlayer *ffp, Frame *vp)
     return mediaCodecInfo->output_buffer_size;
 }
 
-int ffp_jsvh_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
+int ffp_jsvh_set_matrix4(FFPlayer *ffp, int64_t mat4_handler)
+{
+    if (!ffp || !ffp->jsv_context) {
+        return -1;
+    }
+
+    int ret = SetJsvVideoRendererMatrix4(ffp->jsv_context, (float*) mat4_handler);
+
+    return ret;
+}
+
+int ffp_jsvh_draw_frame(FFPlayer *ffp)
 {
     if (!ffp || !ffp->jsv_context) {
         return -1;
@@ -5170,7 +5182,7 @@ int ffp_jsvh_draw_frame(FFPlayer *ffp, float *mvp_matrix, int size)
     }
     int dataSize = ret;
 
-    ret = DrawJsvVideoRendererWithData(ffp->jsv_context, mvp_matrix, size,
+    ret = DrawJsvVideoRendererWithData(ffp->jsv_context,
                                        video_format, video_width, video_height,
                                        data, dataSize);
 
