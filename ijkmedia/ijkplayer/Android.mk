@@ -82,7 +82,7 @@ LOCAL_SRC_FILES += jsview/JsvApi.cpp
 LOCAL_SRC_FILES += jsview/JsvGLRenderer.cpp
 LOCAL_SRC_FILES += jsview/JsvRendererYuv420p.cpp
 LOCAL_SRC_FILES += jsview/JsvRendererYuv420sp.cpp
-LOCAL_LDLIBS += -lEGL -lGLESv2
+LOCAL_LDLIBS += -lOpenSLES -lEGL -lGLESv2
 # JsView Added <<<
 
 LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl

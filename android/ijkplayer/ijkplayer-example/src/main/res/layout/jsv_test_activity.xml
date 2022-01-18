@@ -32,13 +32,25 @@
             android:textColor="#FFFFFF"
             android:padding="8dp" />
 
-        <TableLayout
-            android:id="@+id/hud_view"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
-            android:background="@color/ijk_transparent_dark"
-            android:padding="8dp" />
-
+            android:orientation="vertical">
+            <TableLayout
+                android:id="@+id/hud_view_0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:background="@color/ijk_transparent_dark"
+                android:padding="8dp" />
+            <TableLayout
+                android:id="@+id/hud_view_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:background="@color/ijk_transparent_dark"
+                android:padding="8dp" />
+        </LinearLayout>
     </FrameLayout>
 </androidx.drawerlayout.widget.DrawerLayout>

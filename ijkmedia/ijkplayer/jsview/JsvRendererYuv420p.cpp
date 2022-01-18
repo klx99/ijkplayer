@@ -9,7 +9,11 @@
 #include "JsvRendererYuv420p.hpp"
 
 #include <android/log.h>
+#include <android/hardware_buffer.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES2/gl2.h>
+#include <chrono>
 
 #include <unistd.h>
 
@@ -65,6 +69,9 @@ int JsvRendererYuv420p::hasPrepared() {
     return prepared;
 }
 
+static int8_t testBufferSrc[1024*1024*3];
+static int8_t testBufferDest[1024*1024*3];
+bool uploaded = false;
 
 int JsvRendererYuv420p::drawFrame(float mvpMat4[16],
                                    int width, int height,
@@ -100,6 +107,16 @@ int JsvRendererYuv420p::drawFrame(float mvpMat4[16],
     glUniformMatrix3fv(glvarColorConversion, 1, GL_FALSE, GetBt709ColorMat3());
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, VertexCount);
+
+//    using namespace std::chrono;
+//    auto startTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+//    memcpy(testBufferDest, testBufferSrc, 1024*1024*3);
+//    auto endTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+//    __android_log_print(ANDROID_LOG_ERROR, "mengxk", "xxxxxxxxxxxxxxxx %lld", endTime - startTime);
+//
+////    AHardwareBuffer buffer;
+//    eglGetNativeClientBufferANDROID (nullptr);
+
 
     ret = JsvGLRenderer::postDrawFrame();
     if(ret < 0) {

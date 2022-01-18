@@ -4,6 +4,7 @@ import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -41,10 +43,10 @@ public class JsvSharedSurfaceView extends GLSurfaceView
             removeRenderer(key);
         }
         synchronized (JsvSharedSurfaceView.class) {
-            if(rendererMap.isEmpty()) {
-                ParentView.addView(ViewInstance, new ViewGroup.LayoutParams(
+            if(ViewInstance.getParent() == null) {
+                ParentView.addView(ViewInstance, 0, new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT));
+                        400));
             }
 
             rendererMap.put(key, renderer);
@@ -85,9 +87,21 @@ public class JsvSharedSurfaceView extends GLSurfaceView
             Renderer renderer = entry.getValue();
             renderer.onDrawFrame(key);
         }
+
+        fpsCount.incrementAndGet();
     }
 
-    private JsvSharedSurfaceView(Context context) {
+    public String getFps() {
+        long currTime = SystemClock.uptimeMillis();
+        long deltaTime = currTime - prevTime;
+        prevTime = currTime;
+
+        long count = fpsCount.getAndSet(0);
+        float fps = count * 1000f / deltaTime;
+        return String.format("%.02f", fps);
+    }
+
+    public JsvSharedSurfaceView(Context context) {
         super(context);
 
         this.setZOrderOnTop(false);
@@ -96,8 +110,8 @@ public class JsvSharedSurfaceView extends GLSurfaceView
         this.setEGLContextClientVersion(2);
 
         this.setRenderer(this);
-//        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+//        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     private float[] projectionMatrix = new float[16];
@@ -105,6 +119,9 @@ public class JsvSharedSurfaceView extends GLSurfaceView
     private float[] mvpMatrix = new float[16];
 
     private Map<Object, Renderer> rendererMap = new LinkedHashMap();
+
+    private AtomicInteger fpsCount = new AtomicInteger(0);
+    private long prevTime = 0;
 
     private static Context ViewContext;
     private static ViewGroup ParentView;
