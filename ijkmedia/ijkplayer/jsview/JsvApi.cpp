@@ -82,12 +82,15 @@ int SetJsvVideoRendererMatrix4(JsvContext* context, float data[])
         return -1;
     }
 
-    float* newMat4 = new float[16] {
-        data[0],  data[1],  data[2],  data[3],
-        data[4],  data[5],  data[6],  data[7],
-        data[8],  data[9],  data[10], data[11],
-        data[12], data[13], data[14], data[15],
-    };
+    float* newMat4 = nullptr;
+    if(data != nullptr) {
+        newMat4 = new float[16] {
+            data[0],  data[1],  data[2],  data[3],
+            data[4],  data[5],  data[6],  data[7],
+            data[8],  data[9],  data[10], data[11],
+            data[12], data[13], data[14], data[15],
+        };
+    }
     float* oldMat4 = context->mvpMat4;
     context->mvpMat4 = newMat4;
     if(oldMat4 != nullptr) {
@@ -108,6 +111,10 @@ int DrawJsvVideoRendererWithData(JsvContext* context,
     }
     if(context->videoRenderer == nullptr) {
         __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw frame to video renderer, video renderer has been deleted.");
+        return -1;
+    }
+    if(context->mvpMat4 == nullptr) {
+        __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to draw frame to video renderer, mvp matrix has been deleted.");
         return -1;
     }
 

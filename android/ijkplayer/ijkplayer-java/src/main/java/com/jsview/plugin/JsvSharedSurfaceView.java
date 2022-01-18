@@ -25,14 +25,9 @@ public class JsvSharedSurfaceView extends GLSurfaceView
     }
 
     public static JsvSharedSurfaceView GetInstance() {
-        if(ViewInstance == null) {
-            synchronized (JsvSharedSurfaceView.class) {
-                if (ViewInstance == null) {
-                    ViewInstance = new JsvSharedSurfaceView(ViewContext);
-                    ParentView.addView(ViewInstance, new ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
-                }
+        synchronized (JsvSharedSurfaceView.class) {
+            if (ViewInstance == null) {
+                ViewInstance = new JsvSharedSurfaceView(ViewContext);
             }
         }
 
@@ -43,11 +38,26 @@ public class JsvSharedSurfaceView extends GLSurfaceView
         if(renderer == null) {
             removeRenderer(key);
         }
-        rendererMap.put(key, renderer);
+        synchronized (JsvSharedSurfaceView.class) {
+            if(rendererMap.isEmpty()) {
+                ParentView.addView(ViewInstance, new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+
+            rendererMap.put(key, renderer);
+        }
     }
 
     public void removeRenderer(Object key) {
-        rendererMap.remove(key);
+        synchronized (JsvSharedSurfaceView.class) {
+            rendererMap.remove(key);
+
+            if (rendererMap.isEmpty()) {
+                ParentView.removeView(ViewInstance);
+                ViewInstance = null;
+            }
+        }
     }
 
     @Override
@@ -84,12 +94,11 @@ public class JsvSharedSurfaceView extends GLSurfaceView
         this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
-
     private float[] projectionMatrix = new float[16];
     private float[] viewMatrix = new float[16];
     private float[] mvpMatrix = new float[16];
 
-    private Map<Object, Renderer> rendererMap = Collections.synchronizedMap(new LinkedHashMap()); // 线程安全的有序map
+    private Map<Object, Renderer> rendererMap = new LinkedHashMap();
 
     private static Context ViewContext;
     private static ViewGroup ParentView;

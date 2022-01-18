@@ -45,8 +45,8 @@ public class JsvTestActivity extends AppCompatActivity {
 
         FrameLayout rootView = findViewById(R.id.root_view);
 
-        jsvSharedSurfaceView = new JsvSharedSurfaceView(this);
-        rootView.addView(jsvSharedSurfaceView, 0);
+        JsvSharedSurfaceView.SetParentView(this, rootView);
+        jsvSharedSurfaceView = JsvSharedSurfaceView.GetInstance();
 
         logView = findViewById(R.id.log_view);
 
