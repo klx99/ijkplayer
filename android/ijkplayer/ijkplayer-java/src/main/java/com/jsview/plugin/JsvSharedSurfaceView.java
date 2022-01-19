@@ -42,7 +42,7 @@ public class JsvSharedSurfaceView extends GLSurfaceView
         }
         synchronized (JsvSharedSurfaceView.class) {
             if(rendererMap.isEmpty()) {
-                ParentView.addView(ViewInstance, new ViewGroup.LayoutParams(
+                ParentView.addView(ViewInstance, 0, new ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
             }
@@ -96,8 +96,8 @@ public class JsvSharedSurfaceView extends GLSurfaceView
         this.setEGLContextClientVersion(2);
 
         this.setRenderer(this);
-//        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+//        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     private float[] projectionMatrix = new float[16];

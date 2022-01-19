@@ -51,18 +51,20 @@ int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
     }
 
     enum SupportColorFormat : int32_t { // Same as MediaCodecInfo.CodecCapabilities
-        ColorFormat_YUV420Planar = 19,
-        ColorFormat_YUV420SemiPlanar = 21,
-        ColorFormat_YCbYCr = 25
+        YUV420Planar = 19,
+        YUV420SemiPlanar = 21,
+        YCbYCr = 25,
+        QCOM_YUV420SemiPlanar = 2141391872,
     };
 
     switch (colorFormat) {
-    case ColorFormat_YCbYCr:
+    case YCbYCr:
+    case QCOM_YUV420SemiPlanar:
         context->videoRenderer = new jsview::plugin::JsvRendererYuv420sp();
         break;
 
-    case ColorFormat_YUV420Planar:
-    case ColorFormat_YUV420SemiPlanar:
+    case YUV420Planar:
+    case YUV420SemiPlanar:
     default:
         context->videoRenderer = new jsview::plugin::JsvRendererYuv420p();
     }

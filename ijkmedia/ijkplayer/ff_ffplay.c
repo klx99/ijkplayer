@@ -912,10 +912,11 @@ static void video_image_display2(FFPlayer *ffp)
         // JsView Added >>>, 等到GL线程去描画
         if(ffp->overlay_format == SDL_FCC_JSVH) {
             ffp_jsvh_cache_frame(ffp, vp);
-        } else
+        } else {
         // JsView Added <<<
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
+        } // JsView Added
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;
             ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
@@ -5191,6 +5192,8 @@ int ffp_jsvh_draw_frame(FFPlayer *ffp)
     if(ret < 0) {
         return -1;
     }
+
+    ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
 
     return ret;
 }

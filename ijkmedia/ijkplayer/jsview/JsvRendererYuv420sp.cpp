@@ -123,7 +123,7 @@ const char* JsvRendererYuv420sp::getFragmentShaderSource()
         "    lowp    vec3 rgb;"
         ""
         "    yuv.x  = texture2D(us2_SamplerY,  vv2_Texcoord).r  - 0.062745;" // 0.062745 = (16.0 / 255.0)
-        "    yuv.yz = texture2D(us2_SamplerUV, vv2_Texcoord).ra - vec2(0.5, 0.5);"
+        "    yuv.yz = texture2D(us2_SamplerUV, vv2_Texcoord).ar - vec2(0.5, 0.5);"
         "    rgb = um3_ColorConversion * yuv;"
         "    gl_FragColor = vec4(rgb, 1);"
         "}";
