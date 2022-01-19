@@ -231,6 +231,12 @@ typedef struct Frame {
     int uploaded;
 
     // JsView Added >>>
+    int is_scaled; // TODO
+    int scaled_width;
+    int scaled_height;
+    struct AVBufferRef* scaled_output_buffer;
+    struct SwsContext* scaled_context;
+
     int output_buffer_index;
     int output_buffer_offset;
     int output_buffer_size;
@@ -562,15 +568,15 @@ inline static void ffp_reset_demux_cache_control(FFDemuxCacheControl *dcc)
 typedef struct {
     pthread_mutex_t mutex;
 
+    int video_color_format;
     int video_width;
     int video_height;
-    int video_color_format;
 
     Frame *vp;
     int output_buffer_index;
     int output_buffer_size;
     uint8_t *output_buffer_data;
-    void* outputBufferRef;
+    void* output_buffer_ref;
 } JsvMediaCodecInfo;
 // JsView Added <<<
 

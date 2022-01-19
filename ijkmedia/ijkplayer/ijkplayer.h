@@ -219,7 +219,7 @@ int             ijkmp_get_msg(IjkMediaPlayer *mp, AVMessage *msg, int block);
 void            ijkmp_set_frame_at_time(IjkMediaPlayer *mp, const char *path, int64_t start_time, int64_t end_time, int num, int definition);
 
 // JsView Added >>>
-int             ijkmp_jsv_set_matrix4(IjkMediaPlayer *mp, int64_t mat4_handler);
+int             ijkmp_jsv_set_matrix4(IjkMediaPlayer *mp, int64_t mat4_handler, int view_width, int view_height);
 int             ijkmp_jsv_draw_frame(IjkMediaPlayer *mp);
 int             ijkmp_jsv_color_format(IjkMediaPlayer *mp);
 void            ijkmp_set_video_sync_callback(IjkMediaPlayer *mp, void(*callback)(void*), void *opaque);

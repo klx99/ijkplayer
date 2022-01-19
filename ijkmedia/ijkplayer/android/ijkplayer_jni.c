@@ -1153,11 +1153,11 @@ LABEL_RETURN:
 
 // JsView Added >>>
 static jint
-IjkMediaPlayer_native_jsvSetMatrix4ByDirectBuffer(JNIEnv *env, jobject thiz, jobject mat4Buf) {
+IjkMediaPlayer_native_jsvSetMatrix4ByDirectBuffer(JNIEnv *env, jobject thiz, jobject mat4Buf, jint viewWidth, jint viewHeight) {
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
 
     jlong mat4NativeAddr  = (*env)->GetDirectBufferAddress(env, mat4Buf);
-    int ret = ijkmp_jsv_set_matrix4(mp, mat4NativeAddr);
+    int ret = ijkmp_jsv_set_matrix4(mp, mat4NativeAddr, viewWidth, viewHeight);
 
     ijkmp_dec_ref_p(&mp);
 
@@ -1165,10 +1165,10 @@ IjkMediaPlayer_native_jsvSetMatrix4ByDirectBuffer(JNIEnv *env, jobject thiz, job
 }
 
 static jint
-IjkMediaPlayer_native_jsvSetMatrix4(JNIEnv *env, jobject thiz, jlong mat4NativeAddr) {
+IjkMediaPlayer_native_jsvSetMatrix4(JNIEnv *env, jobject thiz, jlong mat4NativeAddr, jint viewWidth, jint viewHeight) {
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
 
-    int ret = ijkmp_jsv_set_matrix4(mp, mat4NativeAddr);
+    int ret = ijkmp_jsv_set_matrix4(mp, mat4NativeAddr, viewWidth, viewHeight);
 
     ijkmp_dec_ref_p(&mp);
 
@@ -1250,10 +1250,10 @@ static JNINativeMethod g_methods[] = {
     { "_setFrameAtTime",        "(Ljava/lang/String;JJII)V", (void *) IjkMediaPlayer_setFrameAtTime },
 
      // JsView Added >>>
-    { "native_jsvSetMatrix4ByDirectBuffer", "(Ljava/nio/FloatBuffer;)I", (void *) IjkMediaPlayer_native_jsvSetMatrix4ByDirectBuffer },
-    { "native_jsvSetMatrix4",               "(J)I",                      (void *) IjkMediaPlayer_native_jsvSetMatrix4 },
-    { "native_jsvDrawFrame",                "()I",                       (void *) IjkMediaPlayer_native_jsvDrawFrame },
-    { "native_jsvGetColorFormat",           "()I",                       (void *) IjkMediaPlayer_native_jsvGetColorFormat },
+    { "native_jsvSetMatrix4ByDirectBuffer", "(Ljava/nio/FloatBuffer;II)I", (void *) IjkMediaPlayer_native_jsvSetMatrix4ByDirectBuffer },
+    { "native_jsvSetMatrix4",               "(JII)I",                      (void *) IjkMediaPlayer_native_jsvSetMatrix4 },
+    { "native_jsvDrawFrame",                "()I",                         (void *) IjkMediaPlayer_native_jsvDrawFrame },
+    { "native_jsvGetColorFormat",           "()I",                         (void *) IjkMediaPlayer_native_jsvGetColorFormat },
     // JsView Added <<<
 };
 

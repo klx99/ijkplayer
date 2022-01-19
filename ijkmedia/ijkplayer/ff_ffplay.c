@@ -819,6 +819,18 @@ static void decoder_abort(Decoder *d, FrameQueue *fq)
 
 static void free_picture(Frame *vp)
 {
+    // JsView Added >>>
+    int view_width = -1;
+    int view_height = -1;
+    if(vp->scaled_output_buffer != NULL) {
+        av_buffer_unref(&vp->scaled_output_buffer);
+    }
+    if(vp->scaled_context) {
+        sws_freeContext(vp->scaled_context);
+        vp->scaled_context = NULL;
+    }
+    // JsView Added <<<
+
     if (vp->bmp) {
         SDL_VoutFreeYUVOverlay(vp->bmp);
         vp->bmp = NULL;
@@ -1490,6 +1502,32 @@ static void alloc_picture(FFPlayer *ffp, int frame_format)
     vp->bmp = SDL_Vout_CreateOverlay(vp->width, vp->height,
                                    frame_format,
                                    ffp->vout);
+
+    // JsView Added >>>
+    vp->scaled_width = vp->width;
+    vp->scaled_height = vp->height;
+    int view_width = ffp->jsv_context->viewWidth;
+    int view_height = ffp->jsv_context->viewHeight;
+    if(view_width > 0 && view_height > 0) {
+        if(vp->scaled_width >= view_width * 2 && vp->scaled_height >= view_height * 2) {
+            vp->scaled_width /= 3;
+            vp->scaled_height /= 3;
+        }
+        if(vp->scaled_width < vp->width
+           && vp->scaled_height < vp->height) {
+            int scaled_size = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, vp->scaled_width, vp->scaled_height, 1);
+            vp->scaled_output_buffer = av_buffer_alloc(scaled_size);
+            vp->scaled_context = sws_getContext(vp->width, vp->height, AV_PIX_FMT_YUV420P,
+                                                vp->scaled_width, vp->scaled_height, AV_PIX_FMT_YUV420P,
+                                                SWS_FAST_BILINEAR, NULL, NULL, NULL);
+        } else {
+            vp->scaled_output_buffer = NULL;
+            vp->scaled_width = -1;
+            vp->scaled_height = -1;
+        }
+    }
+    // JsView Added <<<
+
 #ifdef FFP_MERGE
     if (vp->format == AV_PIX_FMT_YUV420P)
         sdl_format = SDL_PIXELFORMAT_YV12;
@@ -1669,6 +1707,35 @@ static int queue_picture(FFPlayer *ffp, AVFrame *src_frame, double pts, double d
             vp->output_buffer_index = output_buffer_index;
             vp->output_buffer_offset = output_buffer_offset;
             vp->output_buffer_size = output_buffer_size;
+
+            if(vp->scaled_output_buffer != NULL) {
+                uint8_t *output_buffer_data;
+                void* output_buffer_ref;
+                int ret = ffpipenode_ref_mediacodec_buffer(ffp->node_vdec, output_buffer_index,
+                                                           &output_buffer_ref, &output_buffer_data);
+                if(ret >= 0) {
+                    vp->scaled_context = sws_getCachedContext(vp->scaled_context,
+                                                              vp->width, vp->height, AV_PIX_FMT_YUV420P,
+                                                              vp->scaled_width, vp->scaled_height, AV_PIX_FMT_YUV420P,
+                                                              SWS_FAST_BILINEAR, NULL, NULL, NULL);
+                    int in_offset = vp->width * vp->height;
+                    uint8_t* in_data[] = {output_buffer_data,
+                                          output_buffer_data + in_offset,
+                                          output_buffer_data + in_offset + in_offset / 4};
+                    int out_offset = vp->scaled_width * vp->scaled_height;
+                    uint8_t* out_data[] = {vp->scaled_output_buffer->data,
+                                           vp->scaled_output_buffer->data + out_offset,
+                                           vp->scaled_output_buffer->data + out_offset + out_offset / 4};
+                    int in_stride[] = {vp->width, vp->width / 2, vp->width / 2};
+                    int out_stride[] = {vp->scaled_width, vp->scaled_width / 2, vp->scaled_width / 2};
+                    ret = sws_scale(vp->scaled_context,
+                                    in_data, in_stride, 0, vp->height,
+                                    out_data, out_stride);
+
+                    ffpipenode_unref_mediacodec_buffer(ffp->node_vdec, output_buffer_index,
+                                                       output_buffer_ref);
+                }
+            }
         }
         // JsView Added <<<
         if (SDL_VoutFillFrameYUVOverlay(vp->bmp, src_frame) < 0) {
@@ -5087,23 +5154,33 @@ int jsvh_get_frame_format(FFPlayer *ffp, int* video_format, int* video_width, in
     }
 
     *video_format = ffp->jsv_mediacodec_info.video_color_format;
-    *video_width = ffp->jsv_mediacodec_info.video_width;
-    *video_height = ffp->jsv_mediacodec_info.video_height;
+    if(ffp->jsv_mediacodec_info.vp != NULL) {
+        *video_width = ffp->jsv_mediacodec_info.vp->scaled_width;
+        *video_height = ffp->jsv_mediacodec_info.vp->scaled_height;
+    } else {
+        *video_width = ffp->jsv_mediacodec_info.video_width;
+        *video_height = ffp->jsv_mediacodec_info.video_height;
+    }
 
     return 0;
 }
 
 int jsvh_lock_frame_buffer(FFPlayer *ffp, uint8_t** data)
 {
-    if (!ffp || !ffp->jsv_context
-        || ffp->jsv_mediacodec_info.output_buffer_data == NULL) {
+    if (!ffp || !ffp->jsv_context) {
         return -1;
     }
 
     pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
 
-    *data = ffp->jsv_mediacodec_info.output_buffer_data;
-    int size = ffp->jsv_mediacodec_info.output_buffer_size;
+    int size;
+    if(ffp->jsv_mediacodec_info.vp != NULL) {
+        *data = ffp->jsv_mediacodec_info.vp->scaled_output_buffer->data;
+        size = ffp->jsv_mediacodec_info.vp->scaled_output_buffer->size;
+    } else {
+        *data = ffp->jsv_mediacodec_info.output_buffer_data;
+        size = ffp->jsv_mediacodec_info.output_buffer_size;
+    };
 
     return size;
 }
@@ -5122,29 +5199,33 @@ int ffp_jsvh_cache_frame(FFPlayer *ffp, Frame *vp)
     if (!ffp || !ffp->jsv_context)
         return -1;
 
-    pthread_mutex_lock(&ffp->jsv_mediacodec_info.mutex);
-
     JsvMediaCodecInfo *mediaCodecInfo = &ffp->jsv_mediacodec_info;
-    if(mediaCodecInfo->output_buffer_index >= 0) {
-        ffpipenode_unref_mediacodec_buffer(ffp->node_vdec,
-                                           mediaCodecInfo->output_buffer_index,
-                                           mediaCodecInfo->outputBufferRef);
+    pthread_mutex_lock(&mediaCodecInfo->mutex);
+
+    if(vp->scaled_output_buffer != NULL) {
+        mediaCodecInfo->vp = vp;
+    } else {
+        if (mediaCodecInfo->output_buffer_index >= 0) {
+            ffpipenode_unref_mediacodec_buffer(ffp->node_vdec,
+                                               mediaCodecInfo->output_buffer_index,
+                                               mediaCodecInfo->output_buffer_ref);
+        }
+
+        int ret = ffpipenode_ref_mediacodec_buffer(ffp->node_vdec,
+                                                   vp->output_buffer_index,
+                                                   &mediaCodecInfo->output_buffer_ref,
+                                                   &mediaCodecInfo->output_buffer_data);
+        if (ret < 0) {
+            pthread_mutex_unlock(&mediaCodecInfo->mutex);
+            return ret;
+        }
+
+        mediaCodecInfo->output_buffer_index = vp->output_buffer_index;
+        mediaCodecInfo->output_buffer_data += vp->output_buffer_offset;
+        mediaCodecInfo->output_buffer_size = vp->output_buffer_size;
     }
 
-    int ret = ffpipenode_ref_mediacodec_buffer(ffp->node_vdec,
-                                               vp->output_buffer_index,
-                                               &mediaCodecInfo->outputBufferRef,
-                                               &mediaCodecInfo->output_buffer_data);
-    if(ret < 0) {
-        pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
-        return ret;
-    }
-
-    mediaCodecInfo->output_buffer_index = vp->output_buffer_index;
-    mediaCodecInfo->output_buffer_data += vp->output_buffer_offset;
-    mediaCodecInfo->output_buffer_size = vp->output_buffer_size;
-
-    pthread_mutex_unlock(&ffp->jsv_mediacodec_info.mutex);
+    pthread_mutex_unlock(&mediaCodecInfo->mutex);
 
     if(ffp->jsv_context->videoSyncCallback) {
         ffp->jsv_context->videoSyncCallback(ffp->jsv_context->videoSyncData);
@@ -5153,13 +5234,13 @@ int ffp_jsvh_cache_frame(FFPlayer *ffp, Frame *vp)
     return mediaCodecInfo->output_buffer_size;
 }
 
-int ffp_jsvh_set_matrix4(FFPlayer *ffp, int64_t mat4_handler)
+int ffp_jsvh_set_matrix4(FFPlayer *ffp, int64_t mat4_handler, int view_width, int view_height)
 {
     if (!ffp || !ffp->jsv_context) {
         return -1;
     }
 
-    int ret = SetJsvVideoRendererMatrix4(ffp->jsv_context, (float*) mat4_handler);
+    int ret = SetJsvVideoRendererMatrix4(ffp->jsv_context, (float*) mat4_handler, view_width, view_height);
 
     return ret;
 }

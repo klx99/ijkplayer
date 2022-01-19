@@ -1292,8 +1292,8 @@ public class IjkMediaPlayer extends AbstractMediaPlayer {
         void onVideoSync(IMediaPlayer mp);
     }
 
-    protected native int native_jsvSetMatrix4ByDirectBuffer(FloatBuffer mat4Buf);
-    protected native int native_jsvSetMatrix4(long mat4NativeAddr);
+    protected native int native_jsvSetMatrix4ByDirectBuffer(FloatBuffer mat4Buf, int viewWidth, int viewHeight);
+    protected native int native_jsvSetMatrix4(long mat4NativeAddr, int viewWidth, int viewHeight);
     protected native int native_jsvDrawFrame();
     protected native int native_jsvGetColorFormat();
 

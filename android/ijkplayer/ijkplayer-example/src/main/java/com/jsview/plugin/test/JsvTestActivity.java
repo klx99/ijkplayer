@@ -114,7 +114,7 @@ public class JsvTestActivity extends AppCompatActivity {
         Matrix.scaleM(matrix4, 0, 2, 2, 1);
         ByteBuffer buf = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder());
         FloatBuffer mat4Buf = buf.asFloatBuffer().put(matrix4);
-        mp.setMatrix4ByDirectBuffer(mat4Buf);
+        mp.setMatrix4ByDirectBuffer(mat4Buf, idx != 0 ? 100 : -1, idx != 0 ? 100 : -1);
 
         mp.setOnVideoSyncListener((player) -> {
             if(idx != 0) {
@@ -196,12 +196,12 @@ public class JsvTestActivity extends AppCompatActivity {
 
     private ArrayList<JsvSharedMediaPlayer> mediaPlayerList = new ArrayList();
 
-    public static final int MediaPlayerCount = 1;
+    public static final int MediaPlayerCount = 2;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
 //        "/data/local/tmp/1080p60.mp4",
-        "/data/local/tmp/test.mp4",
-//            "http://192.168.3.188:11002/1002/test.m3u8",
-//            "http://192.168.3.188:11007/1007/test.m3u8",
+//        "/data/local/tmp/test.mp4",
+            "http://192.168.3.188:11002/1002/test.m3u8",
+            "http://192.168.3.188:11007/1007/test.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",

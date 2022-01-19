@@ -75,7 +75,7 @@ int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
     return 0;
 }
 
-int SetJsvVideoRendererMatrix4(JsvContext* context, float data[])
+int SetJsvVideoRendererMatrix4(JsvContext* context, float mvpMat4[], int viewWidth, int viewHeight)
 {
     if(context == nullptr) {
         __android_log_print(ANDROID_LOG_ERROR, "JsView", "Failed to set matrix to video renderer, context has been deleted.");
@@ -83,12 +83,12 @@ int SetJsvVideoRendererMatrix4(JsvContext* context, float data[])
     }
 
     float* newMat4 = nullptr;
-    if(data != nullptr) {
+    if(mvpMat4 != nullptr) {
         newMat4 = new float[16] {
-            data[0],  data[1],  data[2],  data[3],
-            data[4],  data[5],  data[6],  data[7],
-            data[8],  data[9],  data[10], data[11],
-            data[12], data[13], data[14], data[15],
+            mvpMat4[0],  mvpMat4[1],  mvpMat4[2],  mvpMat4[3],
+            mvpMat4[4],  mvpMat4[5],  mvpMat4[6],  mvpMat4[7],
+            mvpMat4[8],  mvpMat4[9],  mvpMat4[10], mvpMat4[11],
+            mvpMat4[12], mvpMat4[13], mvpMat4[14], mvpMat4[15],
         };
     }
     float* oldMat4 = context->mvpMat4;
@@ -96,6 +96,9 @@ int SetJsvVideoRendererMatrix4(JsvContext* context, float data[])
     if(oldMat4 != nullptr) {
         delete[] oldMat4;
     }
+
+    context->viewWidth = viewWidth;
+    context->viewHeight = viewHeight;
 
     return 0;
 }

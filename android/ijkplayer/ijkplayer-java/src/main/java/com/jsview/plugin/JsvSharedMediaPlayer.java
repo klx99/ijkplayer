@@ -17,12 +17,12 @@ public class JsvSharedMediaPlayer extends IjkMediaPlayer {
         super.videoSyncListener = listener;
     }
 
-    public void setMatrix4ByDirectBuffer(FloatBuffer mat4Buf) {
-        super.native_jsvSetMatrix4ByDirectBuffer(mat4Buf);
+    public void setMatrix4ByDirectBuffer(FloatBuffer mat4Buf, int viewWidth, int viewHeight) {
+        super.native_jsvSetMatrix4ByDirectBuffer(mat4Buf, viewWidth, viewHeight);
     }
 
-    public void setMatrix4(long mat4NativeAddr) {
-        super.native_jsvSetMatrix4(mat4NativeAddr);
+    public void setMatrix4(long mat4NativeAddr, int viewWidth, int viewHeight) {
+        super.native_jsvSetMatrix4(mat4NativeAddr, viewWidth, viewHeight);
     }
 
     public int drawFrame() {
