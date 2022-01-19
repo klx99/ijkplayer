@@ -113,6 +113,7 @@ static int func_fill_frame(SDL_VoutOverlay *overlay, const AVFrame *frame)
     if (!check_object(overlay, __func__))
         return -1;
 
+    if(opaque->vout->overlay_format != SDL_FCC_JSVH) // JsView Added
     if (opaque->buffer_proxy)
         SDL_VoutAndroid_releaseBufferProxyP(opaque->vout, (SDL_AMediaCodecBufferProxy **)&opaque->buffer_proxy, false);
 

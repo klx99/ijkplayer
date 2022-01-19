@@ -196,12 +196,12 @@ public class JsvTestActivity extends AppCompatActivity {
 
     private ArrayList<JsvSharedMediaPlayer> mediaPlayerList = new ArrayList();
 
-    public static final int MediaPlayerCount = 2;
+    public static final int MediaPlayerCount = 1;
     private static final ArrayList<String> VideoUrlList = new ArrayList(Arrays.asList(
 //        "/data/local/tmp/1080p60.mp4",
-//        "/data/local/tmp/test.mp4",
-            "http://192.168.3.188:11002/1002/test.m3u8",
-            "http://192.168.3.188:11007/1007/test.m3u8",
+        "/data/local/tmp/test.mp4",
+//            "http://192.168.3.188:11002/1002/test.m3u8",
+//            "http://192.168.3.188:11007/1007/test.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225642/index.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225633/index.m3u8",
         "http://39.135.138.58:18890/PLTV/88888888/224/3221225643/index.m3u8",

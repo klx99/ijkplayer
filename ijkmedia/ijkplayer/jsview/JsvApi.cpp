@@ -12,6 +12,7 @@
 #include <android/log.h>
 #include "JsvRendererYuv420p.hpp"
 #include "JsvRendererYuv420sp.hpp"
+#include "JsvRendererQComYuv420sp.hpp"
 
 JsvContext* NewJsvContext()
 {
@@ -54,13 +55,15 @@ int MakeJsvVideoRenderer(JsvContext* context, int colorFormat)
         YUV420Planar = 19,
         YUV420SemiPlanar = 21,
         YCbYCr = 25,
-        QCOM_YUV420SemiPlanar = 2141391872,
+        QComYUV420SemiPlanar = 2141391872,
     };
 
     switch (colorFormat) {
     case YCbYCr:
-    case QCOM_YUV420SemiPlanar:
         context->videoRenderer = new jsview::plugin::JsvRendererYuv420sp();
+            break;
+    case QComYUV420SemiPlanar:
+        context->videoRenderer = new jsview::plugin::JsvRendererQComYuv420sp();
         break;
 
     case YUV420Planar:

@@ -80,6 +80,7 @@ LOCAL_SRC_FILES += ijkavutil/ijkstl.cpp
 # JsView Added >>>
 LOCAL_SRC_FILES += jsview/JsvApi.cpp
 LOCAL_SRC_FILES += jsview/JsvGLRenderer.cpp
+LOCAL_SRC_FILES += jsview/JsvRendererQComYuv420sp.cpp
 LOCAL_SRC_FILES += jsview/JsvRendererYuv420p.cpp
 LOCAL_SRC_FILES += jsview/JsvRendererYuv420sp.cpp
 LOCAL_LDLIBS += -lEGL -lGLESv2
