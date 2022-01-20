@@ -3,10 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".menu_app">
+    <!-- JsView Added >>> -->
     <item
         android:id="@+id/action_jsview"
         android:title="JsView"
-        app:showAsAction="ifRoom" /> <!-- JsView Added -->
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_ijk"
+        android:title="Ijk"
+        app:showAsAction="ifRoom" />
+    <!-- JsView Added <<< -->
     <item
         android:id="@+id/action_sample"
         android:title="@string/sample"

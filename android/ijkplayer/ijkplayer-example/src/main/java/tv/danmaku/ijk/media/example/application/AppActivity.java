@@ -29,6 +29,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.jsview.plugin.test.IjkTestActivity;
 import com.jsview.plugin.test.JsvTestActivity;
 
 import tv.danmaku.ijk.media.example.R;
@@ -94,6 +95,8 @@ public class AppActivity extends AppCompatActivity {
         // JsView Added >>>
         } else if (id == R.id.action_jsview) {
             JsvTestActivity.intentTo(this);
+        } else if (id == R.id.action_ijk) {
+            IjkTestActivity.intentTo(this);
         // JsView Added <<<
         }
 

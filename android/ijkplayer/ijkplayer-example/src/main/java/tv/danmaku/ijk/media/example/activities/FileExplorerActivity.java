@@ -22,7 +22,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import android.text.TextUtils;
 
-import com.jsview.plugin.test.JsvTestActivity;
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
