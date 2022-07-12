@@ -1,15 +1,15 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
 
     lintOptions {
         abortOnError false
     }
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        targetSdkVersion 30
     }
     buildTypes {
         release {

@@ -126,7 +126,11 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     ijkmp_mediacodecinfo_context *mcc      = &opaque->mcc;
     SDL_AMediaCodec              *acodec   = NULL;
 
-    if (opaque->jsurface == NULL) {
+    // JsView Modified >>>
+    // if (opaque->jsurface == NULL) {
+    if (opaque->jsurface == NULL
+    && ffpipeline_jsv_has_mcodec_filter_callback(opaque->pipeline) == false) {
+    // JsView Modified <<<
         // we don't need real codec if we don't have a surface
         acodec = SDL_AMediaCodecDummy_create();
     } else {
@@ -1240,6 +1244,13 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
             ret = amc_fill_frame(node, frame, got_frame, output_buffer_index, SDL_AMediaCodec_getSerial(opaque->acodec), &bufferInfo);
         }
     }
+
+    // JsView Added >>>
+    if(*got_frame == 1) {
+        jobject mediaCodec = SDL_AMediaCodecJava_getObject(env, opaque->acodec);
+        bool ignoreRelease = ffpipeline_jsv_mcodec_filter(opaque->pipeline, mediaCodec, output_buffer_index, bufferInfo.offset, bufferInfo.size);
+    }
+    // JsView Added <<<
 
 done:
     if (opaque->decoder->queue->abort_request)

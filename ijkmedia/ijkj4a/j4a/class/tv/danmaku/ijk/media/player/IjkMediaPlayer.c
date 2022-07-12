@@ -30,6 +30,7 @@ typedef struct J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer {
     jmethodID method_postEventFromNative;
     jmethodID method_onSelectCodec;
     jmethodID method_onNativeInvoke;
+    jmethodID method_JsvOnMCodecFilter;
 } J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 static J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 
@@ -324,6 +325,21 @@ jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onNativeInvoke__catchA
     return ret_value;
 }
 
+jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecFilter(JNIEnv *env, jobject weakThiz, jobject mediaCodec, jint bufferIndex, jint bufferOffset, jint bufferSize)
+{
+    return (*env)->CallStaticBooleanMethod(env, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecFilter, weakThiz, mediaCodec, bufferIndex, bufferOffset, bufferSize);
+}
+
+jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecFilter__catchAll(JNIEnv *env, jobject weakThiz, jobject mediaCodec, jint bufferIndex, jint bufferOffset, jint bufferSize)
+{
+    jboolean ret_value = J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecFilter(env, weakThiz, mediaCodec, bufferIndex, bufferOffset, bufferSize);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return false;
+    }
+
+    return ret_value;
+}
+
 int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
 {
     int         ret                   = -1;
@@ -380,6 +396,13 @@ int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
     sign     = "(Ljava/lang/Object;ILandroid/os/Bundle;)Z";
     class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onNativeInvoke = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
     if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onNativeInvoke == NULL)
+        goto fail;
+
+    class_id = class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id;
+    name     = "JsvOnMCodecFilter";
+    sign     = "(Ljava/lang/Object;Landroid/media/MediaCodec;III)Z";
+    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecFilter = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecFilter == NULL)
         goto fail;
 
     J4A_ALOGD("J4ALoader: OK: '%s' loaded\n", "tv.danmaku.ijk.media.player.IjkMediaPlayer");

@@ -42,6 +42,11 @@ typedef struct IJKFF_Pipeline_Opaque {
     bool         (*mediacodec_select_callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc);
     void          *mediacodec_select_callback_opaque;
 
+    // JsView Added >>>
+    bool         (*jsv_mcodec_filter_callback)(void *opaque, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize);
+    void          *jsv_mcodec_filter_callback_opaque;
+    // JsView Added <<<
+
     SDL_Vout      *weak_vout;
 
     float          left_volume;
@@ -267,6 +272,40 @@ void ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*
     pipeline->opaque->mediacodec_select_callback        = callback;
     pipeline->opaque->mediacodec_select_callback_opaque = opaque;
 }
+
+// JsView Added >>>
+void ffpipeline_jsv_set_mcodec_filter_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque), void *opaque)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return;
+
+    pipeline->opaque->jsv_mcodec_filter_callback        = callback;
+    pipeline->opaque->jsv_mcodec_filter_callback_opaque = opaque;
+}
+
+bool ffpipeline_jsv_has_mcodec_filter_callback(IJKFF_Pipeline* pipeline)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return false;
+
+    return (pipeline->opaque->jsv_mcodec_filter_callback != NULL);
+}
+
+bool ffpipeline_jsv_mcodec_filter(IJKFF_Pipeline* pipeline, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return false;
+
+    if (!pipeline->opaque->jsv_mcodec_filter_callback)
+        return false;
+
+    return pipeline->opaque->jsv_mcodec_filter_callback(pipeline->opaque->jsv_mcodec_filter_callback_opaque,
+                                                     mediaCodec, bufferIndex, bufferOffset, bufferSize);
+}
+// JsView Added <<<
 
 bool ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc)
 {

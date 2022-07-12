@@ -125,3 +125,19 @@ void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*cal
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_android_set_mediacodec_select_callback()=void");
 }
+
+// JsView Added >>>
+void ijkmp_jsv_set_mcodec_filter_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque), void *opaque)
+{
+    if (!mp)
+        return;
+
+    pthread_mutex_lock(&mp->mutex);
+
+    if (mp && mp->ffplayer && mp->ffplayer->pipeline) {
+        ffpipeline_jsv_set_mcodec_filter_callback(mp->ffplayer->pipeline, callback, opaque);
+    }
+
+    pthread_mutex_unlock(&mp->mutex);
+}
+// JsView Added <<<

@@ -2,8 +2,8 @@ apply plugin: 'com.android.application'
 //apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "30.0.2"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
 
     lintOptions {
         abortOnError false
@@ -11,9 +11,9 @@ android {
     defaultConfig {
 //        applicationId "tv.danmaku.ijk.media.example"
         minSdkVersion 17
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode rootProject.ext.versionCode
-        versionName rootProject.ext.versionName
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
         externalNativeBuild {
             ndkBuild {
                 abiFilters "armeabi-v7a"
