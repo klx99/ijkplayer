@@ -126,7 +126,11 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     ijkmp_mediacodecinfo_context *mcc      = &opaque->mcc;
     SDL_AMediaCodec              *acodec   = NULL;
 
-    if (opaque->jsurface == NULL) {
+    // JsView Modified >>>
+    // if (opaque->jsurface == NULL) {
+    if (opaque->jsurface == NULL
+    && ffpipeline_jsv_has_video_sync_callback(opaque->pipeline) == false) {
+    // JsView Modified <<<
         // we don't need real codec if we don't have a surface
         acodec = SDL_AMediaCodecDummy_create();
     } else {
@@ -1093,6 +1097,10 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
     }
 
     output_buffer_index = SDL_AMediaCodecFake_dequeueOutputBuffer(opaque->acodec, &bufferInfo, timeUs);
+    // JsView Added >>>
+    jobject mediaCodec = SDL_AMediaCodecJava_getObject(env, opaque->acodec);
+    bool ignoreRelease = ffpipeline_jsv_video_sync(opaque->pipeline, mediaCodec, output_buffer_index, bufferInfo.offset, bufferInfo.size);
+    // JsView Added <<<
     if (output_buffer_index == AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED) {
         ALOGI("AMEDIACODEC__INFO_OUTPUT_BUFFERS_CHANGED\n");
         // continue;

@@ -50,6 +50,12 @@ void    ffpipeline_set_surface_need_reconfigure_l(IJKFF_Pipeline* pipeline, bool
 void    ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque);
 bool    ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc);
 
+// JsView Added >>>
+void ffpipeline_jsv_set_video_sync_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque), void *opaque);
+bool ffpipeline_jsv_has_video_sync_callback(IJKFF_Pipeline* pipeline);
+bool ffpipeline_jsv_video_sync(IJKFF_Pipeline* pipeline, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize);
+// JsView Added <<<
+
 void    ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right);
 
 #endif

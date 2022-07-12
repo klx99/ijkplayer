@@ -59,6 +59,7 @@ static player_fields_t g_clazz;
 
 static int inject_callback(void *opaque, int type, void *data, size_t data_size);
 static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc);
+static bool jsv_video_sync_callback(void *opaque, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize); // JsView Added
 
 static IjkMediaPlayer *jni_get_media_player(JNIEnv* env, jobject thiz)
 {
@@ -758,6 +759,8 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     ijkmp_set_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_set_ijkio_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, ijkmp_get_weak_thiz(mp));
+    ijkmp_jsv_set_video_sync_callback(mp, jsv_video_sync_callback, ijkmp_get_weak_thiz(mp)); // JsView Added
+
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -875,9 +878,30 @@ static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_contex
         goto fail;
     }
 
-fail:
+    fail:
     return found_codec_name;
 }
+
+// JsView Added >>>
+static bool jsv_video_sync_callback(void *opaque, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize)
+{
+    JNIEnv *env = NULL;
+    jobject weak_this = (jobject) opaque;
+
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s: SetupThreadEnv failed\n", __func__);
+        return false;
+    }
+
+    bool ignore_release = J4AC_IjkMediaPlayer__JsvOnVideoSync(env, weak_this, mediaCodec, bufferIndex, bufferOffset, bufferSize);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        ALOGE("%s: onMediaCodecDequeue failed\n", __func__);
+        return false;
+    }
+
+    return ignore_release;
+}
+// JsView Added <<<
 
 inline static void post_event(JNIEnv *env, jobject weak_this, int what, int arg1, int arg2)
 {

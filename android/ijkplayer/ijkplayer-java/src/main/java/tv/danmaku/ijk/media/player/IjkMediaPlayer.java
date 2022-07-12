@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
 import android.graphics.Rect;
+import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.RingtoneManager;
@@ -47,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -1284,4 +1286,46 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static native void native_profileBegin(String libName);
     public static native void native_profileEnd();
     public static native void native_setLogLevel(int level);
+
+    // JsView Added >>>
+    public int jsvVideoPostProcess(ByteBuffer srcData, int srcColorFormat, int srcWidth, int srcHeight,
+                                   int destColorFormat, int destWidth, int destHeight,
+                                   ByteBuffer destData) {
+        return 0;
+    }
+
+    public static native void native_jsvVideoPostProcess(ByteBuffer srcData, int srcColorFormat, int srcWidth, int srcHeight,
+                                                         int destColorFormat, int destWidth, int destHeight,
+                                                         ByteBuffer destData);
+
+    public interface JsvOnVideoSyncListener {
+        boolean onVideoSync(IMediaPlayer mp, MediaCodec mediaCodec, int bufferIndex, int bufferOffset, int bufferSize);
+    }
+
+    public void jsvSetOnVideoSyncListener(JsvOnVideoSyncListener listener) {
+        this.jsvVideoSyncListener = listener;
+    }
+
+    @CalledByNative
+    private static boolean JsvOnVideoSync(Object weakThiz, MediaCodec mediaCodec, int bufferIndex, int bufferOffset, int bufferSize) {
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>)) {
+            return false;
+        }
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null) {
+            return false;
+        }
+
+        boolean ignoreRelease = false;
+        if(player.jsvVideoSyncListener != null) {
+            ignoreRelease = player.jsvVideoSyncListener.onVideoSync(player, mediaCodec, bufferIndex, bufferOffset, bufferSize);
+        }
+
+        return ignoreRelease;
+    }
+
+    protected JsvOnVideoSyncListener jsvVideoSyncListener;
+    // JsView Added <<<
 }
