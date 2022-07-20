@@ -302,7 +302,7 @@ if [ -f "./config.h" ]; then
     echo 'reuse configure'
 else
     which $CC
-    ./configure $FF_CFG_FLAGS \
+    ./configure $FF_CFG_FLAGS --enable-filters --enable-neon \
         --extra-cflags="$FF_CFLAGS $FF_EXTRA_CFLAGS" \
         --extra-ldflags="$FF_DEP_LIBS $FF_EXTRA_LDFLAGS"
     make clean
