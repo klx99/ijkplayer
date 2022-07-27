@@ -51,9 +51,14 @@ void    ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool
 bool    ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacodecinfo_context *mcc);
 
 // JsView Added >>>
-void ffpipeline_jsv_set_mcodec_filter_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque), void *opaque);
-bool ffpipeline_jsv_has_mcodec_filter_callback(IJKFF_Pipeline* pipeline);
-bool ffpipeline_jsv_mcodec_filter(IJKFF_Pipeline* pipeline, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize);
+void ffpipeline_jsv_set_postprocess_callback(IJKFF_Pipeline* pipeline, void *opaque,
+                                             bool (*mcodec_decoded_callback)(void *opaque, jobject, int32_t, int32_t, int32_t, int64_t),
+                                             int  (*display_callback)(void *opaque, int32_t, int64_t));
+bool ffpipeline_jsv_has_postprocess_callback(IJKFF_Pipeline* pipeline);
+bool ffpipeline_jsv_mcodec_decoded(IJKFF_Pipeline* pipeline, jobject mediaCodec,
+                                   int32_t bufferIndex, int32_t bufferOffset, int32_t bufferSize,
+                                   int64_t presentationTimeUs);
+int ffpipeline_jsv_display(IJKFF_Pipeline* pipeline, int32_t framedrop, int64_t presentationTimeUs);
 // JsView Added <<<
 
 void    ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right);

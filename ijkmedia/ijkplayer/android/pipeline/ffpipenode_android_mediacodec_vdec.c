@@ -129,7 +129,7 @@ static SDL_AMediaCodec *create_codec_l(JNIEnv *env, IJKFF_Pipenode *node)
     // JsView Modified >>>
     // if (opaque->jsurface == NULL) {
     if (opaque->jsurface == NULL
-    && ffpipeline_jsv_has_mcodec_filter_callback(opaque->pipeline) == false) {
+    && ffpipeline_jsv_has_postprocess_callback(opaque->pipeline) == false) {
     // JsView Modified <<<
         // we don't need real codec if we don't have a surface
         acodec = SDL_AMediaCodecDummy_create();
@@ -1246,9 +1246,17 @@ static int drain_output_buffer_l(JNIEnv *env, IJKFF_Pipenode *node, int64_t time
     }
 
     // JsView Added >>>
-    if(*got_frame == 1) {
+    if(*got_frame == 1 || output_buffer_index < 0) {
         jobject mediaCodec = SDL_AMediaCodecJava_getObject(env, opaque->acodec);
-        bool ignoreRelease = ffpipeline_jsv_mcodec_filter(opaque->pipeline, mediaCodec, output_buffer_index, bufferInfo.offset, bufferInfo.size);
+        bool ignoreRelease = ffpipeline_jsv_mcodec_decoded(opaque->pipeline, mediaCodec,
+                                                           output_buffer_index, bufferInfo.offset, bufferInfo.size,
+                                                           (*got_frame == 1) ? bufferInfo.presentationTimeUs : 0);
+        if(ignoreRelease) {
+            JSV_SDL_VoutAndroid_updateBufferInfoFlags(
+                    opaque->weak_vout,
+                    (SDL_AMediaCodecBufferProxy*)frame->opaque,
+                    bufferInfo.flags |= AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME);
+        }
     }
     // JsView Added <<<
 

@@ -908,6 +908,11 @@ static void video_image_display2(FFPlayer *ffp)
                 SDL_Delay(20);
             }
         }
+
+        AVRational tb = is->video_st->time_base;
+        int64_t pts = (vp->frame->pts == AV_NOPTS_VALUE) ? NAN : vp->frame->pts * av_q2d(tb);
+
+        ffpipeline_jsv_display(ffp->pipeline, ffp->framedrop, (int64_t)(vp->pts * 1000000)); // JsView Added
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {

@@ -43,8 +43,11 @@ typedef struct IJKFF_Pipeline_Opaque {
     void          *mediacodec_select_callback_opaque;
 
     // JsView Added >>>
-    bool         (*jsv_mcodec_filter_callback)(void *opaque, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize);
-    void          *jsv_mcodec_filter_callback_opaque;
+    void          *jsv_postprocess_callback_opaque;
+    bool         (*jsv_mcodec_decoded_callback)(void *opaque, jobject mediaCodec,
+                                                int32_t bufferIndex, int32_t bufferOffset, int32_t bufferSize,
+                                                int64_t presentationTimeUs);
+    int          (*jsv_display_callback)(void *opaque, int32_t framedrop, int64_t presentationTimeUs);
     // JsView Added <<<
 
     SDL_Vout      *weak_vout;
@@ -274,36 +277,56 @@ void ffpipeline_set_mediacodec_select_callback(IJKFF_Pipeline* pipeline, bool (*
 }
 
 // JsView Added >>>
-void ffpipeline_jsv_set_mcodec_filter_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque), void *opaque)
+void ffpipeline_jsv_set_postprocess_callback(IJKFF_Pipeline* pipeline, void *opaque,
+                                             bool (*mcodec_decoded_callback)(void *opaque, jobject, int32_t, int32_t, int32_t, int64_t),
+                                             int  (*display_callback)(void *opaque, int32_t, int64_t))
 {
     ALOGD("%s\n", __func__);
     if (!check_ffpipeline(pipeline, __func__))
         return;
 
-    pipeline->opaque->jsv_mcodec_filter_callback        = callback;
-    pipeline->opaque->jsv_mcodec_filter_callback_opaque = opaque;
+    pipeline->opaque->jsv_postprocess_callback_opaque = opaque;
+    pipeline->opaque->jsv_mcodec_decoded_callback     = mcodec_decoded_callback;
+    pipeline->opaque->jsv_display_callback            = display_callback;
 }
 
-bool ffpipeline_jsv_has_mcodec_filter_callback(IJKFF_Pipeline* pipeline)
+bool ffpipeline_jsv_has_postprocess_callback(IJKFF_Pipeline* pipeline)
 {
     ALOGD("%s\n", __func__);
     if (!check_ffpipeline(pipeline, __func__))
         return false;
 
-    return (pipeline->opaque->jsv_mcodec_filter_callback != NULL);
+    return (pipeline->opaque->jsv_mcodec_decoded_callback != NULL);
 }
 
-bool ffpipeline_jsv_mcodec_filter(IJKFF_Pipeline* pipeline, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize)
+bool ffpipeline_jsv_mcodec_decoded(IJKFF_Pipeline* pipeline, jobject mediaCodec,
+                                   int32_t bufferIndex, int32_t bufferOffset, int32_t bufferSize,
+                                   int64_t presentationTimeUs)
 {
     ALOGD("%s\n", __func__);
     if (!check_ffpipeline(pipeline, __func__))
         return false;
 
-    if (!pipeline->opaque->jsv_mcodec_filter_callback)
+    if (!pipeline->opaque->jsv_mcodec_decoded_callback)
         return false;
 
-    return pipeline->opaque->jsv_mcodec_filter_callback(pipeline->opaque->jsv_mcodec_filter_callback_opaque,
-                                                     mediaCodec, bufferIndex, bufferOffset, bufferSize);
+    return pipeline->opaque->jsv_mcodec_decoded_callback(pipeline->opaque->jsv_postprocess_callback_opaque,
+                                                         mediaCodec,
+                                                         bufferIndex, bufferOffset, bufferSize,
+                                                         presentationTimeUs);
+}
+
+int ffpipeline_jsv_display(IJKFF_Pipeline* pipeline, int32_t framedrop, int64_t presentationTimeUs)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return false;
+
+    if (!pipeline->opaque->jsv_display_callback)
+        return false;
+
+    return pipeline->opaque->jsv_display_callback(pipeline->opaque->jsv_postprocess_callback_opaque,
+                                                  framedrop, presentationTimeUs);
 }
 // JsView Added <<<
 

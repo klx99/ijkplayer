@@ -448,3 +448,20 @@ int SDL_VoutAndroid_releaseBufferProxyP_l(SDL_Vout *vout, SDL_AMediaCodecBufferP
     *proxy = NULL;
     return ret;
 }
+
+// JsView Added >>>
+int JSV_SDL_VoutAndroid_updateBufferInfoFlags(SDL_Vout *vout, SDL_AMediaCodecBufferProxy *proxy, int flags)
+{
+    SDL_LockMutex(vout->mutex);
+    proxy->buffer_info.flags = flags;
+    AMCTRACE("%s: [%d] ++++++++ proxy %d: vout: %d idx: %d fake: %s",
+             __func__,
+             proxy->buffer_id,
+             proxy->acodec_serial,
+             SDL_AMediaCodec_getSerial(opaque->acodec),
+             proxy->buffer_index,
+             (proxy->buffer_info.flags & AMEDIACODEC__BUFFER_FLAG_FAKE_FRAME) ? "YES" : "NO");
+    SDL_UnlockMutex(vout->mutex);
+    return 0;
+}
+// JsView Added <<<

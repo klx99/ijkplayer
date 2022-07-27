@@ -30,7 +30,8 @@ typedef struct J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer {
     jmethodID method_postEventFromNative;
     jmethodID method_onSelectCodec;
     jmethodID method_onNativeInvoke;
-    jmethodID method_JsvOnMCodecFilter;
+    jmethodID method_JsvOnMCodecDecoded;
+    jmethodID method_JsvOnDisplay;
 } J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 static J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 
@@ -325,16 +326,31 @@ jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onNativeInvoke__catchA
     return ret_value;
 }
 
-jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecFilter(JNIEnv *env, jobject weakThiz, jobject mediaCodec, jint bufferIndex, jint bufferOffset, jint bufferSize)
+jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecDecoded(JNIEnv *env, jobject weakThiz, jobject mediaCodec, jint bufferIndex, jint bufferOffset, jint bufferSize, jlong presentationTimeUs)
 {
-    return (*env)->CallStaticBooleanMethod(env, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecFilter, weakThiz, mediaCodec, bufferIndex, bufferOffset, bufferSize);
+    return (*env)->CallStaticBooleanMethod(env, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecDecoded, weakThiz, mediaCodec, bufferIndex, bufferOffset, bufferSize, presentationTimeUs);
 }
 
-jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecFilter__catchAll(JNIEnv *env, jobject weakThiz, jobject mediaCodec, jint bufferIndex, jint bufferOffset, jint bufferSize)
+jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecDecoded__catchAll(JNIEnv *env, jobject weakThiz, jobject mediaCodec, jint bufferIndex, jint bufferOffset, jint bufferSize, jlong presentationTimeUs)
 {
-    jboolean ret_value = J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecFilter(env, weakThiz, mediaCodec, bufferIndex, bufferOffset, bufferSize);
+    jboolean ret_value = J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnMCodecDecoded(env, weakThiz, mediaCodec, bufferIndex, bufferOffset, bufferSize, presentationTimeUs);
     if (J4A_ExceptionCheck__catchAll(env)) {
         return false;
+    }
+
+    return ret_value;
+}
+
+jint J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnDisplay(JNIEnv *env, jobject weakThiz, jint framedrop, jlong presentationTimeUs)
+{
+    return (*env)->CallStaticIntMethod(env, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnDisplay, weakThiz, framedrop, presentationTimeUs);
+}
+
+jint J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnDisplay__catchAll(JNIEnv *env, jobject weakThiz, jint framedrop, jlong presentationTimeUs)
+{
+    jint ret_value = J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__JsvOnDisplay(env, weakThiz, framedrop, presentationTimeUs);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        return 0;
     }
 
     return ret_value;
@@ -399,10 +415,17 @@ int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
         goto fail;
 
     class_id = class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id;
-    name     = "JsvOnMCodecFilter";
-    sign     = "(Ljava/lang/Object;Landroid/media/MediaCodec;III)Z";
-    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecFilter = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
-    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecFilter == NULL)
+    name     = "JsvOnMCodecDecoded";
+    sign     = "(Ljava/lang/Object;Landroid/media/MediaCodec;IIIJ)Z";
+    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecDecoded = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnMCodecDecoded == NULL)
+        goto fail;
+
+    class_id = class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id;
+    name     = "JsvOnDisplay";
+    sign     = "(Ljava/lang/Object;IJ)I";
+    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnDisplay = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_JsvOnDisplay == NULL)
         goto fail;
 
     J4A_ALOGD("J4ALoader: OK: '%s' loaded\n", "tv.danmaku.ijk.media.player.IjkMediaPlayer");

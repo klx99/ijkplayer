@@ -59,7 +59,12 @@ static player_fields_t g_clazz;
 
 static int inject_callback(void *opaque, int type, void *data, size_t data_size);
 static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc);
-static bool jsv_mcodec_filter_callback(void *opaque, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize); // JsView Added
+// JsView Added >>>
+static bool jsv_mcodec_decoded_callback(void *opaque, jobject mediaCodec,
+                                        int32_t bufferIndex, int32_t bufferOffset, int32_t bufferSize,
+                                        int64_t presentationTimeUs);
+static int jsv_display_callback(void *opaque, int32_t framedrop, int64_t presentationTimeUs);
+// JsView Added <<<
 
 static IjkMediaPlayer *jni_get_media_player(JNIEnv* env, jobject thiz)
 {
@@ -759,7 +764,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     ijkmp_set_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_set_ijkio_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, ijkmp_get_weak_thiz(mp));
-    ijkmp_jsv_set_mcodec_filter_callback(mp, jsv_mcodec_filter_callback, ijkmp_get_weak_thiz(mp)); // JsView Added
+    ijkmp_jsv_set_postprocess_callback(mp, ijkmp_get_weak_thiz(mp), jsv_mcodec_decoded_callback, jsv_display_callback); // JsView Added
 
 
 LABEL_RETURN:
@@ -883,7 +888,9 @@ fail:
 }
 
 // JsView Added >>>
-static bool jsv_mcodec_filter_callback(void *opaque, jobject mediaCodec, int bufferIndex, int bufferOffset, int bufferSize)
+static bool jsv_mcodec_decoded_callback(void *opaque, jobject mediaCodec,
+                                        int32_t bufferIndex, int32_t bufferOffset, int32_t bufferSize,
+                                        int64_t presentationTimeUs)
 {
     JNIEnv *env = NULL;
     jobject weak_this = (jobject) opaque;
@@ -893,13 +900,34 @@ static bool jsv_mcodec_filter_callback(void *opaque, jobject mediaCodec, int buf
         return false;
     }
 
-    bool ignore_release = J4AC_IjkMediaPlayer__JsvOnMCodecFilter(env, weak_this, mediaCodec, bufferIndex, bufferOffset, bufferSize);
+    bool ignore_release = J4AC_IjkMediaPlayer__JsvOnMCodecDecoded(env, weak_this, mediaCodec,
+                                                                  bufferIndex, bufferOffset, bufferSize,
+                                                                  presentationTimeUs);
     if (J4A_ExceptionCheck__catchAll(env)) {
         ALOGE("%s: onMediaCodecDequeue failed\n", __func__);
         return false;
     }
 
     return ignore_release;
+}
+
+static int jsv_display_callback(void *opaque, int32_t framedrop, int64_t presentationTimeUs)
+{
+    JNIEnv *env = NULL;
+    jobject weak_this = (jobject) opaque;
+
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s: SetupThreadEnv failed\n", __func__);
+        return -1;
+    }
+
+    int ret = J4AC_IjkMediaPlayer__JsvOnDisplay(env, weak_this, framedrop, presentationTimeUs);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        ALOGE("%s: onMediaCodecDequeue failed\n", __func__);
+        return -1;
+    }
+
+    return ret;
 }
 // JsView Added <<<
 

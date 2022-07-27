@@ -50,4 +50,6 @@ SDL_AMediaCodecBufferProxy *SDL_VoutAndroid_obtainBufferProxy(SDL_Vout *vout, in
 int SDL_VoutAndroid_releaseBufferProxyP(SDL_Vout *vout, SDL_AMediaCodecBufferProxy **proxy, bool render);
 int SDL_VoutAndroid_releaseBufferProxyP_l(SDL_Vout *vout, SDL_AMediaCodecBufferProxy **proxy, bool render);
 
+int JSV_SDL_VoutAndroid_updateBufferInfoFlags(SDL_Vout *vout, SDL_AMediaCodecBufferProxy *proxy, int flags); // JsView Added
+
 #endif

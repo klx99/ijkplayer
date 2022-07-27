@@ -127,7 +127,9 @@ void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*cal
 }
 
 // JsView Added >>>
-void ijkmp_jsv_set_mcodec_filter_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque), void *opaque)
+void ijkmp_jsv_set_postprocess_callback(IjkMediaPlayer *mp, void *opaque,
+                                        bool (*mcodec_decoded_callback)(void *opaque, jobject, int32_t, int32_t, int32_t, int64_t),
+                                        int  (*display_callback)(void *opaque, int32_t, int64_t))
 {
     if (!mp)
         return;
@@ -135,7 +137,7 @@ void ijkmp_jsv_set_mcodec_filter_callback(IjkMediaPlayer *mp, bool (*callback)(v
     pthread_mutex_lock(&mp->mutex);
 
     if (mp && mp->ffplayer && mp->ffplayer->pipeline) {
-        ffpipeline_jsv_set_mcodec_filter_callback(mp->ffplayer->pipeline, callback, opaque);
+        ffpipeline_jsv_set_postprocess_callback(mp->ffplayer->pipeline, opaque, mcodec_decoded_callback, display_callback);
     }
 
     pthread_mutex_unlock(&mp->mutex);

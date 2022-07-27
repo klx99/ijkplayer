@@ -12,5 +12,9 @@ public class IjkMediaPlayer {
     private static void postEventFromNative(Object weakThiz, int what, int arg1, int arg2, Object obj);
     private static String onSelectCodec(Object weakThiz, String mimeType, int profile, int level);
     private static boolean onNativeInvoke(Object weakThiz, int what, Bundle args);
-    private static boolean JsvOnMCodecFilter(Object weakThiz, MediaCodec mediaCodec, int bufferIndex, int bufferOffset, int bufferSize);
+
+    private static boolean JsvOnMCodecDecoded(Object weakThiz, MediaCodec mediaCodec,
+                                              int bufferIndex, int bufferOffset, int bufferSize,
+                                              long presentationTimeUs);
+    private static int JsvOnDisplay(Object weakThiz, int framedrop, long presentationTimeUs);
 }

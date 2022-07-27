@@ -41,6 +41,10 @@ void ijkmp_android_set_surface(JNIEnv *env, IjkMediaPlayer *mp, jobject android_
 void ijkmp_android_set_volume(JNIEnv *env, IjkMediaPlayer *mp, float left, float right);
 int  ijkmp_android_get_audio_session_id(JNIEnv *env, IjkMediaPlayer *mp);
 void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque);
-void ijkmp_jsv_set_mcodec_filter_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque), void *opaque); // JsView Added
+// JsView Added >>>
+void ijkmp_jsv_set_postprocess_callback(IjkMediaPlayer *mp, void *opaque,
+                                        bool (*mcodec_decoded_callback)(void *opaque, jobject, int32_t, int32_t, int32_t, int64_t),
+                                        int  (*display_callback)(void *opaque, int32_t, int64_t));
+// JsView Added <<<
 
 #endif

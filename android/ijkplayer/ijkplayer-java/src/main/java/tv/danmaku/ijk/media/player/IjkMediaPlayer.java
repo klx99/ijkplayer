@@ -1288,34 +1288,67 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static native void native_setLogLevel(int level);
 
     // JsView Added >>>
-    public interface JsvOnMCodecFilterListener {
-        boolean onMCodecFilter(MediaCodec mediaCodec, int bufferIndex, int bufferOffset, int bufferSize);
+    public interface JsvOnPostProcessListener {
+        boolean onMCodecDecoded(MediaCodec mediaCodec,
+                                int bufferIndex, int bufferOffset, int bufferSize,
+                                long presentationTimeUs);
+        int onDisplay(int framedrop, long presentationTimeUs);
     }
 
-    public void jsvSetOnMCodecFilterListener(JsvOnMCodecFilterListener listener) {
-        this.jsvMCodecFilterListener = listener;
+    public void jsvSetOnPostProcessListener(JsvOnPostProcessListener listener) {
+        this.jsvPostProcessListener = listener;
     }
 
     @CalledByNative
-    private static boolean JsvOnMCodecFilter(Object weakThiz, MediaCodec mediaCodec, int bufferIndex, int bufferOffset, int bufferSize) {
-        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>)) {
-            return false;
-        }
-        @SuppressWarnings("unchecked")
-        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
-        IjkMediaPlayer player = weakPlayer.get();
+    private static boolean JsvOnMCodecDecoded(Object weakThiz, MediaCodec mediaCodec,
+                                              int bufferIndex, int bufferOffset, int bufferSize,
+                                              long presentationTimeUs) {
+        IjkMediaPlayer player = JsvGetPlayerFromWeak(weakThiz);
         if (player == null) {
             return false;
         }
 
         boolean ignoreRelease = false;
-        if(player.jsvMCodecFilterListener != null) {
-            ignoreRelease = player.jsvMCodecFilterListener.onMCodecFilter(mediaCodec, bufferIndex, bufferOffset, bufferSize);
+        if(player.jsvPostProcessListener != null) {
+            ignoreRelease = player.jsvPostProcessListener.onMCodecDecoded(mediaCodec,
+                                                                          bufferIndex, bufferOffset, bufferSize,
+                                                                          presentationTimeUs);
         }
 
         return ignoreRelease;
     }
 
-    protected JsvOnMCodecFilterListener jsvMCodecFilterListener;
+    @CalledByNative
+    private static int JsvOnDisplay(Object weakThiz, int framedrop, long presentationTimeUs) {
+        IjkMediaPlayer player = JsvGetPlayerFromWeak(weakThiz);
+        if (player == null) {
+            return -1;
+        }
+
+        int ret = 0;
+        if(player.jsvPostProcessListener != null) {
+            ret = player.jsvPostProcessListener.onDisplay(framedrop, presentationTimeUs);
+        }
+
+        return ret;
+    }
+
+    private static IjkMediaPlayer JsvGetPlayerFromWeak(Object weakThiz) {
+        if (weakThiz == null || !(weakThiz instanceof WeakReference<?>)) {
+            Log.e(TAG, "JsvError: Failed to get ijkplayer instance.");
+            return null;
+        }
+        @SuppressWarnings("unchecked")
+        WeakReference<IjkMediaPlayer> weakPlayer = (WeakReference<IjkMediaPlayer>) weakThiz;
+        IjkMediaPlayer player = weakPlayer.get();
+        if (player == null) {
+            Log.e(TAG, "JsvError: Failed to get ijkplayer instance.");
+            return null;
+        }
+
+        return player;
+    }
+
+    private JsvOnPostProcessListener jsvPostProcessListener;
     // JsView Added <<<
 }
