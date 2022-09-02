@@ -52,4 +52,9 @@ bool    ffpipeline_select_mediacodec_l(IJKFF_Pipeline* pipeline, ijkmp_mediacode
 
 void    ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right);
 
+// JsView Added >>>
+void    ffpipeline_set_vsync_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque, int64_t renderTimeUs), void *opaque);
+void    ffpipeline_vsync(IJKFF_Pipeline* pipeline, int64_t renderTimeUs);
+// JsView Added <<<
+
 #endif

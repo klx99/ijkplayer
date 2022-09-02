@@ -112,8 +112,9 @@ int ijkmp_android_get_audio_session_id(JNIEnv *env, IjkMediaPlayer *mp)
 
 void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*callback)(void *opaque, ijkmp_mediacodecinfo_context *mcc), void *opaque)
 {
-    if (!mp)
+    if (!mp) {
         return;
+    }
 
     MPTRACE("ijkmp_android_set_mediacodec_select_callback()");
     pthread_mutex_lock(&mp->mutex);
@@ -125,3 +126,21 @@ void ijkmp_android_set_mediacodec_select_callback(IjkMediaPlayer *mp, bool (*cal
     pthread_mutex_unlock(&mp->mutex);
     MPTRACE("ijkmp_android_set_mediacodec_select_callback()=void");
 }
+
+// JsView Added >>>
+void ijkmp_android_set_vsync_callback(IjkMediaPlayer *mp, void (*callback)(void *opaque, int64_t renderTimeUs), void *opaque)
+{
+    if (!mp)
+        return;
+
+    MPTRACE("ijkmp_android_set_vsync_callback()");
+    pthread_mutex_lock(&mp->mutex);
+
+    if (mp && mp->ffplayer && mp->ffplayer->pipeline) {
+        ffpipeline_set_vsync_callback(mp->ffplayer->pipeline, callback, opaque);
+    }
+
+    pthread_mutex_unlock(&mp->mutex);
+    MPTRACE("ijkmp_android_set_vsync_callback()=void");
+}
+// JsView Added <<<

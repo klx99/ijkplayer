@@ -46,6 +46,11 @@ typedef struct IJKFF_Pipeline_Opaque {
 
     float          left_volume;
     float          right_volume;
+
+    // JsView Added >>>
+    void         (*vsync_callback)(void *opaque, int64_t renderTimeUs);
+    void          *vsync_callback_opaque;
+    // JsView Added <<<
 } IJKFF_Pipeline_Opaque;
 
 static void func_destroy(IJKFF_Pipeline *pipeline)
@@ -294,3 +299,29 @@ void ffpipeline_set_volume(IJKFF_Pipeline* pipeline, float left, float right)
         SDL_AoutSetStereoVolume(opaque->ffp->aout, left, right);
     }
 }
+
+// JsView Added >>>
+void ffpipeline_set_vsync_callback(IJKFF_Pipeline* pipeline, bool (*callback)(void *opaque, int64_t renderTimeUs), void *opaque)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__))
+        return;
+
+    pipeline->opaque->vsync_callback        = callback;
+    pipeline->opaque->vsync_callback_opaque = opaque;
+}
+
+void ffpipeline_vsync(IJKFF_Pipeline* pipeline, int64_t renderTimeUs)
+{
+    ALOGD("%s\n", __func__);
+    if (!check_ffpipeline(pipeline, __func__)) {
+        return;
+    }
+
+    if (!pipeline->opaque->vsync_callback) {
+        return;
+    }
+
+    pipeline->opaque->vsync_callback(pipeline->opaque->vsync_callback_opaque, renderTimeUs);
+}
+// JsView Added <<<

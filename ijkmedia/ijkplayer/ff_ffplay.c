@@ -908,7 +908,9 @@ static void video_image_display2(FFPlayer *ffp)
                 SDL_Delay(20);
             }
         }
+        int64_t curr_time = av_gettime_relative();
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+        ffpipeline_vsync(ffp->pipeline, curr_time); // JsView Added
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;

@@ -30,6 +30,7 @@ typedef struct J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer {
     jmethodID method_postEventFromNative;
     jmethodID method_onSelectCodec;
     jmethodID method_onNativeInvoke;
+    jmethodID method_onVSync;
 } J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 static J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer;
 
@@ -324,6 +325,17 @@ jboolean J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onNativeInvoke__catchA
     return ret_value;
 }
 
+void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onVSync(JNIEnv *env, jobject weakThiz, jlong renderTimeUs)
+{
+    (*env)->CallStaticVoidMethod(env, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id, class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onVSync, weakThiz, renderTimeUs);
+}
+
+void J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onVSync__catchAll(JNIEnv *env, jobject weakThiz, jlong renderTimeUs)
+{
+    J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer__onVSync(env, weakThiz, renderTimeUs);
+    J4A_ExceptionCheck__catchAll(env);
+}
+
 int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
 {
     int         ret                   = -1;
@@ -380,6 +392,13 @@ int J4A_loadClass__J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer(JNIEnv *env)
     sign     = "(Ljava/lang/Object;ILandroid/os/Bundle;)Z";
     class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onNativeInvoke = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
     if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onNativeInvoke == NULL)
+        goto fail;
+
+    class_id = class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.id;
+    name     = "onVSync";
+    sign     = "(Ljava/lang/Object;J)V";
+    class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onVSync = J4A_GetStaticMethodID__catchAll(env, class_id, name, sign);
+    if (class_J4AC_tv_danmaku_ijk_media_player_IjkMediaPlayer.method_onVSync == NULL)
         goto fail;
 
     J4A_ALOGD("J4ALoader: OK: '%s' loaded\n", "tv.danmaku.ijk.media.player.IjkMediaPlayer");

@@ -59,6 +59,7 @@ static player_fields_t g_clazz;
 
 static int inject_callback(void *opaque, int type, void *data, size_t data_size);
 static bool mediacodec_select_callback(void *opaque, ijkmp_mediacodecinfo_context *mcc);
+static void vsync_callback(void *opaque, int64_t renderTimeUs);
 
 static IjkMediaPlayer *jni_get_media_player(JNIEnv* env, jobject thiz)
 {
@@ -758,6 +759,7 @@ IjkMediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     ijkmp_set_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_set_ijkio_inject_opaque(mp, ijkmp_get_weak_thiz(mp));
     ijkmp_android_set_mediacodec_select_callback(mp, mediacodec_select_callback, ijkmp_get_weak_thiz(mp));
+    ijkmp_android_set_vsync_callback(mp, vsync_callback, ijkmp_get_weak_thiz(mp));
 
 LABEL_RETURN:
     ijkmp_dec_ref_p(&mp);
@@ -1212,3 +1214,22 @@ JNIEXPORT void JNI_OnUnload(JavaVM *jvm, void *reserved)
 
     pthread_mutex_destroy(&g_clazz.mutex);
 }
+
+// JsView Added >>>
+static void vsync_callback(void *opaque, int64_t renderTimeUs)
+{
+    JNIEnv *env = NULL;
+    jobject weak_this = (jobject) opaque;
+
+    if (JNI_OK != SDL_JNI_SetupThreadEnv(&env)) {
+        ALOGE("%s: SetupThreadEnv failed\n", __func__);
+        return;
+    }
+
+    J4AC_IjkMediaPlayer__onVSync(env, weak_this, renderTimeUs);
+    if (J4A_ExceptionCheck__catchAll(env)) {
+        ALOGE("%s: onVSync failed\n", __func__);
+        return;
+    }
+}
+// JsView Added <<<
