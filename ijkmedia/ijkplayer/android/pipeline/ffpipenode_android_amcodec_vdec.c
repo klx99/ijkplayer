@@ -418,7 +418,7 @@ static vformat_t codecid_to_vformat(enum AVCodecID id)
   {
     case AV_CODEC_ID_MPEG1VIDEO:
     case AV_CODEC_ID_MPEG2VIDEO:
-    case AV_CODEC_ID_MPEG2VIDEO_XVMC:
+//    case AV_CODEC_ID_MPEG2VIDEO_XVMC:
       format = VFORMAT_MPEG12;
       break;
     case AV_CODEC_ID_H263:
@@ -1675,7 +1675,7 @@ static int pre_header_feeding(am_private_t *para, am_packet_t *pkt)
         }
         if (( AV_CODEC_ID_MPEG1VIDEO == para->video_codec_id)
           || (AV_CODEC_ID_MPEG2VIDEO == para->video_codec_id)
-          || (AV_CODEC_ID_MPEG2VIDEO_XVMC == para->video_codec_id)) {
+          /*|| (AV_CODEC_ID_MPEG2VIDEO_XVMC == para->video_codec_id)*/) {
             ret = mpeg_add_header(para, pkt);
             if (ret != PLAYER_SUCCESS) {
                 return ret;
