@@ -467,6 +467,9 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_hisicodec(FFPlayer 
     hisi_codec_create(opaque);
 
     pre_header_feeding(opaque, &opaque->hisi_pkt);
+
+    ffp->stat.vdec_type = FFP_PROPV_DECODER_HISILICON;
+
     return node;
 }
 
@@ -509,7 +512,9 @@ static void req_reset(SHIJIU_HISI_Pipenode_Opaque *opaque ) {
 
     ALOGD("hisi codec req_reset!");
 
-    is->reset_req = 1;
+// mengxk removed >>>
+//    is->reset_req = 1;
+// mengxk removed <<<
 }
 
 static int reset(SHIJIU_HISI_Pipenode_Opaque *opaque) 
@@ -725,14 +730,18 @@ static int feed_input_buffer(JNIEnv *env, IJKFF_Pipenode *node, int *enqueue_cou
         if (!ffp->first_video_frame_rendered && (d->pkt_temp.flags&0x1)) {
             int64_t current_t = av_gettime();
             ffp->first_video_frame_rendered = 1;
-            if(!is->ic){
+            if(!is->ic) {
                 ALOGE("no ic\n");
-            }else if(!is->ic->pb){
-                ALOGD("avformat bytes read: %lld\n", is->ic->bytes_read);
-                ffp->stat.bit_rate = is->ic->bytes_read*8*1000000/(current_t-is->start_download_time);
-            }else{
-                ALOGD("bytes read: %lld\n", is->ic->pb->bytes_read);
-                ffp->stat.bit_rate = is->ic->pb->bytes_read*8*1000000/(current_t-is->start_download_time);
+            } else {
+                ffp->stat.bit_rate = is->ic->bit_rate;
+//mengxk modified >>>
+//            }else if(!is->ic->pb){
+//                ALOGD("avformat bytes read: %lld\n", is->ic->bytes_read);
+//                ffp->stat.bit_rate = is->ic->bytes_read*8*1000000/(current_t-is->start_download_time);
+//            }else{
+//                ALOGD("bytes read: %lld\n", is->ic->pb->bytes_read);
+//                ffp->stat.bit_rate = is->ic->pb->bytes_read*8*1000000/(current_t-is->start_download_time);
+//mengxk modified <<<
             }
             ffp_notify_msg1(ffp, FFP_MSG_VIDEO_RENDERING_START);
             // ALOGE("bitrate: %jd\n", ffp->stat.bit_rate);
@@ -757,28 +766,30 @@ static void modifyRect(SHIJIU_HISI_Pipenode_Opaque *opaque){
     int y = 0;
     int width = 0;
     int height = 0;
-    if(ffp->rect != NULL){
-        // ALOGD("modifyRect: rect = %s\n", ffp->rect);
-        int n=sscanf(ffp->rect, "%d/%d/%d/%d", &x, &y, &width, &height);
-        if(x != opaque->window_x || y != opaque->window_y || width != opaque->window_width || height != opaque->window_height){
-            ALOGD("modifyRect: x(%d), y(%d), width(%d), height(%d)\n", x, y, width, height);
-            opaque->window_x = x;
-            opaque->window_y = y;
-            opaque->window_width = width;
-            opaque->window_height = height;
-            if(opaque->windowHandle != HI_INVALID_HANDLE){
-                opaque->windowAttr.stInputRect.s32X = 0;
-                opaque->windowAttr.stInputRect.s32Y = 0;
-                opaque->windowAttr.stInputRect.s32Width = opaque->video_width;
-                opaque->windowAttr.stInputRect.s32Height = opaque->video_height;
-                opaque->windowAttr.stOutputRect.s32X = x;
-                opaque->windowAttr.stOutputRect.s32Y = y;
-                opaque->windowAttr.stOutputRect.s32Width = width;
-                opaque->windowAttr.stOutputRect.s32Height = height;
-                hisi_vo_set_window_attr(opaque->windowHandle, &(opaque->windowAttr));
-            }
-        }
-    }
+// mengxk removed >>>
+//    if(ffp->rect != NULL){
+//        // ALOGD("modifyRect: rect = %s\n", ffp->rect);
+//        int n=sscanf(ffp->rect, "%d/%d/%d/%d", &x, &y, &width, &height);
+//        if(x != opaque->window_x || y != opaque->window_y || width != opaque->window_width || height != opaque->window_height){
+//            ALOGD("modifyRect: x(%d), y(%d), width(%d), height(%d)\n", x, y, width, height);
+//            opaque->window_x = x;
+//            opaque->window_y = y;
+//            opaque->window_width = width;
+//            opaque->window_height = height;
+//            if(opaque->windowHandle != HI_INVALID_HANDLE){
+//                opaque->windowAttr.stInputRect.s32X = 0;
+//                opaque->windowAttr.stInputRect.s32Y = 0;
+//                opaque->windowAttr.stInputRect.s32Width = opaque->video_width;
+//                opaque->windowAttr.stInputRect.s32Height = opaque->video_height;
+//                opaque->windowAttr.stOutputRect.s32X = x;
+//                opaque->windowAttr.stOutputRect.s32Y = y;
+//                opaque->windowAttr.stOutputRect.s32Width = width;
+//                opaque->windowAttr.stOutputRect.s32Height = height;
+//                hisi_vo_set_window_attr(opaque->windowHandle, &(opaque->windowAttr));
+//            }
+//        }
+//    }
+// mengxk removed <<<
 }
 
 static void modifyPlayBackRate(SHIJIU_HISI_Pipenode_Opaque *opaque){
@@ -839,7 +850,10 @@ static int func_run_sync(IJKFF_Pipenode *node)
         ALOGD("hisicodec: feed_input_buffer\n");
         ret = feed_input_buffer(env, node, &dequeue_count);
         if (ret != 0) {
-            goto fail;
+// mengxk modified >>>
+            continue;
+//            goto fail;
+// mengxk modified <<<
         }
 
         
