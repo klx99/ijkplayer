@@ -186,10 +186,10 @@ static HI_S32 (*hisi_avplay_is_buff_empty)(HI_HANDLE hAvplay, HI_BOOL * pbIsEmpt
 static HI_S32 (*hisi_avplay_register_event)(HI_HANDLE hAvplay, HI_UNF_AVPLAY_EVENT_E enEvent, HI_UNF_AVPLAY_EVENT_CB_FN pfnEventCB);
 static HI_S32 (*hisi_avplay_get_status_info)(HI_HANDLE hAvplay, HI_UNF_AVPLAY_STATUS_INFO_S *pstStatusInfo);
 static HI_S32 (*hisi_avplay_set_decode_mode)(HI_HANDLE hAvplay, HI_UNF_VCODEC_MODE_E enDecodeMode);
-static HI_S32 (*hisi_vo_init)(HI_UNF_VO_DEV_MODE_E enDevMode);
-static HI_S32 (*hisi_vo_create_window)(const HI_UNF_WINDOW_ATTR_S *pWinAttr, HI_HANDLE *phWindow);
-static HI_S32 (*hisi_vo_destroy_window)(HI_HANDLE hWindow);
-static HI_S32 (*hisi_vo_deinit)(HI_VOID);
+//static HI_S32 (*hisi_vo_init)(HI_UNF_VO_DEV_MODE_E enDevMode);
+//static HI_S32 (*hisi_vo_create_window)(const HI_UNF_WINDOW_ATTR_S *pWinAttr, HI_HANDLE *phWindow);
+//static HI_S32 (*hisi_vo_destroy_window)(HI_HANDLE hWindow);
+//static HI_S32 (*hisi_vo_deinit)(HI_VOID);
 static HI_S32 (*hisi_vo_attach_window)(HI_HANDLE hWindow, HI_HANDLE hSrc);
 static HI_S32 (*hisi_vo_detach_window)(HI_HANDLE hWindow, HI_HANDLE hSrc);
 static HI_S32 (*hisi_vo_set_window_enable)(HI_HANDLE hWindow, HI_BOOL bEnable);
@@ -207,7 +207,7 @@ static int func_run_sync(IJKFF_Pipenode *node);
 static void syncToMaster(SHIJIU_HISI_Pipenode_Opaque *opaque);
 static int hisi_codec_init();
 static HI_S32 hisi_codec_disp_init(SHIJIU_HISI_Pipenode_Opaque *opaque);
-HI_S32 hisi_codec_vo_init(HI_UNF_VO_DEV_MODE_E enDevMode);
+//HI_S32 hisi_codec_vo_init(HI_UNF_VO_DEV_MODE_E enDevMode);
 static HI_VOID __GetVoAspectCvrs(SHIJIU_HISI_Pipenode_Opaque *opaque);
 static void  hisi_codec_window_attr_init(HI_UNF_WINDOW_ATTR_S* pWinAttr, int VoType, SHIJIU_HISI_Pipenode_Opaque *opaque);
 static HI_UNF_VCODEC_TYPE_E hisi_codecid_to_vformat(enum AVCodecID id);
@@ -350,10 +350,10 @@ static void loadLibrary()
     hisi_avplay_register_event         = find_symbol("HI_UNF_AVPLAY_RegisterEvent");
     hisi_avplay_get_status_info        = find_symbol("HI_UNF_AVPLAY_GetStatusInfo");
     hisi_avplay_set_decode_mode        = find_symbol("HI_UNF_AVPLAY_SetDecodeMode");
-    hisi_vo_init                       = find_symbol("HI_UNF_VO_Init");
-    hisi_vo_create_window              = find_symbol("HI_UNF_VO_CreateWindow");
-    hisi_vo_destroy_window             = find_symbol("HI_UNF_VO_DestroyWindow");
-    hisi_vo_deinit                     = find_symbol("HI_UNF_VO_DeInit");
+//    hisi_vo_init                       = find_symbol("HI_UNF_VO_Init");
+//    hisi_vo_create_window              = find_symbol("HI_UNF_VO_CreateWindow");
+//    hisi_vo_destroy_window             = find_symbol("HI_UNF_VO_DestroyWindow");
+//    hisi_vo_deinit                     = find_symbol("HI_UNF_VO_DeInit");
     hisi_vo_attach_window              = find_symbol("HI_UNF_VO_AttachWindow");
     hisi_vo_detach_window              = find_symbol("HI_UNF_VO_DetachWindow");
     hisi_vo_set_window_enable          = find_symbol("HI_UNF_VO_SetWindowEnable");
@@ -397,7 +397,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_hisicodec(FFPlayer 
     opaque->ffp         = ffp;
     opaque->decoder     = &is->viddec;
     opaque->cvrs        = 1;
-    opaque->windowHandle = HI_INVALID_HANDLE;
+    opaque->windowHandle = ffp->window_handle;
     opaque->avPlayHandle = HI_INVALID_HANDLE;
     opaque->stream_type = HISI_STREAM_ES;
 
@@ -488,7 +488,7 @@ static void func_destroy(IJKFF_Pipenode *node)
     if(hWindow != HI_INVALID_HANDLE){
         hisi_vo_set_window_enable(hWindow, HI_FALSE);
         hisi_vo_detach_window(hWindow, hAvplay);
-        hisi_vo_destroy_window(hWindow);
+//        hisi_vo_destroy_window(hWindow);
     }
     if(hAvplay != HI_INVALID_HANDLE){
         hisi_avplay_chn_close(hAvplay, HI_UNF_AVPLAY_MEDIA_CHAN_VID);
@@ -496,7 +496,7 @@ static void func_destroy(IJKFF_Pipenode *node)
     }
     hisi_packet_release(&opaque->hisi_pkt);
     hisi_avplay_deinit();
-    hisi_vo_deinit();
+//    hisi_vo_deinit();
     hisi_disp_deinit();
     hisi_sys_deinit();
 }
@@ -1047,11 +1047,11 @@ static int hisi_codec_init(SHIJIU_HISI_Pipenode_Opaque *opaque){
     //     ALOGE("hisi display init failed\n");
     // }
 
-    ret = hisi_codec_vo_init(HI_UNF_VO_DEV_MODE_NORMAL);
-    if (ret != HI_SUCCESS)
-    {
-        ALOGE("hisi vo init failed\n");
-    }
+//    ret = hisi_codec_vo_init(HI_UNF_VO_DEV_MODE_NORMAL);
+//    if (ret != HI_SUCCESS)
+//    {
+//        ALOGE("hisi vo init failed\n");
+//    }
 
     ret = hisi_avplay_init();
     if(ret != HI_SUCCESS){
@@ -1104,20 +1104,20 @@ HI_S32 hisi_codec_disp_init(SHIJIU_HISI_Pipenode_Opaque *opaque)
     return HI_SUCCESS;
 }
 
-HI_S32 hisi_codec_vo_init(HI_UNF_VO_DEV_MODE_E enDevMode)
-{
-    HI_S32             Ret;
-
-
-    Ret = hisi_vo_init(enDevMode);
-    if (Ret != HI_SUCCESS)
-    {
-        ALOGE("call HI_UNF_VO_Init failed. ret = 0x%x\n", Ret);
-        return Ret;
-    }
-
-    return HI_SUCCESS;
-}
+//HI_S32 hisi_codec_vo_init(HI_UNF_VO_DEV_MODE_E enDevMode)
+//{
+//    HI_S32             Ret;
+//
+//
+//    Ret = hisi_vo_init(enDevMode);
+//    if (Ret != HI_SUCCESS)
+//    {
+//        ALOGE("call HI_UNF_VO_Init failed. ret = 0x%x\n", Ret);
+//        return Ret;
+//    }
+//
+//    return HI_SUCCESS;
+//}
 
 static HI_VOID __GetVoAspectCvrs(SHIJIU_HISI_Pipenode_Opaque *opaque)
 {
@@ -1418,8 +1418,8 @@ static int hisi_codec_create(SHIJIU_HISI_Pipenode_Opaque *opaque){
 
     PLAYER_LOGI("### hisicodec::Prepare \n");
 
-    s32Ret = hisi_vo_create_window(&(opaque->windowAttr), &(opaque->windowHandle));
-    PLAYER_CHK_PRINTF((HI_SUCCESS != s32Ret), s32Ret, "Call HI_UNF_VO_CreateWindow failed");
+//    s32Ret = hisi_vo_create_window(&(opaque->windowAttr), &(opaque->windowHandle));
+//    PLAYER_CHK_PRINTF((HI_SUCCESS != s32Ret), s32Ret, "Call HI_UNF_VO_CreateWindow failed");
 
     s32Ret = hisi_avplay_get_default_config(&(opaque->avplayAttr), HI_UNF_AVPLAY_STREAM_TYPE_ES);
     PLAYER_CHK_PRINTF((HI_SUCCESS != s32Ret), s32Ret, "Call HI_UNF_AVPLAY_GetDefaultConfig failed");
