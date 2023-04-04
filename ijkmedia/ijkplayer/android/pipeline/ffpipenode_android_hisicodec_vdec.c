@@ -358,10 +358,10 @@ static void loadLibrary()
     hisi_vo_detach_window              = find_symbol("HI_UNF_VO_DetachWindow");
     hisi_vo_set_window_enable          = find_symbol("HI_UNF_VO_SetWindowEnable");
     hisi_vo_set_window_attr            = find_symbol("HI_UNF_VO_SetWindowAttr");
-    hisi_disp_init                     = find_symbol("HI_UNF_DISP_Init");
-    hisi_disp_deinit                   = find_symbol("HI_UNF_DISP_DeInit");
-    hisi_disp_open                     = find_symbol("HI_UNF_DISP_Open");
-    hisi_disp_close                    = find_symbol("HI_UNF_DISP_Close");
+//    hisi_disp_init                     = find_symbol("HI_UNF_DISP_Init");
+//    hisi_disp_deinit                   = find_symbol("HI_UNF_DISP_DeInit");
+//    hisi_disp_open                     = find_symbol("HI_UNF_DISP_Open");
+//    hisi_disp_close                    = find_symbol("HI_UNF_DISP_Close");
     property_get                       = find_symbol("property_get");
 
     hisi_so_loaded = 1;
@@ -497,7 +497,7 @@ static void func_destroy(IJKFF_Pipenode *node)
     hisi_packet_release(&opaque->hisi_pkt);
     hisi_avplay_deinit();
 //    hisi_vo_deinit();
-    hisi_disp_deinit();
+//    hisi_disp_deinit();
     hisi_sys_deinit();
 }
 
