@@ -52,6 +52,7 @@ LOCAL_SRC_FILES += android/pipeline/ffpipeline_android.c
 LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mediacodec_vdec.c
 LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_amcodec_vdec.c
 LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_hisicodec_vdec.c
+LOCAL_SRC_FILES += android/pipeline/ffpipenode_android_mtkcodec_vdec.c
 
 LOCAL_SRC_FILES += ijkavformat/allformats.c
 LOCAL_SRC_FILES += ijkavformat/cJSON.c
