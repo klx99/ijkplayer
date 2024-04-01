@@ -78,6 +78,7 @@
 #define     FFP_PROPV_DECODER_VIDEOTOOLBOX              3
 #define     FFP_PROPV_DECODER_AMLOGIC                   4
 #define     FFP_PROPV_DECODER_HISILICON                 5
+#define     FFP_PROPV_DECODER_MEDIATEK                  6
 #define FFP_PROP_INT64_VIDEO_CACHED_DURATION            20005
 #define FFP_PROP_INT64_AUDIO_CACHED_DURATION            20006
 #define FFP_PROP_INT64_VIDEO_CACHED_BYTES               20007

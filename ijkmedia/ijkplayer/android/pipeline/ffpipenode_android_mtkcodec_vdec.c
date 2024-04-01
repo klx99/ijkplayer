@@ -164,9 +164,9 @@ typedef struct SHiJIU_MTK_Aout_Opaque {
     int finished;
 }SHiJIU_MTK_Aout_Opaque;
 
-static int32_t (*mtk_codec_init)();
-static uint32_t (*mtk_codec_create)(int pip);
-static void (*mtk_codec_player_destroy)(const uint32_t handler);
+//static int32_t (*mtk_codec_init)();
+//static uint32_t (*mtk_codec_create)(int pip);
+//static void (*mtk_codec_player_destroy)(const uint32_t handler);
 static int32_t (*mtk_codec_video_init)(const uint32_t handler, const PVIDEO_PARA_T pVideoPara);
 static int32_t (*mtk_codec_audio_init)(const uint32_t handler, const PAUDIO_PARA_T pAudioPara);
 static int32_t (*mtk_codec_write_data)(const uint32_t handler, STREAMTYPE_E type, const uint8_t *pBuffer, uint32_t size, uint64_t timestamp);
@@ -302,9 +302,9 @@ static void loadLibrary()
       return;
     }
 
-    mtk_codec_init                   = find_symbol(lib, "mtk_player_init");
-    mtk_codec_create                 = find_symbol(lib, "mtk_player_create");
-    mtk_codec_player_destroy         = find_symbol(lib, "mtk_player_destroy");
+//    mtk_codec_init                   = find_symbol(lib, "mtk_player_init");
+//    mtk_codec_create                 = find_symbol(lib, "mtk_player_create");
+//    mtk_codec_player_destroy         = find_symbol(lib, "mtk_player_destroy");
     mtk_codec_video_init             = find_symbol(lib, "mtk_player_video_init");
     mtk_codec_audio_init             = find_symbol(lib, "mtk_player_audio_init");
     mtk_codec_write_data             = find_symbol(lib, "mtk_player_write_data");
@@ -327,11 +327,11 @@ static void loadLibrary()
         return;
     }
 
-    if(mtk_codec_init() == MTK_FAIL){
-        ALOGD("mtkcodec init failed.\n");
-        mtk_not_present = 1;
-        return;
-    }
+//    if(mtk_codec_init() == MTK_FAIL){
+//        ALOGD("mtkcodec init failed.\n");
+//        mtk_not_present = 1;
+//        return;
+//    }
     
     mtk_so_loaded = 1;
 }
@@ -400,7 +400,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mtkcodec(FFPlayer *
         opaque->fps = av_q2d(opaque->ffp->is->video_st->avg_frame_rate);
     }
 
-    opaque->player_handler = MTK_HANDLER_INVALID;
+    opaque->player_handler = ffp->window_handle;
     opaque->pause_on = 1;
     opaque->pause_changed = false;
     opaque->need_set_volume = 0;
@@ -462,6 +462,9 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mtkcodec(FFPlayer *
 
     mtk_packet_init(opaque);
     // pre_header_feeding(opaque, &opaque->mtk_pkt);
+
+    ffp->stat.vdec_type = FFP_PROPV_DECODER_MEDIATEK;
+
     return node;
 }
 
@@ -500,7 +503,7 @@ static void func_destroy(IJKFF_Pipenode *node)
 
     if (opaque->player_handler != MTK_HANDLER_INVALID) {
         mtk_codec_register_evt_cb(opaque->player_handler, NULL, NULL);
-        mtk_codec_player_destroy(opaque->player_handler);
+//        mtk_codec_player_destroy(opaque->player_handler);
     }
 
     ALOGI("mtk func_destroy exit\n");
@@ -1175,14 +1178,15 @@ static int mtk_video_init(SHIJIU_MTK_Pipenode_Opaque *opaque){
         return -1;
     }
 
-//    ALOGD("mtk_video_init: pip is %d\n", ffp->pip_mode);
+    ALOGD("mtk_video_init: handler:0x%x\n", opaque->player_handler);
 //    opaque->player_handler = mtk_codec_create(ffp->pip_mode);
-    opaque->player_handler = mtk_codec_create(0);
+//    opaque->player_handler = mtk_codec_create(0);
     if(opaque->player_handler == MTK_HANDLER_INVALID){
         return -1;
     }
 
     jsurface = ffpipeline_get_surface_as_global_ref(env, pipeline);
+    ALOGD("mtk_video_init: jsurface:0x%x\n", jsurface);
     // mtk_codec_set_video_window(opaque->player_handler, 0, 0, 1920, 1080);
     if(jsurface != NULL)
         mtk_codec_set_surface(opaque->player_handler, env, jsurface);
