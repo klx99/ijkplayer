@@ -397,8 +397,8 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_hisicodec(FFPlayer 
     opaque->ffp         = ffp;
     opaque->decoder     = &is->viddec;
     opaque->cvrs        = 1;
-//    opaque->windowHandle = ffp->window_handle;
-    opaque->avPlayHandle = ffp->window_handle;
+//    opaque->windowHandle = ffp->display_handle;
+    opaque->avPlayHandle = ffp->display_handle;
     opaque->stream_type = HISI_STREAM_ES;
 
     AVCodecContext * avctx = opaque->decoder->avctx;

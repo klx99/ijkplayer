@@ -213,8 +213,8 @@ static const AVOption ffp_context_options[] = {
     { "render-wait-start",          "render wait start",
         OPTION_OFFSET(render_wait_start),      OPTION_INT(0, 0, 1) },
         // QCode Added >>>
-    { "window-handle",          "window handle",
-      OPTION_OFFSET(window_handle),      OPTION_INT64(0, INT_MIN, INT_MAX) },
+    { "display-handle",          "display handle",
+      OPTION_OFFSET(display_handle),      OPTION_INT64(0, INT_MIN, INT_MAX) },
         // QCode Added <<<
     { NULL }
 };

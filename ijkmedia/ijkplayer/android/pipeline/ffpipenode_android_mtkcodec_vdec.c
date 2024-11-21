@@ -400,7 +400,7 @@ IJKFF_Pipenode *ffpipenode_create_video_decoder_from_android_mtkcodec(FFPlayer *
         opaque->fps = av_q2d(opaque->ffp->is->video_st->avg_frame_rate);
     }
 
-    opaque->player_handler = ffp->window_handle;
+    opaque->player_handler = ffp->display_handle;
     opaque->pause_on = 1;
     opaque->pause_changed = false;
     opaque->need_set_volume = 0;
